@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futsal Arena Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <div class="glass-container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-futbol"></i>
+                <h1>Futsal<span>Pro</span></h1>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-target="turnamen-section">
+                    <i class="fa-solid fa-trophy"></i> Turnamen
+                </button>
+                <button class="nav-btn" data-target="klub-section">
+                    <i class="fa-solid fa-shield-halved"></i> Klub
+                </button>
+            </nav>
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/150?img=11" alt="Profile">
+            </div>
+        </header>
+
+        <main>
+            <!-- Turnamen Section -->
+            <section id="turnamen-section" class="content-section active">
+                <div class="section-header">
+                    <h2>Turnamen Mendatang</h2>
+                    <button class="btn-primary"><i class="fa-solid fa-plus"></i> Buat Turnamen</button>
+                </div>
+                
+                <div class="cards-grid" id="turnamen-grid">
+                    <!-- Cards injected by JS -->
+                </div>
+            </section>
+
+            <!-- Klub Section -->
+            <section id="klub-section" class="content-section">
+                <div class="section-header">
+                    <h2>Daftar Klub</h2>
+                    <button class="btn-primary"><i class="fa-solid fa-plus"></i> Daftarkan Klub</button>
+                </div>
+
+                <div class="cards-grid" id="klub-grid">
+                    <!-- Cards injected by JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
