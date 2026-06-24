@@ -20,9 +20,9 @@ class BookingController extends Controller
     public function index()
     {
         $bookings = Booking::with(['lapangan', 'pembayaran'])
-                           ->where('user_id', Auth::id())
-                           ->latest()
-                           ->get();
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
         return view('customer.booking.index', compact('bookings'));
     }
 
@@ -31,7 +31,7 @@ class BookingController extends Controller
         $lapangans = Lapangan::all();
 
         $jamOperasional = collect(range(self::JAM_BUKA, self::JAM_TUTUP))
-            ->map(fn ($jam) => sprintf('%02d:00', $jam));
+            ->map(fn($jam) => sprintf('%02d:00', $jam));
 
         return view('customer.booking.create', compact('lapangans', 'jamOperasional'));
     }
@@ -45,24 +45,26 @@ class BookingController extends Controller
             'jam_selesai'  => 'required|date_format:H:i|after:jam_mulai',
         ]);
 
-        // Validasi H-1: tolak jika tanggal main <= hari ini + 1
+        // Validasi minimal H+2
+        // Saat ini kita tolak jika tanggal main <= hari ini + 1 (berarti booking minimal 2 hari ke depan).
         $tanggal = Carbon::parse($request->tanggal_main);
         if ($tanggal->lessThanOrEqualTo(Carbon::today()->addDay())) {
-            return back()->withErrors(['tanggal_main' => 'Booking minimal harus H-2 (2 hari sebelum main).'])->withInput();
+            return back()->withErrors(['tanggal_main' => 'Booking minimal harus H+2 (2 hari setelah hari ini).'])->withInput();
         }
+
 
         // Cek bentrok jadwal di lapangan yang sama
         $bentrok = Booking::where('lapangan_id', $request->lapangan_id)
-                          ->where('tanggal_main', $request->tanggal_main)
-                          ->where('status_booking', '!=', 'batal')
-                          ->where(function ($query) use ($request) {
-                              $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
-                                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
-                                    ->orWhere(function ($q) use ($request) {
-                                        $q->where('jam_mulai', '<=', $request->jam_mulai)
-                                          ->where('jam_selesai', '>=', $request->jam_selesai);
-                                    });
-                          })->exists();
+            ->where('tanggal_main', $request->tanggal_main)
+            ->where('status_booking', '!=', 'batal')
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('jam_mulai', '<=', $request->jam_mulai)
+                            ->where('jam_selesai', '>=', $request->jam_selesai);
+                    });
+            })->exists();
 
         if ($bentrok) {
             return back()->withErrors(['jam_mulai' => 'Slot waktu tersebut sudah dipesan. Pilih jam lain.'])->withInput();
@@ -84,7 +86,7 @@ class BookingController extends Controller
         ]);
 
         return redirect()->route('customer.booking.index')
-                         ->with('success', 'Booking berhasil dibuat! Segera lakukan pembayaran DP.');
+            ->with('success', 'Booking berhasil dibuat! Segera lakukan pembayaran DP.');
     }
 
     public function show(Booking $booking)
@@ -100,6 +102,6 @@ class BookingController extends Controller
         abort_if($booking->user_id !== Auth::id(), 403);
         $booking->update(['status_booking' => 'batal']);
         return redirect()->route('customer.booking.index')
-                         ->with('success', 'Booking berhasil dibatalkan.');
+            ->with('success', 'Booking berhasil dibatalkan.');
     }
 }
