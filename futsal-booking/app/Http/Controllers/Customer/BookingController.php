@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Lapangan;
-use App\Models\SkemaHarga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class BookingController extends Controller
 {
+    /**
+     * Jam operasional lapangan (06.00 - 23.00).
+     */
+    private const JAM_BUKA  = 6;
+    private const JAM_TUTUP = 23;
+
     public function index()
     {
         $bookings = Booking::with(['lapangan', 'pembayaran'])
@@ -23,9 +28,12 @@ class BookingController extends Controller
 
     public function create()
     {
-        $lapangans    = Lapangan::all();
-        $skemaHargas  = SkemaHarga::orderBy('jam_mulai')->get();
-        return view('customer.booking.create', compact('lapangans', 'skemaHargas'));
+        $lapangans = Lapangan::all();
+
+        $jamOperasional = collect(range(self::JAM_BUKA, self::JAM_TUTUP))
+            ->map(fn ($jam) => sprintf('%02d:00', $jam));
+
+        return view('customer.booking.create', compact('lapangans', 'jamOperasional'));
     }
 
     public function store(Request $request)
@@ -33,9 +41,8 @@ class BookingController extends Controller
         $request->validate([
             'lapangan_id'  => 'required|exists:lapangans,id',
             'tanggal_main' => 'required|date|after:today', // minimal H+1 = menolak hari-H
-            'jam_mulai'    => 'required',
-            'jam_selesai'  => 'required|after:jam_mulai',
-            'total_harga'  => 'required|integer|min:0',
+            'jam_mulai'    => 'required|date_format:H:i',
+            'jam_selesai'  => 'required|date_format:H:i|after:jam_mulai',
         ]);
 
         // Validasi H-1: tolak jika tanggal main <= hari ini + 1
@@ -61,14 +68,19 @@ class BookingController extends Controller
             return back()->withErrors(['jam_mulai' => 'Slot waktu tersebut sudah dipesan. Pilih jam lain.'])->withInput();
         }
 
+        // Hitung total harga di SERVER berdasarkan harga lapangan (jangan percaya input client!)
+        $lapangan  = Lapangan::findOrFail($request->lapangan_id);
+        $durasiJam = Carbon::parse($request->jam_mulai)->diffInMinutes(Carbon::parse($request->jam_selesai)) / 60;
+        $totalHarga = (int) round($durasiJam * ($lapangan->harga_per_jam ?? 0));
+
         Booking::create([
-            'user_id'       => Auth::id(),
-            'lapangan_id'   => $request->lapangan_id,
-            'tanggal_main'  => $request->tanggal_main,
-            'jam_mulai'     => $request->jam_mulai,
-            'jam_selesai'   => $request->jam_selesai,
-            'total_harga'   => $request->total_harga,
-            'status_booking' => 'pending',
+            'user_id'         => Auth::id(),
+            'lapangan_id'     => $request->lapangan_id,
+            'tanggal_main'    => $request->tanggal_main,
+            'jam_mulai'       => $request->jam_mulai,
+            'jam_selesai'     => $request->jam_selesai,
+            'total_harga'     => $totalHarga,
+            'status_booking'  => 'pending',
         ]);
 
         return redirect()->route('customer.booking.index')
