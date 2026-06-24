@@ -6,5 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pembayaran extends Model
 {
-    //
+    protected $fillable = [
+        'booking_id',
+        'nominal_dp',
+        'bukti_transfer',
+        'status_verifikasi',
+    ];
+
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class);
+    }
 }
