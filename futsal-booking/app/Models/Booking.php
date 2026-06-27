@@ -18,6 +18,7 @@ class Booking extends Model
 
     protected $casts = [
         'tanggal_main' => 'date',
+        'pending_expires_at' => 'datetime',
     ];
 
     public function user()

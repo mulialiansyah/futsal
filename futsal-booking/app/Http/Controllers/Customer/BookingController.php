@@ -16,6 +16,7 @@ class BookingController extends Controller
      */
     private const JAM_BUKA  = 6;
     private const JAM_TUTUP = 23;
+    private const PENDING_EXPIRE_MINUTES = 60;
 
     public function index()
     {
@@ -45,6 +46,7 @@ class BookingController extends Controller
             'jam_selesai'  => 'required|date_format:H:i|after:jam_mulai',
         ]);
 
+
         // Validasi minimal H+2
         // Saat ini kita tolak jika tanggal main <= hari ini + 1 (berarti booking minimal 2 hari ke depan).
         $tanggal = Carbon::parse($request->tanggal_main);
@@ -53,18 +55,34 @@ class BookingController extends Controller
         }
 
 
-        // Cek bentrok jadwal di lapangan yang sama
+        // Cek bentrok jadwal di lapangan yang sama.
+        // Slot dianggap "terkunci" jika:
+        //  - status_booking = pending/dp_dibayar/lunas
+        //  - khusus pending, slot terkunci hanya sampai pending_expires_at
+
         $bentrok = Booking::where('lapangan_id', $request->lapangan_id)
             ->where('tanggal_main', $request->tanggal_main)
             ->where('status_booking', '!=', 'batal')
+            ->where(function ($q) {
+                // pending terkunci hanya sampai pending_expires_at
+                $q->where(function ($q1) {
+                    $q1->whereIn('status_booking', ['dp_dibayar', 'lunas']);
+                })->orWhere(function ($q2) {
+                    $q2->where('status_booking', 'pending')
+                        ->whereNotNull('pending_expires_at')
+                        ->where('pending_expires_at', '>', now());
+                });
+            })
             ->where(function ($query) use ($request) {
+                // overlap
                 $query->whereBetween('jam_mulai', [$request->jam_mulai, $request->jam_selesai])
                     ->orWhereBetween('jam_selesai', [$request->jam_mulai, $request->jam_selesai])
                     ->orWhere(function ($q) use ($request) {
                         $q->where('jam_mulai', '<=', $request->jam_mulai)
                             ->where('jam_selesai', '>=', $request->jam_selesai);
                     });
-            })->exists();
+            })
+            ->exists();
 
         if ($bentrok) {
             return back()->withErrors(['jam_mulai' => 'Slot waktu tersebut sudah dipesan. Pilih jam lain.'])->withInput();
@@ -75,14 +93,17 @@ class BookingController extends Controller
         $durasiJam = Carbon::parse($request->jam_mulai)->diffInMinutes(Carbon::parse($request->jam_selesai)) / 60;
         $totalHarga = (int) round($durasiJam * ($lapangan->harga_per_jam ?? 0));
 
+        $pendingExpiresAt = now()->addMinutes(self::PENDING_EXPIRE_MINUTES);
+
         Booking::create([
-            'user_id'         => Auth::id(),
-            'lapangan_id'     => $request->lapangan_id,
-            'tanggal_main'    => $request->tanggal_main,
-            'jam_mulai'       => $request->jam_mulai,
-            'jam_selesai'     => $request->jam_selesai,
-            'total_harga'     => $totalHarga,
-            'status_booking'  => 'pending',
+            'user_id'               => Auth::id(),
+            'lapangan_id'           => $request->lapangan_id,
+            'tanggal_main'          => $request->tanggal_main,
+            'jam_mulai'             => $request->jam_mulai,
+            'jam_selesai'           => $request->jam_selesai,
+            'total_harga'           => $totalHarga,
+            'status_booking'        => 'pending',
+            'pending_expires_at'   => $pendingExpiresAt,
         ]);
 
         return redirect()->route('customer.booking.index')

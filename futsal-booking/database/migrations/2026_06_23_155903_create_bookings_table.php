@@ -21,6 +21,7 @@ return new class extends Migration
             $table->time('jam_selesai');
             $table->integer('total_harga');
             $table->enum('status_booking', ['pending', 'dp_dibayar', 'lunas', 'batal'])->default('pending');
+            $table->dateTime('pending_expires_at')->nullable()->after('status_booking');
             $table->timestamps();
         });
     }

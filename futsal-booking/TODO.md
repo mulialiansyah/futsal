@@ -1,28 +1,39 @@
-# TODO - Perubahan Sementara (Admin Dashboard)
+# TODO - MVP Futsal Booking (Laravel 13)
 
-## Ringkasan
+## Checklist MVP (dari requirement)
 
-Repo sudah memiliki dashboard admin (route + controller + view + layout). Task ini difokuskan untuk memastikan “rapih dan pasti jalan”, terutama dari sisi wiring route/middleware dan konsistensi view.
+- [x] Role Admin & Penyewa (middleware + route prefix)
+- [x] Penyewa cari slot kosong (via form booking)
+- [x] Booking slot (status awal pending)
+- [x] Cegah bentrok sewa lapangan
+- [x] Checkout/pembayaran: pending menunggu pembayaran
+- [x] Slot otomatis tersedia lagi jika pending tidak dibayar (timeout)
+- [ ] Admin: manajemen harga
+- [ ] Admin: validasi pembayaran (verifikasi DP)
+- [ ] Admin: ketersediaan lapangan
+- [x] Admin: gambar asli lapangan (lapangan foto)
+- [ ] Admin: cetak laporan penyewaan (dari tanggal/bulan/tahun)
+- [x] Visualisasi lapangan (warna berubah saat booking) - [butuh UI slot grid]
+- [ ] Integrasi payment gateway lokal sandbox (plus)
+- [ ] Hosting gratis (fitur deploy)
 
-## Checklist
+## Perubahan yang sudah dilakukan
 
-- [ ] Pastikan middleware alias `admin` terdaftar dan mengarah ke `App\Http\Middleware\AdminMiddleware`
-    - Cari lokasi registrasi middleware: biasanya `bootstrap/app.php` (Laravel 10+) atau `app/Http/Kernel.php` (Laravel 9-)
-    - Validasi bahwa route prefix `/admin` benar-benar memakai middleware `admin` yang sesuai
+- [x] Tambah `pending_expires_at` pada bookings table (migration)
+- [x] Saat booking dibuat (pending), set `pending_expires_at = now() + 60 menit`
+- [x] Anti bentrok: `pending` hanya mengunci selama belum expired
+- [x] Bentrok yang mengunci: `pending (belum expired)`, `dp_dibayar`, `lunas`
 
-- [ ] Validasi koneksi admin dashboard end-to-end
-    - [ ] Login pakai user role `admin`
-    - [ ] Akses `GET /admin/dashboard`
-    - [ ] Pastikan tidak terjadi error relasi/view (mis. `$booking->user`, `$booking->lapangan`)
+## Catatan penting tentang database
 
-- [ ] Rapihkan coding view (opsional, jika diperlukan)
-    - [ ] Rapihkan formatting Blade & guard terhadap data null (jika ada kasus booking tanpa relasi)
+- `php artisan migrate` mengembalikan "Nothing to migrate" sehingga kolom `pending_expires_at` mungkin belum benar-benar ada di database Anda.
+- Cara aman (recommended): jalankan migration tambahan yang hanya menambah kolom tersebut (tanpa reset data).
 
-- [ ] Dokumentasi hasil
-    - [ ] Catat perbaikan yang dilakukan (file apa yang berubah dan kenapa)
+## Langkah berikutnya (prioritas)
 
-## Note Teknis
-
-- Route admin dashboard sudah terdeteksi lewat `php artisan route:list --path=admin`.
-- `AdminMiddleware` sudah ada dan logic-nya: hanya user dengan `role === 'admin'` yang boleh lewat.
-- `app/Http/Kernel.php` sempat dicek tapi tidak ditemukan (kemungkinan struktur project berbeda).
+1. [ ] Buat migration baru: add kolom `pending_expires_at` jika belum ada (tanpa migrate:fresh)
+2. [ ] Pastikan Bentrok & Checkout benar-benar membaca kolom `pending_expires_at` di DB
+3. [ ] Tambahkan fitur “ketersediaan slot” berbasis UI grid + warna berubah saat booking
+4. [ ] Admin: laporan penyewaan (filter tanggal/bulan/tahun)
+5. [ ] Integrasi payment gateway sandbox (flow & status)
+6. [ ] Setup hosting gratis
