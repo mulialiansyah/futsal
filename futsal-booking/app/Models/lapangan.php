@@ -11,6 +11,7 @@ class Lapangan extends Model
         'kategori',         // standar | internasional
         'jenis_lapangan',   // sintetis | vinyl
         'tipe_venue',       // indoor | outdoor
+        'image',
     ];
 
     public function bookings()

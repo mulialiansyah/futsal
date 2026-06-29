@@ -15,10 +15,18 @@ class DatabaseSeeder extends Seeder
     {
         // ===== USERS =====
         User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+        ]);
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
+            'role' => 'penyewa',
         ]);
 
         // ===== LAPANGAN (9 total: 5 standar, 4 internasional) =====

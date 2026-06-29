@@ -1,58 +1,89 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Booking Lapangan Futsal
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem booking lapangan futsal berbasis Laravel dengan fitur manajemen admin dan user.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Admin
+- Manajemen lapangan (tambah, edit, hapus, lihat)
+- Manajemen tarif (atur harga berdasarkan kategori, tipe hari, dan jam)
+- Manajemen hari libur (atur tanggal merah yang dianggap sebagai weekend)
+- Manajemen booking (lihat semua booking, ubah status booking)
+- Manajemen pembayaran (lihat bukti transfer, verifikasi pembayaran)
+- Generate laporan penjualan berdasarkan rentang tanggal
+- Dashboard dengan statistik (total booking, total lapangan, pembayaran pending)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### User (Penyewa)
+- Melihat daftar booking sendiri
+- Membuat booking lapangan baru (pilih lapangan, tanggal, jam, durasi)
+- Melihat detail booking
+- Membatalkan booking
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Spesifikasi Sistem
 
-## Learning Laravel
+- **Jam Operasional**: 08:00 - 21:00
+- **Kategori Lapangan**: Standar, Internasional
+- **Jenis Lapangan**: Sintetis, Vinyl
+- **Tipe Venue**: Indoor, Outdoor
+- **Total Lapangan**: 9 (5 Standar, 4 Internasional)
+- **Durasi Booking**: 1-4 jam
+- **Deadline Pembayaran**: 1 jam setelah booking (booking otomatis batal jika tidak dibayar)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Harga
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Weekday (Senin-Jumat, tidak termasuk hari libur)
+| Kategori     | Jam 08:00-15:00 | Jam 15:00-21:00 |
+|--------------|-----------------|-----------------|
+| Standar      | Rp 60.000/jam   | Rp 100.000/jam  |
+| Internasional| Rp 80.000/jam   | Rp 120.000/jam  |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Weekend (Sabtu-Minggu, hari libur)
+| Kategori     | Jam 08:00-15:00 | Jam 15:00-21:00 |
+|--------------|-----------------|-----------------|
+| Standar      | Rp 80.000/jam   | Rp 130.000/jam  |
+| Internasional| Rp 100.000/jam  | Rp 150.000/jam  |
 
-## Agentic Development
+## Instalasi
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. Clone repository
+2. Install dependencies:
+   ```bash
+   composer install
+   npm install
+   ```
+3. Copy .env.example ke .env dan konfigurasi database
+4. Generate application key:
+   ```bash
+   php artisan key:generate
+   ```
+5. Jalankan migrasi dan seeder:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+6. Jalankan development server:
+   ```bash
+   php artisan serve
+   ```
+7. Akses aplikasi di http://127.0.0.1:8000
 
-```bash
-composer require laravel/boost --dev
+## Akun Demo
 
-php artisan boost:install
-```
+### Admin
+- Email: admin@example.com
+- Password: password
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### User
+- Email: test@example.com
+- Password: password
 
-## Contributing
+## Teknologi
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Laravel 13
+- PHP 8.4
+- SQLite
+- Tailwind CSS
+- Blade Template Engine
 
-## Code of Conduct
+## Lisensi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proyek ini open-source di bawah [MIT license](https://opensource.org/licenses/MIT).

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('nominal')->default(0);
             $table->string('bukti_transfer')->nullable();
-            $table->enum('status_verifikasi', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('status_verifikasi', ['pending', 'diterima', 'ditolak'])->default('pending');
             $table->timestamps();
         });
     }
