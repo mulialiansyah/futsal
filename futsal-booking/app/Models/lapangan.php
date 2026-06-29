@@ -8,15 +8,9 @@ class Lapangan extends Model
 {
     protected $fillable = [
         'nama_lapangan',
-        'alamat',
-        'harga_per_jam',
-        'ukuran',
-        'kapasitas',
-        'fasilitas',
-    ];
-
-    protected $casts = [
-        'fasilitas' => 'array',
+        'kategori',         // standar | internasional
+        'jenis_lapangan',   // sintetis | vinyl
+        'tipe_venue',       // indoor | outdoor
     ];
 
     public function bookings()
@@ -24,10 +18,15 @@ class Lapangan extends Model
         return $this->hasMany(Booking::class);
     }
 
-    public function getHargaFormattedAttribute(): string
+    public function getKategoriLabelAttribute(): string
     {
-        return $this->harga_per_jam
-            ? 'Rp ' . number_format($this->harga_per_jam, 0, ',', '.')
-            : '-';
+        return $this->kategori === 'internasional' ? 'Internasional' : 'Standar';
+    }
+
+    public function getDeskripsiSingkatAttribute(): string
+    {
+        $jenis = ucfirst($this->jenis_lapangan ?? '-');
+        $tipe  = ucfirst($this->tipe_venue ?? '-');
+        return "{$jenis} - {$tipe}";
     }
 }

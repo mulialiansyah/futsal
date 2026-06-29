@@ -24,4 +24,4 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
     Route::resource('booking', BookingController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__.'/auth.php'; 
