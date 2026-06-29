@@ -51,7 +51,16 @@ Sistem booking lapangan futsal berbasis Laravel dengan fitur manajemen admin dan
    composer install
    npm install
    ```
-3. Copy .env.example ke .env dan konfigurasi database
+3. Copy .env.example ke .env dan konfigurasi database:
+   - Untuk MySQL di Laragon:
+     ```env
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=futsal_db
+     DB_USERNAME=root
+     DB_PASSWORD=
+     ```
 4. Generate application key:
    ```bash
    php artisan key:generate
@@ -80,7 +89,7 @@ Sistem booking lapangan futsal berbasis Laravel dengan fitur manajemen admin dan
 
 - Laravel 13
 - PHP 8.4
-- SQLite
+- MySQL
 - Tailwind CSS
 - Blade Template Engine
 
