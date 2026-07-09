@@ -62,7 +62,7 @@
 
                 <div class="mb-6">
                     <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Ganti Gambar (Opsional)</label>
-                    <input type="file" name="image" id="image" accept="image/*" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    <input type="file" name="image" id="image" class="w-full border border-gray-300 rounded-lg px-4 py-2">
                     @error('image')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror

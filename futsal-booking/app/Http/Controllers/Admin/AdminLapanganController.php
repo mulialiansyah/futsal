@@ -27,7 +27,7 @@ class AdminLapanganController extends Controller
             'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
             'tipe_venue' => 'required|in:indoor,outdoor',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|file|max:10240', // File bebas, max 10MB
         ]);
 
         if ($request->hasFile('image')) {
@@ -56,7 +56,7 @@ class AdminLapanganController extends Controller
             'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
             'tipe_venue' => 'required|in:indoor,outdoor',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|file|max:10240', // File bebas, max 10MB
         ]);
 
         if ($request->hasFile('image')) {

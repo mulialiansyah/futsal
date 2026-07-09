@@ -8,17 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('hari_librs', function (Blueprint $table) {
+        Schema::create('lapangan_fotos', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal')->unique();
-            $table->string('keterangan')->nullable();
-            $table->string('tipe')->default('nasional'); // nasional | cuti_bersama
+            $table->foreignId('lapangan_id')->constrained()->cascadeOnDelete();
+            $table->string('path');
+            $table->boolean('is_utama')->default(false); // foto cover/utama
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('hari_librs');
+        Schema::dropIfExists('lapangan_fotos');
     }
-};
+};  
