@@ -32,6 +32,9 @@
                             <x-nav-link :href="route('admin.lapangan.index')" :active="request()->routeIs('admin.lapangan.*')">
                                 Lapangan
                             </x-nav-link>
+                            <x-nav-link :href="route('admin.ketersediaan.index')" :active="request()->routeIs('admin.ketersediaan.*')">
+                                Ketersediaan
+                            </x-nav-link>
                             <x-nav-link :href="route('admin.tarif.index')" :active="request()->routeIs('admin.tarif.*')">
                                 Tarif
                             </x-nav-link>
@@ -93,6 +96,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.lapangan.index')" :active="request()->routeIs('admin.lapangan.*')">
                         Lapangan
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.ketersediaan.index')" :active="request()->routeIs('admin.ketersediaan.*')">
+                        Ketersediaan
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.tarif.index')" :active="request()->routeIs('admin.tarif.*')">
                         Tarif

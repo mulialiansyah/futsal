@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminHariLiburController;
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\Admin\AdminPembayaranController;
 use App\Http\Controllers\Admin\AdminLaporanController;
+use App\Http\Controllers\Admin\KetersediaanController;
 use Illuminate\Support\Facades\Route;
 
 // ===== PUBLIC ROUTES =====
@@ -60,6 +61,11 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     // Laporan
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
     Route::post('/laporan/generate', [AdminLaporanController::class, 'generate'])->name('laporan.generate');
+
+    // Kelola Ketersediaan Lapangan
+    Route::get('/ketersediaan', [KetersediaanController::class, 'index'])->name('ketersediaan.index');
+    Route::post('/ketersediaan', [KetersediaanController::class, 'store'])->name('ketersediaan.store');
+    Route::delete('/ketersediaan/{ketersediaan}', [KetersediaanController::class, 'destroy'])->name('ketersediaan.destroy');
 });
 
 require __DIR__.'/auth.php';

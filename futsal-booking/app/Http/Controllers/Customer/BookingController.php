@@ -63,6 +63,23 @@ class BookingController extends Controller
                 ->withInput();
         }
 
+        // ===== CEK PENUTUPAN LAPANGAN =====
+        if (\App\Models\PenutupanLapangan::isTutup($request->lapangan_id, $request->tanggal_main)) {
+            $lapanganTmp = \App\Models\Lapangan::find($request->lapangan_id);
+            $penutupan = \App\Models\PenutupanLapangan::where('lapangan_id', $request->lapangan_id)
+                ->where('tanggal_mulai', '<=', $request->tanggal_main)
+                ->where('tanggal_selesai', '>=', $request->tanggal_main)
+                ->first();
+
+            $alasan = $penutupan?->keterangan
+                ? "Lapangan sedang ditutup: {$penutupan->keterangan}."
+                : "Lapangan tidak tersedia pada tanggal tersebut.";
+
+            return back()
+                ->withErrors(['lapangan_id' => $alasan])
+                ->withInput();
+        }
+
         // Validasi jam mulai dalam jam operasional (08:00 - 21:00)
         if ($request->jam_mulai < self::JAM_BUKA || $request->jam_mulai > self::JAM_TUTUP) {
             return back()

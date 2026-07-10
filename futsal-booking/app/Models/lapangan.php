@@ -19,6 +19,19 @@ class Lapangan extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function penutupans()
+    {
+        return $this->hasMany(PenutupanLapangan::class);
+    }
+
+    /**
+     * Cek apakah lapangan ditutup pada tanggal tertentu
+     */
+    public function isTutupPada(string $tanggal): bool
+    {
+        return PenutupanLapangan::isTutup($this->id, $tanggal);
+    }
+
     public function getKategoriLabelAttribute(): string
     {
         return $this->kategori === 'internasional' ? 'Internasional' : 'Standar';
