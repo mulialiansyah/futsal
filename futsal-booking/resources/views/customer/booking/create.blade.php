@@ -54,6 +54,18 @@
                         @enderror
                     </div>
 
+                    <!-- Peringatan Penutupan Lapangan (muncul otomatis via JS) -->
+                    <div id="closureWarning" class="hidden mb-5 p-4 bg-red-50 border border-red-300 rounded-xl">
+                        <div class="flex items-start gap-3">
+                            <span class="text-2xl">🚫</span>
+                            <div>
+                                <p class="font-bold text-red-700 text-sm">Lapangan Tidak Tersedia</p>
+                                <p class="text-red-600 text-xs mt-1" id="closureMessage"></p>
+                                <p class="text-red-500 text-xs mt-1 font-semibold" id="closurePeriod"></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Jam Mulai (bebas menit) & Durasi -->
                     <div class="grid grid-cols-2 gap-4 mb-2">
                         <div>
@@ -117,6 +129,7 @@
     <script>
         const TARIFS = @json($tarifs);
         const HOLIDAYS = @json($holidays);
+        const PENUTUPANS = @json($penutupans);
 
         function isWeekendOrHoliday(dateStr) {
             if (!dateStr) return false;
@@ -193,8 +206,46 @@
             totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
         }
 
-        document.getElementById('lapanganSelect').addEventListener('change', hitungJamSelesaiDanHarga);
-        document.getElementById('tanggal_main').addEventListener('change', hitungJamSelesaiDanHarga);
+        // === CEK PENUTUPAN LAPANGAN REAL-TIME ===
+        function cekPenutupan() {
+            const lapanganId = document.getElementById('lapanganSelect').value;
+            const tanggal = document.getElementById('tanggal_main').value;
+            const warningEl = document.getElementById('closureWarning');
+            const messageEl = document.getElementById('closureMessage');
+            const periodEl = document.getElementById('closurePeriod');
+            const submitBtn = document.querySelector('#bookingForm button[type="submit"]');
+
+            if (!lapanganId || !tanggal) {
+                warningEl.classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            const closure = PENUTUPANS.find(p =>
+                p.lapangan_id == lapanganId &&
+                tanggal >= p.tanggal_mulai &&
+                tanggal <= p.tanggal_selesai
+            );
+
+            if (closure) {
+                const alasan = closure.keterangan
+                    ? `Alasan: ${closure.keterangan}`
+                    : 'Lapangan sedang ditutup pada tanggal ini.';
+                messageEl.textContent = alasan;
+                periodEl.textContent = `Periode tutup: ${closure.tanggal_mulai} s/d ${closure.tanggal_selesai}`;
+                warningEl.classList.remove('hidden');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                warningEl.classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        document.getElementById('lapanganSelect').addEventListener('change', () => { hitungJamSelesaiDanHarga(); cekPenutupan(); });
+        document.getElementById('tanggal_main').addEventListener('change', () => { hitungJamSelesaiDanHarga(); cekPenutupan(); });
         document.getElementById('jamMulai').addEventListener('change', hitungJamSelesaiDanHarga);
         document.getElementById('durasiJam').addEventListener('change', hitungJamSelesaiDanHarga);
     </script>

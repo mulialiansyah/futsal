@@ -39,7 +39,18 @@ class BookingController extends Controller
         $tarifs    = Tarif::select('kategori', 'tipe_hari', 'jam_mulai', 'jam_selesai', 'harga')->get();
         $holidays  = HariLibur::pluck('tanggal')->map(fn ($d) => Carbon::parse($d)->toDateString())->values();
 
-        return view('customer.booking.create', compact('lapangans', 'tarifs', 'holidays'));
+        // Data penutupan lapangan (yang masih aktif / akan datang)
+        $penutupans = \App\Models\PenutupanLapangan::where('tanggal_selesai', '>=', Carbon::today())
+            ->select('lapangan_id', 'tanggal_mulai', 'tanggal_selesai', 'keterangan')
+            ->get()
+            ->map(fn ($p) => [
+                'lapangan_id'     => $p->lapangan_id,
+                'tanggal_mulai'   => $p->tanggal_mulai->toDateString(),
+                'tanggal_selesai' => $p->tanggal_selesai->toDateString(),
+                'keterangan'      => $p->keterangan,
+            ]);
+
+        return view('customer.booking.create', compact('lapangans', 'tarifs', 'holidays', 'penutupans'));
     }
 
     /**

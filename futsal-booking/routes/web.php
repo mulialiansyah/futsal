@@ -60,7 +60,6 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     
     // Laporan
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
-    Route::post('/laporan/generate', [AdminLaporanController::class, 'generate'])->name('laporan.generate');
 
     // Kelola Ketersediaan Lapangan
     Route::get('/ketersediaan', [KetersediaanController::class, 'index'])->name('ketersediaan.index');
