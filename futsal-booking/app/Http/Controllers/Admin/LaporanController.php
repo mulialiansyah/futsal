@@ -14,7 +14,7 @@ class LaporanController extends Controller
     {
         $lapangans = Lapangan::orderBy('nama_lapangan')->get();
 
-        $query = Booking::with(['user', 'lapangan', 'pembayaran'])
+        $query = Booking::with(['user', 'lapangan', 'pembayarans'])
                         ->whereIn('status_booking', ['dp_dibayar', 'lunas']);
 
         // Filter tanggal

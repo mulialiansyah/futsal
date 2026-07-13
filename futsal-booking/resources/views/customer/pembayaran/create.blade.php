@@ -94,7 +94,7 @@
                     </div>
                 @endif
 
-                <form method="POST"
+                <form method="POST" id="pembayaranForm"
                       action="{{ route('customer.pembayaran.store', $booking) }}"
                       enctype="multipart/form-data">
                     @csrf
@@ -102,11 +102,11 @@
                     {{-- Nominal --}}
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">
-                            Nominal yang Ditransfer (Rp)
+                            Nominal yang Ditransfer (Rp) <span class="text-red-500">*</span>
                         </label>
                         <input type="number" name="nominal" id="inputNominal"
                                value="{{ old('nominal', $booking->sisa_tagihan) }}"
-                               min="1"
+                               min="1" required
                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 @error('nominal') border-red-400 @enderror">
                         
                         @if($booking->status_booking === 'pending' && $booking->pembayarans->isEmpty())
@@ -128,11 +128,13 @@
                         @error('nominal')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        <p id="nominalError" class="text-red-500 text-xs mt-1 hidden"></p>
                     </div>
 
                     <script>
                         function setNominal(amount) {
                             document.getElementById('inputNominal').value = amount;
+                            document.getElementById('nominalError').classList.add('hidden');
                         }
                     </script>
 
@@ -172,6 +174,7 @@
                         @error('bukti_transfer')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        <p id="buktiError" class="text-red-500 text-xs mt-1 hidden"></p>
                     </div>
 
                     <button type="submit"
@@ -198,6 +201,8 @@
                         <div class="text-green-600 font-semibold text-sm">✅ ${input.files[0].name}</div>
                         <div class="text-xs text-gray-400 mt-1">Klik untuk ganti foto</div>
                     `;
+                    document.getElementById('dropZone').classList.remove('border-red-500', 'bg-red-50');
+                    document.getElementById('buktiError').classList.add('hidden');
                     document.getElementById('dropZone').classList.add('border-green-400', 'bg-green-50');
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -218,6 +223,47 @@
                 dt.items.add(files[0]);
                 input.files = dt.files;
                 previewBukti(input);
+            }
+        });
+
+        // Clear nominal error when typing
+        document.getElementById('inputNominal').addEventListener('input', function() {
+            document.getElementById('nominalError').classList.add('hidden');
+            this.classList.remove('border-red-500', 'focus:ring-red-500');
+        });
+
+        // Form Submit Frontend Validation
+        document.getElementById('pembayaranForm').addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // 1. Validasi Nominal
+            const nominalInput = document.getElementById('inputNominal');
+            const nominalError = document.getElementById('nominalError');
+            if (!nominalInput.value || parseInt(nominalInput.value) <= 0) {
+                nominalError.textContent = 'Nominal transfer wajib diisi dan harus lebih dari 0.';
+                nominalError.classList.remove('hidden');
+                nominalInput.classList.add('border-red-500', 'focus:ring-red-500');
+                isValid = false;
+            } else {
+                nominalError.classList.add('hidden');
+                nominalInput.classList.remove('border-red-500', 'focus:ring-red-500');
+            }
+
+            // 2. Validasi Bukti Transfer
+            const fileInput = document.getElementById('buktiInput');
+            const buktiError = document.getElementById('buktiError');
+            if (fileInput.files.length === 0) {
+                buktiError.textContent = 'Foto bukti transfer wajib diunggah.';
+                buktiError.classList.remove('hidden');
+                document.getElementById('dropZone').classList.add('border-red-500', 'bg-red-50');
+                isValid = false;
+            } else {
+                buktiError.classList.add('hidden');
+                document.getElementById('dropZone').classList.remove('border-red-500', 'bg-red-50');
+            }
+
+            if (!isValid) {
+                e.preventDefault(); // Stop form submission
             }
         });
 

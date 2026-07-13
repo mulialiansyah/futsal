@@ -11,7 +11,7 @@ class AdminLaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with(['user', 'lapangan', 'pembayaran']);
+        $query = Booking::with(['user', 'lapangan', 'pembayarans']);
 
         // Filter: Tanggal Mulai & Selesai
         if ($request->filled('tanggal_mulai') && $request->filled('tanggal_selesai')) {
