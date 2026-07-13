@@ -22,7 +22,7 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $bookings = Booking::with(['lapangan', 'pembayaran'])
+        $bookings = Booking::with(['lapangan', 'pembayarans'])
                            ->where('user_id', Auth::id())
                            ->latest()
                            ->get();
@@ -148,13 +148,13 @@ class BookingController extends Controller
         ]);
 
         return redirect()->route('customer.booking.index')
-                         ->with('success', 'Booking berhasil dibuat! Lakukan pembayaran dalam 1 jam.');
+                         ->with('success', 'Booking berhasil dibuat! Lakukan pembayaran (DP Minimal 50% atau Lunas) dalam 1 jam.');
     }
 
     public function show(Booking $booking)
     {
         abort_if($booking->user_id !== Auth::id(), 403);
-        $booking->load(['lapangan', 'pembayaran']);
+        $booking->load(['lapangan', 'pembayarans']);
         return view('customer.booking.show', compact('booking'));
     }
 

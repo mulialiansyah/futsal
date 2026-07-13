@@ -64,8 +64,40 @@
                                                     {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
                                                 <a href="{{ route('customer.booking.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">Detail</a>
+                                                
+                                                @php
+                                                    $hasPending = $booking->pembayarans->where('status_verifikasi', 'pending')->isNotEmpty();
+                                                    $hasRejected = $booking->pembayarans->where('status_verifikasi', 'ditolak')->isNotEmpty(); // verified status is actually diterima/ditolak from AdminPembayaranController
+                                                @endphp
+
+                                                @if(($booking->status_booking === 'pending' || $booking->status_booking === 'dp_dibayar') && !$hasPending)
+                                                    @if($booking->status_booking === 'pending' && !$booking->isExpired())
+                                                        <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                                                           class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                                            💳 Bayar DP / Lunas
+                                                        </a>
+                                                    @elseif($booking->status_booking === 'dp_dibayar' && !$booking->isPelunasanExpired())
+                                                        <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                                                           class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                                            💳 Pelunasan
+                                                        </a>
+                                                    @endif
+                                                @endif
+
+                                                @if($hasPending)
+                                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                                        ⏳ Menunggu Verifikasi
+                                                    </span>
+                                                @endif
+
+                                                @if($hasRejected && !$hasPending && in_array($booking->status_booking, ['pending', 'dp_dibayar']))
+                                                    <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                                                       class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                                        🔄 Upload Ulang
+                                                    </a>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

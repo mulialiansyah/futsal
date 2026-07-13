@@ -10,13 +10,13 @@ class AdminBookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['user', 'lapangan', 'pembayaran'])->latest()->get();
+        $bookings = Booking::with(['user', 'lapangan', 'pembayarans'])->latest()->get();
         return view('admin.booking.index', compact('bookings'));
     }
 
     public function show(Booking $booking)
     {
-        $booking->load(['user', 'lapangan', 'pembayaran']);
+        $booking->load(['user', 'lapangan', 'pembayarans']);
         return view('admin.booking.show', compact('booking'));
     }
 

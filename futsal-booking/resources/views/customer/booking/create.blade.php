@@ -112,7 +112,11 @@
                             <span class="text-sm text-gray-600">Estimasi Total Harga:</span>
                             <span class="text-lg font-extrabold text-gray-800" id="totalHarga">Rp 0</span>
                         </div>
-                        <p class="text-gray-400 text-xs mt-2">* Harga final dihitung ulang otomatis oleh sistem saat booking disimpan.</p>
+                        <div class="flex justify-between items-center bg-blue-100 p-2 rounded-lg mt-2">
+                            <span class="text-xs text-blue-800 font-bold">Bisa DP Dulu (Min 50%):</span>
+                            <span class="text-sm font-extrabold text-blue-900" id="dpHarga">Rp 0</span>
+                        </div>
+                        <p class="text-gray-400 text-xs mt-2">* Harga final dihitung ulang otomatis oleh sistem. Waktu pembayaran 1 jam setelah booking.</p>
                     </div>
 
                     <div class="flex justify-end mt-6">
@@ -203,7 +207,9 @@
             }
 
             const total = durasi * tarif.harga;
+            const dp = total / 2;
             totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('dpHarga').textContent = 'Rp ' + dp.toLocaleString('id-ID');
         }
 
         // === CEK PENUTUPAN LAPANGAN REAL-TIME ===

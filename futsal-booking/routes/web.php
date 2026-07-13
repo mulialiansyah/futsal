@@ -32,10 +32,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+use App\Http\Controllers\Customer\PembayaranController as CustomerPembayaranController;
+
 // ===== CUSTOMER ROUTES (Penyewa) =====
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
     // Booking
     Route::resource('booking', BookingController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
+    
+    // Pembayaran customer
+    Route::get('booking/{booking}/bayar', [CustomerPembayaranController::class, 'create'])->name('pembayaran.create');
+    Route::post('booking/{booking}/bayar', [CustomerPembayaranController::class, 'store'])->name('pembayaran.store');
 });
 
 // ===== ADMIN ROUTES (Hanya Akses Admin Resmi) =====
@@ -57,6 +63,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');
     Route::get('/pembayaran/{pembayaran}', [AdminPembayaranController::class, 'show'])->name('pembayaran.show');
     Route::patch('/pembayaran/{pembayaran}/verify', [AdminPembayaranController::class, 'verify'])->name('pembayaran.verify');
+    Route::post('/booking/{booking}/confirm-cash', [AdminPembayaranController::class, 'confirmCash'])->name('pembayaran.confirm-cash');
     
     // Laporan
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');

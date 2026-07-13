@@ -16,12 +16,14 @@ class Booking extends Model
         'total_harga',
         'status_booking',
         'payment_deadline',
+        'pelunasan_deadline',
         'expired_at',
     ];
 
     protected $casts = [
         'tanggal_main' => 'date',
         'payment_deadline' => 'datetime',
+        'pelunasan_deadline' => 'datetime',
         'expired_at' => 'datetime',
     ];
 
@@ -36,16 +38,28 @@ class Booking extends Model
         return $this->belongsTo(Lapangan::class);
     }
 
-    public function pembayaran()
+    public function pembayarans()
     {
-        return $this->hasOne(Pembayaran::class);
+        return $this->hasMany(Pembayaran::class);
     }
 
-    // ===== ACCESSORS - AUTO-RELEASE LOGIC =====
+    // ===== ACCESSORS =====
+    
+    public function getTotalDibayarAttribute(): int
+    {
+        if ($this->relationLoaded('pembayarans')) {
+            return $this->pembayarans->where('status_verifikasi', 'diterima')->sum('nominal');
+        }
+        return $this->pembayarans()->where('status_verifikasi', 'diterima')->sum('nominal');
+    }
+    
+    public function getSisaTagihanAttribute(): int
+    {
+        return max(0, $this->total_harga - $this->total_dibayar);
+    }
 
     /**
-     * Accessor: Hitung sisa waktu pembayaran (dalam detik)
-     * Akses via: $booking->sisa_waktu
+     * Accessor: Hitung sisa waktu pembayaran DP pertama (dalam detik)
      */
     public function getSisaWaktuAttribute(): ?int
     {
@@ -60,13 +74,40 @@ class Booking extends Model
     }
 
     /**
-     * Accessor: Format sisa waktu jadi HH:MM:SS
-     * Akses via: $booking->sisa_waktu_format
+     * Accessor: Hitung sisa waktu pelunasan (dalam detik)
+     */
+    public function getSisaWaktuPelunasanAttribute(): ?int
+    {
+        if ($this->status_booking !== 'dp_dibayar' || !$this->pelunasan_deadline) {
+            return null;
+        }
+
+        $sekarang = Carbon::now();
+        $sisa = $this->pelunasan_deadline->diffInSeconds($sekarang, false);
+
+        return max(0, $sisa);
+    }
+
+    /**
+     * Accessor: Format sisa waktu DP jadi HH:MM:SS
      */
     public function getSisaWaktuFormatAttribute(): string
     {
         $sisa = $this->sisa_waktu;
+        return $this->formatSisaWaktu($sisa);
+    }
 
+    /**
+     * Accessor: Format sisa waktu pelunasan jadi HH:MM:SS
+     */
+    public function getSisaWaktuPelunasanFormatAttribute(): string
+    {
+        $sisa = $this->sisa_waktu_pelunasan;
+        return $this->formatSisaWaktu($sisa);
+    }
+    
+    private function formatSisaWaktu(?int $sisa): string
+    {
         if ($sisa === null || $sisa <= 0) {
             return '00:00:00';
         }
@@ -81,7 +122,7 @@ class Booking extends Model
     // ===== METHODS =====
 
     /**
-     * Cek apakah booking sudah expired
+     * Cek apakah booking DP sudah expired
      */
     public function isExpired(): bool
     {
@@ -91,12 +132,33 @@ class Booking extends Model
     }
 
     /**
+     * Cek apakah batas pelunasan sudah expired
+     */
+    public function isPelunasanExpired(): bool
+    {
+        return $this->status_booking === 'dp_dibayar' 
+            && $this->pelunasan_deadline 
+            && Carbon::now()->greaterThan($this->pelunasan_deadline);
+    }
+
+    /**
      * Mark booking sebagai expired (slot di-release)
      */
     public function markAsExpired(): void
     {
         $this->update([
             'status_booking' => 'expired',
+            'expired_at' => Carbon::now(),
+        ]);
+    }
+    
+    /**
+     * Mark booking sebagai batal jika gagal pelunasan
+     */
+    public function markAsBatal(): void
+    {
+        $this->update([
+            'status_booking' => 'batal',
             'expired_at' => Carbon::now(),
         ]);
     }

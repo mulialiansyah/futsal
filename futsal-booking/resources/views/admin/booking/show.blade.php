@@ -6,6 +6,12 @@
                 <a href="{{ route('admin.booking.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Kembali</a>
             </div>
 
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
+
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">User</label>
                 <p class="text-lg">{{ $booking->user->name }} ({{ $booking->user->email }})</p>
@@ -34,16 +40,62 @@
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status Booking</label>
                 <p class="text-lg">
-                    <span class="px-2 py-1 rounded text-xs font-semibold
-                                        {{ $booking->status_booking === 'lunas' ? 'bg-green-100 text-green-800' : 
-                                           ($booking->status_booking === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                           ($booking->status_booking === 'batal' ? 'bg-red-100 text-red-800' : 
-                                           'bg-gray-100 text-gray-800')) }}">
-                                        {{ ucfirst($booking->status_booking) }}
+                    @php
+                        $statusColors = [
+                            'pending' => 'bg-yellow-100 text-yellow-800',
+                            'dp_dibayar' => 'bg-blue-100 text-blue-800',
+                            'lunas' => 'bg-green-100 text-green-800',
+                            'expired' => 'bg-red-100 text-red-800',
+                            'batal' => 'bg-gray-100 text-gray-800',
+                        ];
+                    @endphp
+                    <span class="px-2 py-1 rounded text-xs font-semibold {{ $statusColors[$booking->status_booking] ?? 'bg-gray-100 text-gray-800' }}">
+                        {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
                     </span>
                 </p>
             </div>
 
+            {{-- Ringkasan Pembayaran --}}
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 class="font-bold text-gray-700 mb-3">Ringkasan Pembayaran</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Harga</span>
+                        <span class="font-bold">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Dibayar</span>
+                        <span class="font-bold text-green-600">Rp {{ number_format($booking->total_dibayar, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between border-t pt-2">
+                        <span class="font-bold text-gray-700">Sisa Tagihan</span>
+                        <span class="font-extrabold {{ $booking->sisa_tagihan > 0 ? 'text-red-600' : 'text-green-600' }}">
+                            Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Tombol Konfirmasi Pelunasan Cash --}}
+            @if($booking->status_booking === 'dp_dibayar' && $booking->sisa_tagihan > 0)
+                <div class="bg-orange-50 border border-orange-300 rounded-xl p-5 mb-6">
+                    <h3 class="font-bold text-orange-800 mb-2">💵 Konfirmasi Pelunasan Cash</h3>
+                    <p class="text-sm text-orange-700 mb-3">
+                        Customer bayar sisa tagihan langsung di tempat (cash)? Klik tombol di bawah untuk konfirmasi.
+                    </p>
+                    <form action="{{ route('admin.pembayaran.confirm-cash', $booking) }}" method="POST"
+                          onsubmit="return confirm('Yakin konfirmasi pelunasan cash Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}?');">
+                        @csrf
+                        <input type="hidden" name="nominal" value="{{ $booking->sisa_tagihan }}">
+                        <button type="submit"
+                                class="bg-orange-600 hover:bg-orange-700 text-white font-bold px-6 py-3 rounded-lg transition w-full">
+                            💵 Konfirmasi Pelunasan Cash — Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
+                        </button>
+                    </form>
+                </div>
+            @endif
+
+            {{-- Ubah Status Manual --}}
             @if($booking->status_booking !== 'lunas' && $booking->status_booking !== 'batal' && $booking->status_booking !== 'expired')
                 <div class="mt-6">
                     <h2 class="text-xl font-semibold mb-4">Ubah Status</h2>
@@ -63,27 +115,53 @@
                 </div>
             @endif
 
-            @if($booking->pembayaran)
-                <div class="mt-6">
-                    <h2 class="text-xl font-semibold mb-4">Pembayaran</h2>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nominal</label>
-                        <p class="text-lg">Rp {{ number_format($booking->pembayaran->nominal, 0, ',', '.') }}</p>
+            {{-- Riwayat Pembayaran --}}
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold mb-4">Riwayat Pembayaran</h2>
+
+                @if($booking->pembayarans->isEmpty())
+                    <p class="text-gray-400 text-sm">Belum ada pembayaran.</p>
+                @else
+                    <div class="space-y-3">
+                        @foreach($booking->pembayarans as $idx => $payment)
+                            <div class="border rounded-lg p-4 {{ $payment->status_verifikasi === 'diterima' ? 'border-green-200 bg-green-50' : ($payment->status_verifikasi === 'ditolak' ? 'border-red-200 bg-red-50' : 'border-gray-200') }}">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-xs text-gray-500">
+                                            Pembayaran #{{ $idx + 1 }} — {{ $payment->created_at->format('d M Y H:i') }}
+                                            @if(!$payment->bukti_transfer)
+                                                <span class="ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-bold">CASH</span>
+                                            @endif
+                                        </p>
+                                        <p class="font-bold text-gray-800 text-lg">Rp {{ number_format($payment->nominal, 0, ',', '.') }}</p>
+                                    </div>
+                                    @php
+                                        $verifikasi = [
+                                            'pending'  => 'bg-yellow-100 text-yellow-700',
+                                            'diterima' => 'bg-green-100 text-green-700',
+                                            'ditolak'  => 'bg-red-100 text-red-700',
+                                        ];
+                                        $labelV = [
+                                            'pending'  => '⏳ Pending',
+                                            'diterima' => '✅ Diterima',
+                                            'ditolak'  => '❌ Ditolak',
+                                        ];
+                                    @endphp
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $verifikasi[$payment->status_verifikasi] ?? 'bg-gray-100' }}">
+                                        {{ $labelV[$payment->status_verifikasi] ?? $payment->status_verifikasi }}
+                                    </span>
+                                </div>
+
+                                @if($payment->bukti_transfer)
+                                    <div class="mt-2">
+                                        <img src="{{ Storage::url($payment->bukti_transfer) }}" alt="Bukti Transfer" class="w-32 h-32 object-cover rounded-lg border">
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transfer</label>
-                        @if($booking->pembayaran->bukti_transfer)
-                            <img src="{{ Storage::url($booking->pembayaran->bukti_transfer) }}" alt="Bukti Transfer" class="w-64 h-64 object-cover">
-                        @else
-                            <span class="text-gray-400">No Bukti</span>
-                        @endif
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status Verifikasi</label>
-                        <p class="text-lg">{{ ucfirst($booking->pembayaran->status_verifikasi) }}</p>
-                    </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </div>
 </x-admin-layout>

@@ -9,27 +9,46 @@ use Illuminate\Console\Command;
 class ReleaseExpiredBookings extends Command
 {
     protected $signature = 'bookings:release-expired';
-    protected $description = 'Release expired booking slots yang pending lebih dari deadline pembayaran';
+    protected $description = 'Release expired booking slots yang pending atau gagal pelunasan DP';
 
     public function handle()
     {
-        // ===== CARI SEMUA BOOKING PENDING YANG SUDAH LEWAT PAYMENT_DEADLINE =====
+        $countExpired = 0;
+        $countBatal = 0;
+
+        // ===== 1. CARI SEMUA BOOKING PENDING YANG SUDAH LEWAT PAYMENT_DEADLINE =====
         $expiredBookings = Booking::where('status_booking', 'pending')
             ->whereNotNull('payment_deadline')
             ->where('payment_deadline', '<', Carbon::now())
             ->get();
 
-        $count = 0;
         foreach ($expiredBookings as $booking) {
-            // Mark setiap booking sebagai expired (slot di-release)
             $booking->markAsExpired();
-            $count++;
+            $countExpired++;
         }
 
-        if ($count > 0) {
-            $this->info("✅ {$count} booking(s) berhasil di-release karena expired.");
+        // ===== 2. CARI SEMUA BOOKING DP_DIBAYAR YANG SUDAH LEWAT PELUNASAN_DEADLINE =====
+        $expiredPelunasan = Booking::where('status_booking', 'dp_dibayar')
+            ->whereNotNull('pelunasan_deadline')
+            ->where('pelunasan_deadline', '<', Carbon::now())
+            ->get();
+
+        foreach ($expiredPelunasan as $booking) {
+            $booking->markAsBatal();
+            $countBatal++;
+        }
+
+        $total = $countExpired + $countBatal;
+
+        if ($total > 0) {
+            if ($countExpired > 0) {
+                $this->info("✅ {$countExpired} booking(s) pending di-release karena expired.");
+            }
+            if ($countBatal > 0) {
+                $this->info("✅ {$countBatal} booking(s) dibatalkan (uang hangus) karena telat pelunasan.");
+            }
         } else {
-            $this->info("✓ Tidak ada booking yang expired.");
+            $this->info("✓ Tidak ada booking yang expired atau batal.");
         }
     }
 }
