@@ -19,6 +19,16 @@ class Lapangan extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function fotos()
+    {
+        return $this->hasMany(LapanganFoto::class);
+    }
+
+    public function fotoUtama()
+    {
+        return $this->hasOne(LapanganFoto::class)->where('is_utama', true);
+    }
+
     public function penutupans()
     {
         return $this->hasMany(PenutupanLapangan::class);

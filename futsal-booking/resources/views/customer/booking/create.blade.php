@@ -31,7 +31,7 @@
                             @foreach($lapangans as $lapangan)
                                 <option value="{{ $lapangan->id }}"
                                         data-kategori="{{ $lapangan->kategori }}"
-                                        {{ old('lapangan_id') == $lapangan->id ? 'selected' : '' }}>
+                                        {{ (old('lapangan_id') ?? request('lapangan_id')) == $lapangan->id ? 'selected' : '' }}>
                                     {{ $lapangan->nama_lapangan }} — {{ $lapangan->kategori_label }} ({{ $lapangan->deskripsi_singkat }})
                                 </option>
                             @endforeach
@@ -45,7 +45,7 @@
                     <div class="mb-5">
                         <label for="tanggal_main" class="block text-sm font-bold text-gray-700 mb-2">Tanggal Main</label>
                         <input type="date" name="tanggal_main" id="tanggal_main" required
-                               value="{{ old('tanggal_main') }}"
+                               value="{{ old('tanggal_main') ?? request('tanggal_main') }}"
                                min="{{ now()->addDays(2)->toDateString() }}"
                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 @error('tanggal_main') border-red-400 @enderror">
                         <p class="text-gray-400 text-xs mt-1">* Minimal H-2 (2 hari sebelum main). Harga weekend/tanggal merah berbeda dengan weekday.</p>
@@ -71,7 +71,7 @@
                         <div>
                             <label for="jamMulai" class="block text-sm font-bold text-gray-700 mb-2">Jam Mulai</label>
                             <input type="time" name="jam_mulai" id="jamMulai" required
-                                   value="{{ old('jam_mulai') }}"
+                                   value="{{ old('jam_mulai') ?? request('jam_mulai') }}"
                                    min="08:00" max="21:00"
                                    class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 @error('jam_mulai') border-red-400 @enderror">
                             <p class="text-gray-400 text-xs mt-1">* Jam operasional 08:00 - 21:00</p>
@@ -254,5 +254,11 @@
         document.getElementById('tanggal_main').addEventListener('change', () => { hitungJamSelesaiDanHarga(); cekPenutupan(); });
         document.getElementById('jamMulai').addEventListener('change', hitungJamSelesaiDanHarga);
         document.getElementById('durasiJam').addEventListener('change', hitungJamSelesaiDanHarga);
+
+        // Auto-run on load if params exist
+        window.addEventListener('DOMContentLoaded', () => {
+            hitungJamSelesaiDanHarga();
+            cekPenutupan();
+        });
     </script>
 </x-app-layout>

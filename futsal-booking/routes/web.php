@@ -33,9 +33,15 @@ Route::middleware('auth')->group(function () {
 });
 
 use App\Http\Controllers\Customer\PembayaranController as CustomerPembayaranController;
+use App\Http\Controllers\Customer\LapanganController as CustomerLapanganController;
 
 // ===== CUSTOMER ROUTES (Penyewa) =====
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
+    // Browse & Detail Lapangan
+    Route::get('lapangan', [CustomerLapanganController::class, 'index'])->name('lapangan.index');
+    Route::get('lapangan/{lapangan}', [CustomerLapanganController::class, 'show'])->name('lapangan.show');
+    Route::get('lapangan/{lapangan}/slots', [CustomerLapanganController::class, 'slots'])->name('lapangan.slots');
+
     // Booking
     Route::resource('booking', BookingController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
     
