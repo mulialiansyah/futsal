@@ -1,53 +1,57 @@
 <x-admin-layout>
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Daftar Lapangan</h1>
-                <a href="{{ route('admin.lapangan.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    Tambah Lapangan
-                </a>
-            </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full bg-white border border-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left">Nama</th>
-                            <th class="px-4 py-2 text-left">Kategori</th>
-                            <th class="px-4 py-2 text-left">Jenis</th>
-                            <th class="px-4 py-2 text-left">Tipe Venue</th>
-                            <th class="px-4 py-2 text-left">Gambar</th>
-                            <th class="px-4 py-2 text-left">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($lapangans as $lapangan)
-                            <tr class="border-t border-gray-200">
-                                <td class="px-4 py-2">{{ $lapangan->nama_lapangan }}</td>
-                                <td class="px-4 py-2">{{ ucfirst($lapangan->kategori) }}</td>
-                                <td class="px-4 py-2">{{ ucfirst($lapangan->jenis_lapangan) }}</td>
-                                <td class="px-4 py-2">{{ ucfirst($lapangan->tipe_venue) }}</td>
-                                <td class="px-4 py-2">
-                                    @if($lapangan->image)
-                                        <img src="{{ Storage::url($lapangan->image) }}" alt="{{ $lapangan->nama_lapangan }}" class="w-20 h-20 object-cover">
-                                    @else
-                                        <span class="text-gray-400">No Image</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-2">
-                                    <a href="{{ route('admin.lapangan.show', $lapangan) }}" class="text-blue-600 hover:underline mr-2">Lihat</a>
-                                    <a href="{{ route('admin.lapangan.edit', $lapangan) }}" class="text-green-600 hover:underline mr-2">Edit</a>
-                                    <form action="{{ route('admin.lapangan.destroy', $lapangan) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Are you sure?')">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+    <h1 class="text-2xl sm:text-3xl font-bold text-neutral-900 mb-6">Lapangan yang dikelola</h1>
+
+    @if($lapangans->count() > 0)
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            @foreach($lapangans as $lapangan)
+                <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                    <div class="p-4 flex items-start gap-4">
+                        @if($lapangan->image)
+                            <img src="{{ Storage::url($lapangan->image) }}" alt="{{ $lapangan->nama_lapangan }}" class="w-24 h-24 object-cover rounded-xl">
+                        @else
+                            <div class="w-24 h-24 bg-neutral-100 rounded-xl flex items-center justify-center text-neutral-400">
+                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        @endif
+                        <div class="flex-1">
+                            <h3 class="font-bold text-neutral-900 mb-1">{{ $lapangan->nama_lapangan }}</h3>
+                            <div class="flex items-center gap-1 text-sm text-neutral-600 mb-1">
+                                <span>📍</span>
+                                <span>1.6 km</span>
+                            </div>
+                            <div class="flex items-center gap-1 mb-2">
+                                <div class="flex items-center text-yellow-500">
+                                    ⭐
+                                </div>
+                                <span class="text-sm text-neutral-700">4.2 (40)</span>
+                            </div>
+                            <p class="font-semibold text-neutral-900">
+                                Rp {{ number_format($lapangan->harga_per_jam ?? 100000, 0, ',', '.') }}/jam
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4">
+                        <a href="{{ route('admin.lapangan.edit', $lapangan) }}" class="block w-full text-center text-sm font-semibold bg-neutral-50 hover:bg-neutral-100 text-neutral-700 py-2 rounded-xl transition">
+                            Edit
+                        </a>
+                    </div>
+                </div>
+            @endforeach
         </div>
-    </div>
+    @else
+        <div class="bg-white rounded-2xl border border-neutral-200 p-8 text-center mb-6">
+            <p class="text-neutral-600 mb-4">Belum ada lapangan yang dikelola.</p>
+        </div>
+    @endif
+
+    <a href="{{ route('admin.lapangan.create') }}" class="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-yellow-400 text-neutral-900 font-bold hover:bg-yellow-500 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        Tambahkan Lapangan
+    </a>
+
 </x-admin-layout>
