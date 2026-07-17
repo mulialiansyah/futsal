@@ -1,60 +1,64 @@
 <x-admin-layout>
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Detail Pembayaran</h1>
-                <a href="{{ route('admin.pembayaran.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">Kembali</a>
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="font-display text-3xl text-white">Detail Pembayaran</h1>
+        </div>
+        <a href="{{ route('admin.pembayaran.index') }}" class="bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 rounded-lg border border-white/10 transition">Kembali</a>
+    </div>
+
+    <div class="rounded-xl bg-neutral-900 border border-white/10 overflow-hidden p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-neutral-400 mb-2">Booking ID</label>
+                    <p class="text-white">{{ $pembayaran->booking_id }}</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-neutral-400 mb-2">User</label>
+                    <p class="text-white">{{ $pembayaran->booking->user->name }} ({{ $pembayaran->booking->user->email }})</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-neutral-400 mb-2">Nominal</label>
+                    <p class="text-white text-xl font-bold">Rp {{ number_format($pembayaran->nominal, 0, ',', '.') }}</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-neutral-400 mb-2">Status Verifikasi</label>
+                    <p class="text-white">
+                        <span @class([
+                            'px-2.5 py-1 rounded-full text-xs font-semibold border',
+                            'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' => $pembayaran->status_verifikasi === 'diterima',
+                            'bg-amber-500/10 text-amber-400 border-amber-500/20' => $pembayaran->status_verifikasi === 'pending',
+                            'bg-red-500/10 text-red-400 border-red-500/20' => $pembayaran->status_verifikasi === 'ditolak',
+                        ])>
+                            {{ ucfirst($pembayaran->status_verifikasi) }}
+                        </span>
+                    </p>
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Booking ID</label>
-                <p class="text-lg">{{ $pembayaran->booking_id }}</p>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">User</label>
-                <p class="text-lg">{{ $pembayaran->booking->user->name }} ({{ $pembayaran->booking->user->email }})</p>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nominal</label>
-                <p class="text-lg">Rp {{ number_format($pembayaran->nominal, 0, ',', '.') }}</p>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transfer</label>
+            <div>
+                <label class="block text-sm font-medium text-neutral-400 mb-2">Bukti Transfer</label>
                 @if($pembayaran->bukti_transfer)
-                    <img src="{{ Storage::url($pembayaran->bukti_transfer) }}" alt="Bukti Transfer" class="w-64 h-64 object-cover">
+                    <img src="{{ Storage::url($pembayaran->bukti_transfer) }}" alt="Bukti Transfer" class="w-64 h-64 object-cover rounded-lg border border-white/10">
                 @else
-                    <span class="text-gray-400">No Bukti</span>
+                    <div class="w-64 h-64 bg-neutral-800 rounded-lg flex items-center justify-center text-neutral-500 border border-white/10">No Bukti</div>
                 @endif
             </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Status Verifikasi</label>
-                <p class="text-lg">
-                    <span class="px-2 py-1 rounded text-xs font-semibold
-                        {{ $pembayaran->status_verifikasi === 'diterima' ? 'bg-green-100 text-green-800' : 
-                           ($pembayaran->status_verifikasi === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                           'bg-red-100 text-red-800') }}">
-                        {{ ucfirst($pembayaran->status_verifikasi) }}
-                    </span>
-                </p>
-            </div>
-
-            @if($pembayaran->status_verifikasi === 'pending')
-                <div class="mt-6">
-                    <h2 class="text-xl font-semibold mb-4">Verifikasi Pembayaran</h2>
-                    <form action="{{ route('admin.pembayaran.verify', $pembayaran) }}" method="POST">
-                        @csrf
-                        @method('PATCH')
-                        <div class="flex gap-4">
-                            <button type="submit" name="status_verifikasi" value="diterima" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Terima</button>
-                            <button type="submit" name="status_verifikasi" value="ditolak" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Tolak</button>
-                        </div>
-                    </form>
-                </div>
-            @endif
         </div>
     </div>
+
+    @if($pembayaran->status_verifikasi === 'pending')
+        <div class="rounded-xl bg-neutral-900 border border-white/10 overflow-hidden p-6">
+            <h2 class="font-display text-lg text-white tracking-wide mb-4">Verifikasi Pembayaran</h2>
+            <form action="{{ route('admin.pembayaran.verify', $pembayaran) }}" method="POST" class="flex gap-3">
+                @csrf
+                @method('PATCH')
+                <button type="submit" name="status_verifikasi" value="diterima" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition">Terima</button>
+                <button type="submit" name="status_verifikasi" value="ditolak" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition">Tolak</button>
+            </form>
+        </div>
+    @endif
 </x-admin-layout>
