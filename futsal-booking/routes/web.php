@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 
 // ===== PUBLIC ROUTES =====
 Route::get('/', function () {
-    return view('welcome');
+    $lapangans = \App\Models\Lapangan::all();
+    return view('welcome', compact('lapangans'));
 });
 
 // ===== DASHBOARD REDIRECTOR =====

@@ -12,28 +12,14 @@
     <div class="py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
 
-            {{-- Foto Gallery --}}
+            {{-- Foto Lapangan --}}
             <div class="bg-white rounded-xl shadow overflow-hidden">
-                @if($lapangan->fotos->count())
-                    {{-- Foto utama --}}
+                @if($lapangan->image)
                     <div class="h-72 bg-gray-100 overflow-hidden">
-                        <img src="{{ $lapangan->fotos->firstWhere('is_utama', true)?->url ?? $lapangan->fotos->first()->url }}"
-                             class="w-full h-full object-cover" id="fotoUtama"
+                        <img src="{{ asset('storage/' . $lapangan->image) }}"
+                             class="w-full h-full object-cover"
                              alt="{{ $lapangan->nama_lapangan }}">
                     </div>
-
-                    {{-- Thumbnail --}}
-                    @if($lapangan->fotos->count() > 1)
-                        <div class="flex gap-2 p-3 overflow-x-auto">
-                            @foreach($lapangan->fotos as $foto)
-                                <img src="{{ $foto->url }}"
-                                     onclick="document.getElementById('fotoUtama').src='{{ $foto->url }}'"
-                                     alt="Foto {{ $lapangan->nama_lapangan }}"
-                                     class="w-20 h-16 object-cover rounded-lg border-2 border-transparent
-                                            hover:border-green-500 cursor-pointer flex-shrink-0 transition">
-                            @endforeach
-                        </div>
-                    @endif
                 @else
                     <div class="h-48 flex items-center justify-center text-gray-300 bg-gray-50">
                         <div class="text-center">

@@ -66,7 +66,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-blue-700">Atas Nama</span>
-                        <span class="font-bold text-blue-900">MyFutsal</span>
+                        <span class="font-bold text-blue-900">FutsalKIte</span>
                     </div>
                     <div class="flex justify-between border-t border-blue-200 pt-2 mt-2">
                         <span class="text-blue-700 font-semibold">Total Transfer</span>
