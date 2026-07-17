@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'isAdmin' => \App\Http\Middleware\IsAdmin::class,
         ]);
+        // Replace default RedirectIfAuthenticated with our custom one
+        $middleware->replace(
+            \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
+            \App\Http\Middleware\RedirectIfAuthenticated::class
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

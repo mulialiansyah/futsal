@@ -21,7 +21,7 @@ class LapanganController extends Controller
         $keyword  = $request->get('q');
         $kategori = $request->get('kategori');
 
-        $query = Lapangan::with('fotoUtama');
+        $query = Lapangan::query();
 
         if ($keyword) {
             $query->where('nama_lapangan', 'like', "%{$keyword}%");
@@ -57,7 +57,7 @@ class LapanganController extends Controller
      */
     public function show(Lapangan $lapangan)
     {
-        $lapangan->load('fotos');
+        // No need to load fotos since we use single image column
 
         // Ambil semua tarif untuk kategori lapangan ini
         $tarifs = Tarif::where('kategori', $lapangan->kategori)

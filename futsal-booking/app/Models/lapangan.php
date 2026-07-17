@@ -21,12 +21,18 @@ class Lapangan extends Model
 
     public function fotos()
     {
+        // Return a dummy collection since we use single image column
         return $this->hasMany(LapanganFoto::class);
     }
 
-    public function fotoUtama()
+    public function getFotoUtamaAttribute()
     {
-        return $this->hasOne(LapanganFoto::class)->where('is_utama', true);
+        if ($this->image) {
+            return (object)[
+                'url' => asset('storage/' . $this->image)
+            ];
+        }
+        return null;
     }
 
     public function penutupans()
