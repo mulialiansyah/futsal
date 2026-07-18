@@ -1,112 +1,102 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Riwayat Booking Saya
-            </h2>
-            <a href="{{ route('customer.booking.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded text-sm">
-                + Booking Baru
-            </a>
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">
+            Riwayat Booking Saya
+        </h2>
+        <a href="{{ route('customer.booking.create') }}" class="bg-amber-400 hover:bg-amber-500 text-neutral-900 font-bold py-2 px-4 rounded-xl text-sm transition shadow-lg shadow-amber-400/20">
+            + Booking Baru
+        </a>
+    </div>
+
+    @if(session('success'))
+        <div class="bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-xl relative mb-6">
+            <span class="block sm:inline">{{ session('success') }}</span>
         </div>
-    </x-slot>
+    @endif
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
-            @endif
+    @if($bookings->isEmpty())
+        <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-8 text-center">
+            <div class="text-5xl mb-3">⚽</div>
+            <div class="font-semibold text-white text-lg">Belum ada riwayat booking</div>
+            <p class="text-neutral-400 text-sm mt-2">Yuk mulai main futsal!</p>
+        </div>
+    @else
+        <div class="space-y-4">
+            @foreach($bookings as $booking)
+                <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6 hover:bg-white/15 transition">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-white text-lg">{{ $booking->lapangan->nama_lapangan }}</h3>
+                                @php
+                                    $statusColors = [
+                                        'pending' => 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+                                        'dp_dibayar' => 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+                                        'lunas' => 'bg-green-500/20 text-green-300 border-green-500/30',
+                                        'expired' => 'bg-red-500/20 text-red-300 border-red-500/30',
+                                        'batal' => 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30'
+                                    ];
+                                    $statusColor = $statusColors[$booking->status_booking] ?? $statusColors['pending'];
+                                @endphp
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusColor }}">
+                                    {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap gap-4 text-sm">
+                                <div class="text-neutral-400">
+                                    <span class="text-neutral-500">Tanggal:</span>
+                                    <span class="text-white font-medium ml-1">{{ \Carbon\Carbon::parse($booking->tanggal_main)->isoFormat('D MMM YYYY') }}</span>
+                                </div>
+                                <div class="text-neutral-400">
+                                    <span class="text-neutral-500">Jam:</span>
+                                    <span class="text-white font-medium ml-1">{{ substr($booking->jam_mulai, 0, 5) }} - {{ substr($booking->jam_selesai, 0, 5) }}</span>
+                                </div>
+                                <div class="text-neutral-400">
+                                    <span class="text-neutral-500">Total:</span>
+                                    <span class="text-white font-bold ml-1">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ route('customer.booking.show', $booking) }}" class="bg-white/10 hover:bg-white/20 text-white font-semibold py-2 px-4 rounded-xl text-sm transition border border-white/20">
+                                Detail
+                            </a>
+                            
+                            @php
+                                $hasPending = $booking->pembayarans->where('status_verifikasi', 'pending')->isNotEmpty();
+                                $hasRejected = $booking->pembayarans->where('status_verifikasi', 'ditolak')->isNotEmpty();
+                            @endphp
 
-            @if($bookings->isEmpty())
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 text-center text-gray-500">
-                    Belum ada riwayat booking. Yuk mulai main futsal!
-                </div>
-            @else
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 bg-white border-b border-gray-200">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lapangan</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal & Waktu</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Harga</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($bookings as $booking)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="font-medium text-gray-900">{{ $booking->lapangan->nama_lapangan }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->tanggal_main)->isoFormat('D MMM YYYY') }}</div>
-                                                <div class="text-sm text-gray-500">{{ substr($booking->jam_mulai, 0, 5) }} - {{ substr($booking->jam_selesai, 0, 5) }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                Rp {{ number_format($booking->total_harga, 0, ',', '.') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                @php
-                                                    $colors = [
-                                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                                        'dp_dibayar' => 'bg-blue-100 text-blue-800',
-                                                        'lunas' => 'bg-green-100 text-green-800',
-                                                        'expired' => 'bg-red-100 text-red-800',
-                                                        'batal' => 'bg-gray-100 text-gray-800'
-                                                    ];
-                                                    $color = $colors[$booking->status_booking] ?? 'bg-gray-100 text-gray-800';
-                                                @endphp
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $color }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
-                                                <a href="{{ route('customer.booking.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">Detail</a>
-                                                
-                                                @php
-                                                    $hasPending = $booking->pembayarans->where('status_verifikasi', 'pending')->isNotEmpty();
-                                                    $hasRejected = $booking->pembayarans->where('status_verifikasi', 'ditolak')->isNotEmpty(); // verified status is actually diterima/ditolak from AdminPembayaranController
-                                                @endphp
+                            @if(($booking->status_booking === 'pending' || $booking->status_booking === 'dp_dibayar') && !$hasPending)
+                                @if($booking->status_booking === 'pending' && !$booking->isExpired())
+                                    <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                                       class="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 font-semibold py-2 px-4 rounded-xl text-sm transition">
+                                        💳 Bayar
+                                    </a>
+                                @elseif($booking->status_booking === 'dp_dibayar' && !$booking->isPelunasanExpired())
+                                    <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                                       class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 font-semibold py-2 px-4 rounded-xl text-sm transition">
+                                        💳 Pelunasan
+                                    </a>
+                                @endif
+                            @endif
 
-                                                @if(($booking->status_booking === 'pending' || $booking->status_booking === 'dp_dibayar') && !$hasPending)
-                                                    @if($booking->status_booking === 'pending' && !$booking->isExpired())
-                                                        <a href="{{ route('customer.pembayaran.create', $booking) }}"
-                                                           class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                                                            💳 Bayar DP / Lunas
-                                                        </a>
-                                                    @elseif($booking->status_booking === 'dp_dibayar' && !$booking->isPelunasanExpired())
-                                                        <a href="{{ route('customer.pembayaran.create', $booking) }}"
-                                                           class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                                                            💳 Pelunasan
-                                                        </a>
-                                                    @endif
-                                                @endif
+                            @if($hasPending)
+                                <span class="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-4 py-2 rounded-xl text-sm font-semibold">
+                                    ⏰ Menunggu Verifikasi
+                                </span>
+                            @endif
 
-                                                @if($hasPending)
-                                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                                                        ⏳ Menunggu Verifikasi
-                                                    </span>
-                                                @endif
-
-                                                @if($hasRejected && !$hasPending && in_array($booking->status_booking, ['pending', 'dp_dibayar']))
-                                                    <a href="{{ route('customer.pembayaran.create', $booking) }}"
-                                                       class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
-                                                        🔄 Upload Ulang
-                                                    </a>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                            @if($hasRejected && !$hasPending && in_array($booking->status_booking, ['pending', 'dp_dibayar']))
+                                <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                                   class="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-semibold py-2 px-4 rounded-xl text-sm transition">
+                                    🔄 Upload Ulang
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
-            @endif
+            @endforeach
         </div>
-    </div>
+    @endif
 </x-app-layout>

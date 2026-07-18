@@ -15,8 +15,12 @@ use Illuminate\Support\Facades\Route;
 // ===== PUBLIC ROUTES =====
 Route::get('/', function () {
     $lapangans = \App\Models\Lapangan::all();
-    return view('welcome', compact('lapangans'));
+    $tarifs = \App\Models\Tarif::all();
+    return view('welcome', compact('lapangans', 'tarifs'));
 });
+
+Route::view('/syarat-ketentuan', 'syarat-ketentuan')->name('syarat-ketentuan');
+Route::view('/kebijakan-privasi', 'kebijakan-privasi')->name('kebijakan-privasi');
 
 // ===== DASHBOARD REDIRECTOR =====
 Route::get('/dashboard', function () {
@@ -49,6 +53,10 @@ Route::middleware('auth')->prefix('customer')->name('customer.')->group(function
     // Pembayaran customer
     Route::get('booking/{booking}/bayar', [CustomerPembayaranController::class, 'create'])->name('pembayaran.create');
     Route::post('booking/{booking}/bayar', [CustomerPembayaranController::class, 'store'])->name('pembayaran.store');
+
+    // Notifikasi
+    Route::post('notifikasi/baca-semua', [\App\Http\Controllers\Customer\NotifikasiController::class, 'markAllRead'])->name('notifikasi.readAll');
+    Route::post('notifikasi/{notifikasi}/baca', [\App\Http\Controllers\Customer\NotifikasiController::class, 'markRead'])->name('notifikasi.read');
 });
 
 // ===== ADMIN ROUTES (Hanya Akses Admin Resmi) =====

@@ -13,3 +13,8 @@ Artisan::command('inspire', function () {
 Schedule::command('bookings:release-expired')
     ->everyMinute()
     ->withoutOverlapping();
+
+// ===== SEND H-1 REMINDER =====
+Schedule::command('futsal:pengingat-main')
+    ->daily()
+    ->withoutOverlapping();
