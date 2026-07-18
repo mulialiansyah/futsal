@@ -28,10 +28,11 @@ class AdminPembayaranController extends Controller
         ]);
 
         $pembayaran->update($validated);
+        $booking = $pembayaran->booking;
+        $lapanganNama = $booking->lapangan->nama_lapangan;
+        $nominalFormatted = 'Rp ' . number_format($pembayaran->nominal, 0, ',', '.');
 
         if ($validated['status_verifikasi'] === 'diterima') {
-            $booking = $pembayaran->booking;
-            
             // Reload pembayarans to get updated sum
             $booking->load('pembayarans');
             
@@ -44,6 +45,13 @@ class AdminPembayaranController extends Controller
                     'status_booking' => 'lunas',
                     'pelunasan_deadline' => null
                 ]);
+
+                \App\Models\Notifikasi::kirim(
+                    $booking->user_id,
+                    'Pembayaran Diterima (Lunas) ✅',
+                    "Pembayaran sebesar {$nominalFormatted} untuk lapangan {$lapanganNama} telah diterima. Status booking Anda sekarang LUNAS.",
+                    'pembayaran'
+                );
             } elseif ($totalTerbayar >= $minimalDp && $booking->status_booking !== 'dp_dibayar') {
                 // DP terpenuhi, set batas pelunasan ke waktu main (Hari H jam mulai)
                 $tanggalMain = Carbon::parse($booking->tanggal_main->format('Y-m-d') . ' ' . $booking->jam_mulai);
@@ -58,7 +66,28 @@ class AdminPembayaranController extends Controller
                     'status_booking' => 'dp_dibayar',
                     'pelunasan_deadline' => $pelunasanDeadline
                 ]);
+
+                \App\Models\Notifikasi::kirim(
+                    $booking->user_id,
+                    'Pembayaran DP Diterima ✅',
+                    "Pembayaran DP sebesar {$nominalFormatted} untuk lapangan {$lapanganNama} telah diterima. Sisa pembayaran sewa dapat dilunasi di lokasi.",
+                    'pembayaran'
+                );
+            } else {
+                \App\Models\Notifikasi::kirim(
+                    $booking->user_id,
+                    'Pembayaran Diterima ✅',
+                    "Pembayaran sebesar {$nominalFormatted} untuk lapangan {$lapanganNama} telah diverifikasi dan diterima.",
+                    'pembayaran'
+                );
             }
+        } else {
+            \App\Models\Notifikasi::kirim(
+                $booking->user_id,
+                'Pembayaran Ditolak ❌',
+                "Pembayaran sebesar {$nominalFormatted} ditolak oleh admin. Silakan periksa kembali bukti transfer Anda dan unggah ulang.",
+                'pembayaran'
+            );
         }
 
         return redirect()->route('admin.pembayaran.show', $pembayaran)->with('success', 'Pembayaran verified successfully.');
@@ -84,6 +113,8 @@ class AdminPembayaranController extends Controller
         // Reload dan hitung ulang
         $booking->load('pembayarans');
         $totalTerbayar = $booking->total_dibayar;
+        $nominalFormatted = 'Rp ' . number_format($request->nominal, 0, ',', '.');
+        $lapanganNama = $booking->lapangan->nama_lapangan;
 
         if ($totalTerbayar >= $booking->total_harga) {
             $booking->update([
@@ -91,6 +122,13 @@ class AdminPembayaranController extends Controller
                 'pelunasan_deadline' => null,
             ]);
         }
+
+        \App\Models\Notifikasi::kirim(
+            $booking->user_id,
+            'Pelunasan Cash Dikonfirmasi ✅',
+            "Pembayaran langsung di tempat (Cash) sebesar {$nominalFormatted} untuk sewa lapangan {$lapanganNama} telah dikonfirmasi oleh admin. Status booking: " . ucfirst(str_replace('_', ' ', $booking->fresh()->status_booking)) . ".",
+            'pembayaran'
+        );
 
         return redirect()->route('admin.booking.show', $booking)
             ->with('success', 'Pelunasan cash berhasil dikonfirmasi! Status: ' . $booking->fresh()->status_booking);

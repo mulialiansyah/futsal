@@ -136,7 +136,7 @@ class BookingController extends Controller
         $totalHarga = PricingService::hitungHarga($lapangan->kategori, $tanggal, $jamMulai, (int) $request->durasi_jam);
 
         // Create booking + payment deadline (auto-release)
-        Booking::create([
+        $booking = Booking::create([
             'user_id'          => Auth::id(),
             'lapangan_id'      => $request->lapangan_id,
             'tanggal_main'     => $request->tanggal_main,
@@ -146,6 +146,14 @@ class BookingController extends Controller
             'status_booking'   => 'pending',
             'payment_deadline' => Carbon::now()->addHour(),
         ]);
+
+        // Kirim Notifikasi ke Customer
+        \App\Models\Notifikasi::kirim(
+            Auth::id(),
+            'Booking Baru Dibuat ⚽',
+            "Booking untuk lapangan {$lapangan->nama_lapangan} pada tanggal " . Carbon::parse($request->tanggal_main)->isoFormat('D MMMM YYYY') . " jam {$jamMulaiStr} berhasil dibuat. Silakan lakukan pembayaran sebelum batas waktu.",
+            'booking'
+        );
 
         return redirect()->route('customer.booking.index')
                          ->with('success', 'Booking berhasil dibuat! Lakukan pembayaran (DP Minimal 50% atau Lunas) dalam 1 jam.');

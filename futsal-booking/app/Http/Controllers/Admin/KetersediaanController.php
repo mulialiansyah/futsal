@@ -43,7 +43,7 @@ class KetersediaanController extends Controller
                 ->withInput();
         }
 
-        PenutupanLapangan::create($request->only([
+        $penutupan = PenutupanLapangan::create($request->only([
             'lapangan_id',
             'tanggal_mulai',
             'tanggal_selesai',
@@ -51,6 +51,26 @@ class KetersediaanController extends Controller
         ]));
 
         $lapangan = Lapangan::find($request->lapangan_id);
+
+        // Cari booking aktif yang terdampak
+        $bookingsTerdampak = \App\Models\Booking::where('lapangan_id', $request->lapangan_id)
+            ->whereIn('status_booking', ['pending', 'dp_dibayar', 'lunas'])
+            ->whereBetween('tanggal_main', [$request->tanggal_mulai, $request->tanggal_selesai])
+            ->get();
+
+        foreach ($bookingsTerdampak as $b) {
+            $tglBooking = $b->tanggal_main->isoFormat('D MMMM YYYY');
+            $jam = substr($b->jam_mulai, 0, 5);
+            $alasan = $request->keterangan ? " karena: {$request->keterangan}" : ".";
+
+            \App\Models\Notifikasi::kirim(
+                $b->user_id,
+                'Lapangan Ditutup (Reschedule) 🚫',
+                "Pemberitahuan: Lapangan {$lapangan->nama_lapangan} yang Anda sewa pada tanggal {$tglBooking} jam {$jam} terpaksa ditutup sementara oleh pengelola{$alasan} Silakan hubungi admin via WhatsApp untuk melakukan reschedule jadwal main.",
+                'penutupan'
+            );
+        }
+
         return redirect()->route('admin.ketersediaan.index')
                          ->with('success', "Lapangan \"{$lapangan->nama_lapangan}\" berhasil ditutup!");
     }
