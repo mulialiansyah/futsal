@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>FutsalKIte — Platform Booking Lapangan Futsal Modern</title>
+    <title>FutsalKite — Platform Booking Lapangan Futsal Modern</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -84,13 +84,6 @@
                     <span class="font-display text-xl text-white">FutsalKite</span>
                 </a>
 
-                <nav class="hidden md:flex items-center gap-1">
-                    <a href="#lapangan" class="px-3 py-2 rounded-md text-sm font-semibold text-neutral-400 hover:text-white hover:bg-white/5 transition">Lapangan</a>
-                    <a href="#tarif" class="px-3 py-2 rounded-md text-sm font-semibold text-neutral-400 hover:text-white hover:bg-white/5 transition">Tarif</a>
-                    <a href="#tentang" class="px-3 py-2 rounded-md text-sm font-semibold text-neutral-400 hover:text-white hover:bg-white/5 transition">Tentang</a>
-                    <a href="#kontak" class="px-3 py-2 rounded-md text-sm font-semibold text-neutral-400 hover:text-white hover:bg-white/5 transition">Kontak</a>
-                </nav>
-
                 <div class="hidden md:flex items-center gap-4">
                     @auth
                         <a href="{{ route('dashboard') }}" class="text-sm font-bold text-neutral-300 hover:text-white transition">Dashboard</a>
@@ -110,10 +103,6 @@
             </div>
 
             <div x-show="mobileOpen" x-cloak class="md:hidden pb-4 space-y-1">
-                <a href="#lapangan" class="block px-2 py-2 text-sm font-semibold text-neutral-400 hover:text-white">Lapangan</a>
-                <a href="#tarif" class="block px-2 py-2 text-sm font-semibold text-neutral-400 hover:text-white">Tarif</a>
-                <a href="#tentang" class="block px-2 py-2 text-sm font-semibold text-neutral-400 hover:text-white">Tentang</a>
-                <a href="#kontak" class="block px-2 py-2 text-sm font-semibold text-neutral-400 hover:text-white">Kontak</a>
                 <div class="pt-3 flex gap-3">
                     @auth
                         <a href="{{ route('dashboard') }}" class="flex-1 text-center px-4 py-2 rounded-full border border-white/20 text-sm font-bold text-white">Dashboard</a>
@@ -138,7 +127,7 @@
                 <div class="max-w-xl">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[11px] font-bold tracking-widest uppercase text-amber-300 mb-5">
                         <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
-                        Mall Kebayoran &middot; Lantai 9
+                        Mall Cengkareng &middot; Lantai 9
                     </div>
                     <h1 class="font-display text-white text-4xl sm:text-5xl leading-[1.05] mb-5">
                         Main sekarang,<br><span class="text-red-500">gaya kamu sendiri.</span>
@@ -272,22 +261,27 @@
                         </div>
                         <div class="p-5 space-y-3">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-sm text-neutral-800">Jadwal · Sabtu, 18 Jul</span>
+                                <span class="font-bold text-sm text-neutral-800">Tarif Lapangan</span>
                                 <span class="text-xs text-red-600 font-semibold">Lihat semua</span>
                             </div>
-                            @foreach([
-                                ['court' => 'Standar A', 'time' => '15:00 - 16:00', 'price' => 'Rp90.000', 'status' => 'available'],
-                                ['court' => 'Internasional B', 'time' => '16:00 - 17:00', 'price' => 'Rp150.000', 'status' => 'held'],
-                                ['court' => 'Standar C', 'time' => '17:00 - 18:00', 'price' => 'Rp90.000', 'status' => 'available'],
-                            ] as $slot)
+                            @foreach($lapangans->take(3) as $index => $lapangan)
+                                @php
+                                    // Cari tarif sesuai kategori lapangan, ambil yang pertama
+                                    $tarifLapangan = $tarifs->where('kategori', $lapangan->kategori)->first();
+                                    $harga = $tarifLapangan ? number_format($tarifLapangan->harga, 0, ',', '.') : '0';
+                                    $jamMulai = $tarifLapangan ? $tarifLapangan->jam_mulai : '00:00';
+                                    $jamSelesai = $tarifLapangan ? $tarifLapangan->jam_selesai : '00:00';
+                                    $statuses = ['available', 'held', 'available'];
+                                    $status = $statuses[$index % 3];
+                                @endphp
                                 <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-neutral-200">
                                     <div>
-                                        <div class="text-sm font-semibold text-neutral-800">{{ $slot['court'] }}</div>
-                                        <div class="text-xs text-neutral-500">{{ $slot['time'] }}</div>
+                                        <div class="text-sm font-semibold text-neutral-800">{{ $lapangan->nama_lapangan }}</div>
+                                        <div class="text-xs text-neutral-500">{{ $jamMulai }} - {{ $jamSelesai }}</div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="text-sm font-bold text-neutral-800">{{ $slot['price'] }}</div>
-                                        @if ($slot['status'] === 'available')
+                                        <div class="text-sm font-bold text-neutral-800">Rp{{ $harga }}</div>
+                                        @if ($status === 'available')
                                             <span class="text-[10px] font-bold uppercase tracking-wide text-emerald-600">Tersedia</span>
                                         @else
                                             <span class="text-[10px] font-bold uppercase tracking-wide text-amber-600">Di-hold</span>
@@ -361,15 +355,15 @@
 
     <!-- ===== FOOTER ===== -->
     <footer id="kontak" class="border-t border-neutral-200 bg-neutral-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid sm:grid-cols-2 md:grid-cols-4 gap-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid sm:grid-cols-2 md:grid-cols-3 gap-10">
             <div>
                 <div class="flex items-center gap-2 mb-3">
                     <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
                     <span class="font-display text-lg text-neutral-900">FutsalKite</span>
                 </div>
                 <p class="text-sm text-neutral-500 leading-relaxed">
-                    Mall Kebayoran, Lantai 9<br>
-                    Jakarta Selatan, DKI Jakarta
+                    Mall Cengkareng, Lantai 9<br>
+                    Jakarta Barat, DKI Jakarta
                 </p>
             </div>
 
@@ -385,22 +379,10 @@
             <div>
                 <div class="font-bold text-sm text-neutral-900 mb-3">Bantuan</div>
                 <ul class="space-y-2 text-sm text-neutral-500">
-                    <li><a href="#kontak" class="hover:text-neutral-900">Kontak</a></li>
-                    <li><a href="#" class="hover:text-neutral-900">Syarat &amp; Ketentuan</a></li>
-                    <li><a href="#" class="hover:text-neutral-900">Kebijakan Privasi</a></li>
+                    <li><a href="https://wa.me/62895610031040" target="_blank" rel="noopener" class="hover:text-neutral-900">Kontak</a></li>
+                    <li><a href="{{ route('syarat-ketentuan') }}" class="hover:text-neutral-900">Syarat &amp; Ketentuan</a></li>
+                    <li><a href="{{ route('kebijakan-privasi') }}" class="hover:text-neutral-900">Kebijakan Privasi</a></li>
                 </ul>
-            </div>
-
-            <div>
-                <div class="font-bold text-sm text-neutral-900 mb-3">Ikuti Kami</div>
-                <div class="flex gap-3">
-                    <a href="#" class="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-red-600 hover:border-red-200 transition">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 5 3.66 9.13 8.44 9.88v-6.99h-2.54V12h2.54V9.79c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99C18.34 21.13 22 17 22 12c0-5.52-4.48-10-10-10z"/></svg>
-                    </a>
-                    <a href="#" class="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-red-600 hover:border-red-200 transition">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85c.15-3.23 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07zM12 0C8.74 0 8.33.01 7.05.07c-4.35.2-6.78 2.62-6.98 6.98C.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.2-4.35-2.62-6.78-6.98-6.98C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4zm6.41-10.4a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44z"/></svg>
-                    </a>
-                </div>
             </div>
         </div>
         <div class="border-t border-neutral-200 py-6 text-center text-xs text-neutral-400">
