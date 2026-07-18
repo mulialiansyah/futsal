@@ -1,36 +1,36 @@
 <x-admin-layout>
-    <h1 class="text-2xl sm:text-3xl font-bold text-neutral-900 mb-6">Daftar Pembayaran</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-6">Daftar Pembayaran</h1>
 
-    <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+    <div class="bg-white/10 rounded-2xl border border-white/20 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-neutral-200 bg-neutral-50">
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-600">Booking ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-600">User</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-600">Nominal</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-600">Status Verifikasi</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-600">Aksi</th>
+                    <tr class="border-b border-white/20 bg-white/5">
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Booking ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Nominal</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Status Verifikasi</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-neutral-100">
+                <tbody class="divide-y divide-white/10">
                     @foreach($pembayarans as $pembayaran)
-                        <tr class="hover:bg-neutral-50 transition">
-                            <td class="px-6 py-3.5 text-neutral-900 font-medium">{{ $pembayaran->booking_id }}</td>
-                            <td class="px-6 py-3.5 text-neutral-700">{{ $pembayaran->booking->user->name }}</td>
-                            <td class="px-6 py-3.5 text-neutral-700 font-medium">Rp {{ number_format($pembayaran->nominal, 0, ',', '.') }}</td>
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="px-6 py-3.5 text-white font-medium">{{ $pembayaran->booking_id }}</td>
+                            <td class="px-6 py-3.5 text-neutral-300">{{ $pembayaran->booking->user->name }}</td>
+                            <td class="px-6 py-3.5 text-neutral-300 font-medium">Rp {{ number_format($pembayaran->nominal, 0, ',', '.') }}</td>
                             <td class="px-6 py-3.5">
                                 <span @class([
                                     'px-2.5 py-1 rounded-full text-xs font-semibold border',
-                                    'bg-green-100 text-green-700 border-green-200' => $pembayaran->status_verifikasi === 'diterima',
-                                    'bg-amber-100 text-amber-700 border-amber-200' => $pembayaran->status_verifikasi === 'pending',
-                                    'bg-red-100 text-red-700 border-red-200' => $pembayaran->status_verifikasi === 'ditolak',
+                                    'bg-green-400/20 text-green-400 border-green-400/30' => $pembayaran->status_verifikasi === 'diterima',
+                                    'bg-amber-400/20 text-amber-400 border-amber-400/30' => $pembayaran->status_verifikasi === 'pending',
+                                    'bg-red-400/20 text-red-400 border-red-400/30' => $pembayaran->status_verifikasi === 'ditolak',
                                 ])>
                                     {{ ucfirst($pembayaran->status_verifikasi) }}
                                 </span>
                             </td>
                             <td class="px-6 py-3.5">
-                                <a href="{{ route('admin.pembayaran.show', $pembayaran) }}" class="text-blue-600 hover:text-blue-800 transition font-medium">Lihat</a>
+                                <a href="{{ route('admin.pembayaran.show', $pembayaran) }}" class="text-sky-400 hover:text-sky-300 transition font-medium">Lihat</a>
                             </td>
                         </tr>
                     @endforeach
