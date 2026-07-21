@@ -1,46 +1,120 @@
 <x-admin-layout>
-    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-6">Daftar Booking</h1>
+  <div class="space-y-6 font-sans">
 
-    <div class="bg-white/10 rounded-2xl border border-white/20 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-white/20 bg-white/5">
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">User</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Lapangan</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Jam</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Total Harga</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/10">
-                    @foreach($bookings as $booking)
-                        <tr class="hover:bg-white/5 transition">
-                            <td class="px-6 py-3.5 text-white font-medium">{{ $booking->user->name }}</td>
-                            <td class="px-6 py-3.5 text-neutral-300">{{ $booking->lapangan->nama_lapangan }}</td>
-                            <td class="px-6 py-3.5 text-neutral-400">{{ $booking->tanggal_main->format('d/m/Y') }}</td>
-                            <td class="px-6 py-3.5 text-neutral-400">{{ $booking->jam_mulai }} - {{ $booking->jam_selesai }}</td>
-                            <td class="px-6 py-3.5 text-neutral-300 font-medium">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</td>
-                            <td class="px-6 py-3.5">
-                                <span @class([
-                                    'px-2.5 py-1 rounded-full text-xs font-semibold border',
-                                    'bg-green-400/20 text-green-400 border-green-400/30' => $booking->status_booking === 'lunas',
-                                    'bg-amber-400/20 text-amber-400 border-amber-400/30' => $booking->status_booking === 'pending' || $booking->status_booking === 'dp_dibayar',
-                                    'bg-red-400/20 text-red-400 border-red-400/30' => $booking->status_booking === 'batal',
-                                    'bg-white/10 text-neutral-300 border-white/20' => !in_array($booking->status_booking, ['lunas', 'pending', 'dp_dibayar', 'batal']),
-                                ])>
-                                    {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3.5">
-                                <a href="{{ route('admin.booking.show', $booking) }}" class="text-sky-400 hover:text-sky-300 transition font-medium">Lihat</a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    <!-- Header Section & Action Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-amber-500 uppercase tracking-widest mb-1">
+          <span>Admin Dashboard</span>
+          <span class="text-zinc-600">/</span>
+          <span class="text-zinc-400">Kelola Booking</span>
         </div>
+        <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+          Daftar Booking
+          <span class="text-xs font-normal px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+            {{ $bookings->count() }} Data
+          </span>
+        </h1>
+      </div>
+
+
     </div>
+
+    <!-- Table Container -->
+    <div class="bg-[#141417] border border-zinc-800/80 rounded-xl overflow-hidden shadow-2xl">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          
+          <!-- Table Header -->
+          <thead class="bg-[#1A1A1E] text-[11px] font-semibold uppercase text-zinc-400 tracking-wider border-b border-zinc-800">
+            <tr>
+              <th class="py-4 px-6">User</th>
+              <th class="py-4 px-6">Lapangan</th>
+              <th class="py-4 px-6">Tanggal</th>
+              <th class="py-4 px-6">Jam</th>
+              <th class="py-4 px-6">Total Harga</th>
+              <th class="py-4 px-6 text-center">Status</th>
+              <th class="py-4 px-6 text-right">Aksi</th>
+            </tr>
+          </thead>
+
+          <!-- Table Body -->
+          <tbody class="divide-y divide-zinc-800/60 text-zinc-300">
+            @forelse($bookings as $booking)
+              <tr class="hover:bg-zinc-800/30 transition-colors">
+                <td class="py-4 px-6 font-medium text-white">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold flex items-center justify-center text-xs">
+                      {{ strtoupper(substr($booking->user->name ?? '?', 0, 1)) }}
+                    </div>
+                    <span class="capitalize">{{ $booking->user->name ?? '-' }}</span>
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-zinc-300 font-medium">{{ $booking->lapangan->nama_lapangan ?? '-' }}</td>
+                <td class="py-4 px-6 text-zinc-400 font-mono text-xs">{{ \Carbon\Carbon::parse($booking->tanggal_main)->format('d/m/Y') }}</td>
+                <td class="py-4 px-6 text-zinc-400 font-mono text-xs">{{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }}</td>
+                <td class="py-4 px-6 font-semibold text-white">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</td>
+                <td class="py-4 px-6 text-center">
+                  @php
+                      $statusColors = [
+                          'lunas' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                          'dp_dibayar' => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                          'pending' => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                          'batal' => 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+                      ];
+                      $statusDotColors = [
+                          'lunas' => 'bg-emerald-400',
+                          'dp_dibayar' => 'bg-amber-400 animate-pulse',
+                          'pending' => 'bg-amber-400 animate-pulse',
+                          'batal' => 'bg-rose-400',
+                      ];
+                      
+                      $colorClass = $statusColors[$booking->status_booking] ?? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+                      $dotClass = $statusDotColors[$booking->status_booking] ?? 'bg-zinc-400';
+                  @endphp
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border {{ $colorClass }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }}"></span>
+                    @php
+                        $statusLabels = [
+                            'pending' => 'Menunggu Pembayaran',
+                            'dp_dibayar' => 'DP Dibayar',
+                            'lunas' => 'Lunas',
+                            'expired' => 'Kedaluwarsa',
+                            'batal' => 'Dibatalkan'
+                        ];
+                    @endphp
+                    {{ $statusLabels[$booking->status_booking] ?? ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
+                  </span>
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <a href="{{ route('admin.booking.show', $booking) }}" class="text-xs font-medium text-zinc-400 hover:text-white bg-zinc-800/80 hover:bg-zinc-700/80 px-3 py-1.5 rounded-lg border border-zinc-700/50 transition inline-block">
+                    Lihat
+                  </a>
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="7" class="py-8 text-center text-zinc-500">
+                  Tidak ada data booking.
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Pagination / Summary Footer -->
+      <div class="px-6 py-3.5 bg-[#1A1A1E] border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
+        @if(method_exists($bookings, 'links'))
+            <span>Menampilkan {{ $bookings->firstItem() ?? 0 }}-{{ $bookings->lastItem() ?? 0 }} dari {{ $bookings->total() }} booking</span>
+            <div class="flex gap-2">
+                {{ $bookings->links() }}
+            </div>
+        @else
+            <span>Total {{ $bookings->count() }} booking</span>
+        @endif
+      </div>
+    </div>
+
+  </div>
 </x-admin-layout>

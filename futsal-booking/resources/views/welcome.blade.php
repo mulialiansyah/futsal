@@ -6,10 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>FutsalKite — Platform Booking Lapangan Futsal Modern</title>
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Anton&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -326,32 +324,7 @@
         </div>
     </section>
 
-    <!-- ===== TESTIMONIAL ===== -->
-    <section id="tentang" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div class="rounded-3xl bg-neutral-50 border border-neutral-200 grid md:grid-cols-[1fr,1.4fr] overflow-hidden">
-            <div class="relative bg-red-600 p-10 flex flex-col justify-center">
-                <svg class="absolute top-0 left-0 w-40 h-40 text-white/10 -translate-x-6 -translate-y-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 7C5 7 3 10 3 14c0 3 2 5 5 5 2 0 4-2 4-4 0-2-1-3-3-3-.5 0-1 .1-1 .1C8 10 9.5 8.5 12 8V7C10.5 7 9.5 7 9 7zm10 0c-4 0-6 3-6 7 0 3 2 5 5 5 2 0 4-2 4-4 0-2-1-3-3-3-.5 0-1 .1-1 .1 0-2.1 1.5-3.6 4-4.1V7c-1.5 0-2.5 0-3 0z"/></svg>
-                <div class="relative">
-                    <div class="text-white/90 font-display text-lg mb-1">Komunitas FutsalKite</div>
-                    <p class="text-red-100 text-sm">Ratusan pemain sudah booking tanpa drama rebutan slot tiap minggunya.</p>
-                </div>
-            </div>
-            <div class="p-10 flex items-center">
-                <div>
-                    <p class="text-lg text-neutral-800 leading-relaxed mb-6">
-                        "Dulu booking harus telepon dulu, sering ternyata udah kepenuhan pas mau bayar. Sekarang tinggal pilih slot, langsung keliatan mana yang kosong. Jauh lebih tenang."
-                    </p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-full bg-red-100 text-red-600 font-bold flex items-center justify-center">D</div>
-                        <div>
-                            <div class="font-bold text-sm text-neutral-900">Dani</div>
-                            <div class="text-xs text-neutral-500">Pemain rutin, tim New Village FC</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- ===== FOOTER ===== -->
     <footer id="kontak" class="border-t border-neutral-200 bg-neutral-50">

@@ -1,7 +1,14 @@
 <x-app-layout>
-    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-8">
-        Cari Lapangan
-    </h2>
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">
+            Cari Lapangan
+        </h2>
+        <a href="{{ route('customer.lapangan.denah') }}"
+           class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition">
+            <span aria-hidden="true">🗺️</span>
+            Lihat Denah
+        </a>
+    </div>
 
     <!-- Search & Filter -->
     <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6 mb-8">

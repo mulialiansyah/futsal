@@ -10,6 +10,7 @@ use App\Models\PenutupanLapangan;
 use App\Models\Tarif;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class LapanganController extends Controller
 {
@@ -18,7 +19,7 @@ class LapanganController extends Controller
      */
     public function index(Request $request)
     {
-        $keyword  = $request->get('q');
+        $keyword = $request->get('q');
         $kategori = $request->get('kategori');
 
         $query = Lapangan::query();
@@ -34,10 +35,10 @@ class LapanganController extends Controller
         $lapangans = $query->orderBy('kategori')->orderBy('nama_lapangan')->get();
 
         // Deteksi tipe hari ini untuk preview harga
-        $today     = Carbon::today();
+        $today = Carbon::today();
         $isWeekend = $today->isWeekend()
                      || HariLibur::where('tanggal', $today->toDateString())->exists();
-        $tipeHari  = $isWeekend ? 'weekend' : 'weekday';
+        $tipeHari = $isWeekend ? 'weekend' : 'weekday';
 
         // Ambil tarif terendah per kategori untuk preview "Mulai dari Rp ..."
         $tarifPreview = Tarif::whereIn('kategori', ['standar', 'internasional'])
@@ -49,6 +50,61 @@ class LapanganController extends Controller
 
         return view('customer.lapangan.index', compact(
             'lapangans', 'keyword', 'kategori', 'tipeHari', 'tarifPreview'
+        ));
+    }
+
+    /**
+     * Menampilkan denah semua lapangan beserta status pada tanggal dan jam pilihan.
+     */
+    public function denah(Request $request)
+    {
+        $jamOptions = collect(range(8, 20))->map(fn ($jam) => sprintf('%02d:00', $jam));
+
+        $validated = $request->validate([
+            'tanggal' => ['nullable', 'date', 'after:tomorrow'],
+            'jam' => ['nullable', 'date_format:H:i', Rule::in($jamOptions->all())],
+        ]);
+
+        $tanggal = $validated['tanggal'] ?? Carbon::today()->addDays(2)->toDateString();
+        $jam = $validated['jam'] ?? $jamOptions->first();
+        $jamDatabase = "{$jam}:00";
+
+        $lapangans = Lapangan::orderBy('kategori')->orderBy('nama_lapangan')->get();
+        $lapanganDitutup = PenutupanLapangan::query()
+            ->where('tanggal_mulai', '<=', $tanggal)
+            ->where('tanggal_selesai', '>=', $tanggal)
+            ->pluck('lapangan_id')
+            ->flip();
+        $bookingPerLapangan = Booking::query()
+            ->where('tanggal_main', $tanggal)
+            ->whereIn('status_booking', ['pending', 'dp_dibayar', 'lunas'])
+            ->where('jam_mulai', '<=', $jamDatabase)
+            ->where('jam_selesai', '>', $jamDatabase)
+            ->get()
+            ->keyBy('lapangan_id');
+
+        $statusLapangan = $lapangans->mapWithKeys(function (Lapangan $lapangan) use ($lapanganDitutup, $bookingPerLapangan) {
+            if ($lapanganDitutup->has($lapangan->id)) {
+                return [$lapangan->id => 'tutup'];
+            }
+
+            $booking = $bookingPerLapangan->get($lapangan->id);
+
+            return [$lapangan->id => match ($booking?->status_booking) {
+                'pending' => 'pending',
+                'dp_dibayar', 'lunas' => 'dipesan',
+                default => 'tersedia',
+            }];
+        });
+        $tanggalCarbon = Carbon::parse($tanggal);
+
+        return view('customer.lapangan.denah', compact(
+            'lapangans',
+            'statusLapangan',
+            'tanggal',
+            'tanggalCarbon',
+            'jam',
+            'jamOptions',
         ));
     }
 
@@ -89,7 +145,7 @@ class LapanganController extends Controller
         // Generate slot jam 08:00 - 20:00 (jam mulai terakhir, selesai paling malam 21:00)
         $slots = [];
         for ($jam = 8; $jam <= 20; $jam++) {
-            $jamStr       = sprintf('%02d:00', $jam);
+            $jamStr = sprintf('%02d:00', $jam);
             $jamSelesaiStr = sprintf('%02d:00', $jam + 1);
 
             $status = 'tersedia'; // default
@@ -110,17 +166,17 @@ class LapanganController extends Controller
             }
 
             $slots[] = [
-                'jam'          => $jamStr,
-                'jam_selesai'  => $jamSelesaiStr,
-                'status'       => $status,
-                'booking'      => $bookingInfo,
+                'jam' => $jamStr,
+                'jam_selesai' => $jamSelesaiStr,
+                'status' => $status,
+                'booking' => $bookingInfo,
             ];
         }
 
         // Deteksi tipe hari untuk info harga
         $isWeekend = $tanggalCarbon->isWeekend()
                      || HariLibur::where('tanggal', $tanggal)->exists();
-        $tipeHari  = $isWeekend ? 'weekend' : 'weekday';
+        $tipeHari = $isWeekend ? 'weekend' : 'weekday';
 
         return view('customer.lapangan.slots', compact(
             'lapangan', 'tanggal', 'tanggalCarbon', 'slots', 'isTutup', 'tipeHari'

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Lapangan;
 use App\Models\Pembayaran;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
@@ -17,7 +16,7 @@ class AdminDashboardController extends Controller
         $totalLapangan = Lapangan::count();
         $pendingPayments = Pembayaran::where('status_verifikasi', 'pending')->count();
         $recentBookings = Booking::with(['user', 'lapangan'])->latest()->take(5)->get();
-        
+
         // Calculate total revenue for current month
         $totalRevenue = Booking::where('status_booking', 'lunas')
             ->whereMonth('created_at', Carbon::now()->month)

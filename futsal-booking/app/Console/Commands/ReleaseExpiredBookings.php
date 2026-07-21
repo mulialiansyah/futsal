@@ -3,12 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\Notifikasi;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class ReleaseExpiredBookings extends Command
 {
     protected $signature = 'bookings:release-expired';
+
     protected $description = 'Release expired booking slots yang pending atau gagal pelunasan DP';
 
     public function handle()
@@ -34,7 +36,13 @@ class ReleaseExpiredBookings extends Command
             ->get();
 
         foreach ($expiredPelunasan as $booking) {
+            $booking->load(['user', 'lapangan']);
             $booking->markAsBatal();
+            Notifikasi::kirimKeAdmin(
+                'Booking Dibatalkan (Telat Pelunasan) ❌',
+                "Booking {$booking->lapangan->nama_lapangan} oleh {$booking->user->name} otomatis dibatalkan karena melewati batas waktu pelunasan.",
+                'booking'
+            );
             $countBatal++;
         }
 
@@ -48,7 +56,7 @@ class ReleaseExpiredBookings extends Command
                 $this->info("✅ {$countBatal} booking(s) dibatalkan (uang hangus) karena telat pelunasan.");
             }
         } else {
-            $this->info("✓ Tidak ada booking yang expired atau batal.");
+            $this->info('✓ Tidak ada booking yang expired atau batal.');
         }
     }
 }

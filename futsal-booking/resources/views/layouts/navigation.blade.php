@@ -3,32 +3,114 @@
     $latestNotifications = auth()->check() ? auth()->user()->notifikasis()->latest()->take(10)->get() : collect();
 @endphp
 
-<!-- ===== TOP BAR ===== -->
-<header class="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-md border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- ===== DESKTOP / TABLET SIDEBAR (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 z-40 bg-neutral-950/95 backdrop-blur-md border-r border-white/10 p-5 overflow-y-auto justify-between">
+    <div class="space-y-6">
         <!-- Logo -->
-        <a href="{{ url('/') }}" class="flex items-center gap-2">
+        <a href="{{ url('/') }}" class="flex items-center gap-2.5 px-2 py-1">
+            <span class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_3px_rgba(239,68,68,0.8)]"></span>
+            <span class="font-display text-2xl text-white tracking-wide">FutsalKite</span>
+        </a>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1.5">
+            <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest px-3 mb-2">Menu Utama</p>
+
+            <a href="{{ url('/') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all {{ request()->is('/') ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30' : 'text-neutral-300 hover:bg-white/5 hover:text-white' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/>
+                </svg>
+                <span>Beranda</span>
+            </a>
+
+            <a href="{{ route('customer.booking.create') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all {{ request()->routeIs('customer.booking.create') ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30' : 'text-neutral-300 hover:bg-white/5 hover:text-white' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Booking Lapangan</span>
+            </a>
+
+            <a href="{{ route('customer.lapangan.denah') }}"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all {{ request()->routeIs('customer.lapangan.denah') ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30' : 'text-neutral-300 hover:bg-white/5 hover:text-white' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+                <span>Denah Lapangan</span>
+            </a>
+
+            <a href="{{ route('customer.booking.index') }}"
+               class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all {{ request()->routeIs('customer.booking.index') || request()->routeIs('customer.booking.show') ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30' : 'text-neutral-300 hover:bg-white/5 hover:text-white' }}">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Riwayat Booking</span>
+                </div>
+                @if($unreadNotificationsCount > 0)
+                    <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                @endif
+            </a>
+
+            <a href="https://wa.me/62895610031040" target="_blank" rel="noopener"
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm text-neutral-300 hover:bg-white/5 hover:text-white transition-all">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.3-3.9A7.9 7.9 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <span>Chat Admin WA</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar User Footer -->
+    @auth
+    <div class="pt-4 border-t border-white/10 flex items-center justify-between">
+        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 hover:opacity-80 transition">
+            <div class="w-9 h-9 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 font-bold flex items-center justify-center text-sm">
+                {{ strtoupper(substr(Auth::user()->name ?? 'P', 0, 1)) }}
+            </div>
+            <div>
+                <p class="text-xs font-bold text-white leading-tight truncate max-w-[110px]">{{ Auth::user()->name }}</p>
+                <p class="text-[10px] text-neutral-400">Penyewa</p>
+            </div>
+        </a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="p-2 text-neutral-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition" title="Logout">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+    @endauth
+</aside>
+
+<!-- ===== TOP BAR ===== -->
+<header class="sticky top-0 z-30 bg-neutral-950/95 backdrop-blur-md border-b border-white/10 md:pl-64">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <!-- Logo (Mobile only) -->
+        <a href="{{ url('/') }}" class="flex items-center gap-2 md:hidden">
             <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_2px_rgba(239,68,68,0.7)]"></span>
             <span class="font-display text-lg text-white">FutsalKite</span>
         </a>
 
-        <!-- Desktop Navigation Menu -->
-        <div class="hidden md:flex items-center gap-6">
-            <a href="{{ url('/') }}" class="text-sm font-semibold {{ request()->is('/') ? 'text-amber-400' : 'text-neutral-300 hover:text-white' }} transition">
-                Beranda
-            </a>
-            <a href="{{ route('customer.booking.create') }}" class="text-sm font-semibold {{ request()->routeIs('customer.booking.create') ? 'text-amber-400' : 'text-neutral-300 hover:text-white' }} transition">
-                Booking Lapangan
-            </a>
-            <a href="{{ route('customer.booking.index') }}" class="text-sm font-semibold {{ request()->routeIs('customer.booking.index') || request()->routeIs('customer.booking.show') ? 'text-amber-400' : 'text-neutral-300 hover:text-white' }} transition">
-                Riwayat Booking
-            </a>
-            <a href="https://wa.me/62895610031040" target="_blank" rel="noopener" class="text-sm font-semibold text-neutral-300 hover:text-white transition flex items-center gap-1">
-                Chat Admin
-            </a>
+        <!-- Desktop Page Indicator -->
+        <div class="hidden md:flex items-center gap-2">
+            <span class="text-sm font-semibold text-neutral-400">Area Customer</span>
+            <span class="text-neutral-600">/</span>
+            <span class="text-sm font-bold text-amber-400">
+                @if(request()->is('/')) Beranda
+                @elseif(request()->routeIs('customer.booking.create')) Booking Lapangan
+                @elseif(request()->routeIs('customer.lapangan.denah')) Denah Lapangan
+                @elseif(request()->routeIs('customer.booking.index') || request()->routeIs('customer.booking.show')) Riwayat Booking
+                @elseif(request()->routeIs('profile.edit')) Profil Saya
+                @else Portal @endif
+            </span>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 ml-auto">
             <!-- Notifikasi Bell -->
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition">
@@ -89,16 +171,13 @@
                 </div>
             </div>
 
-            <!-- Profile & Logout (Desktop) -->
-            <div class="flex items-center gap-3 pl-3 border-l border-white/10">
-                <div class="text-right hidden sm:block">
-                    <div class="text-sm font-bold text-white leading-none">{{ Auth::user()->name ?? 'Penyewa' }}</div>
-                    <div class="text-[11px] text-neutral-400 mt-1">Penyewa</div>
-                </div>
-                <a href="{{ route('profile.edit') }}" class="w-9 h-9 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 font-bold flex items-center justify-center text-sm hover:bg-red-600/30 transition">
+            <!-- Profile & Logout (Mobile Avatar Badge) -->
+            @auth
+            <div class="flex items-center gap-3 md:hidden">
+                <a href="{{ route('profile.edit') }}" class="w-8 h-8 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 font-bold flex items-center justify-center text-xs hover:bg-red-600/30 transition">
                     {{ strtoupper(substr(Auth::user()->name ?? 'P', 0, 1)) }}
                 </a>
-                <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="text-neutral-400 hover:text-white transition p-1" title="Logout">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -107,11 +186,12 @@
                     </button>
                 </form>
             </div>
+            @endauth
         </div>
     </div>
 </header>
 
-<!-- ===== BOTTOM NAV (Mobile & Tablet) ===== -->
+<!-- ===== BOTTOM NAV (Mobile Only - Hidden on Desktop & Tablet: md:hidden) ===== -->
 <nav class="fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/95 backdrop-blur-md border-t border-white/10 md:hidden pb-safe">
     <div class="max-w-5xl mx-auto grid grid-cols-5 text-center">
         <!-- Beranda -->

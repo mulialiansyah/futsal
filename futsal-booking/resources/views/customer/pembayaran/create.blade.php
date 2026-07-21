@@ -53,6 +53,41 @@
             @endif
         </div>
 
+        <!-- Pembayaran Online Midtrans -->
+        @if(config('services.midtrans.client_key'))
+            <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                        <h3 class="font-bold text-red-200">💳 Bayar Online dengan Midtrans</h3>
+                        <p class="text-xs text-red-200/70 mt-1">Pilih metode pembayaran di halaman aman Midtrans: QRIS, e-wallet, transfer bank, atau kartu.</p>
+                    </div>
+                    <span class="shrink-0 px-2.5 py-1 rounded-full bg-red-500/20 text-red-200 text-[11px] font-bold">OTOMATIS</span>
+                </div>
+
+                @if($booking->status_booking === 'pending')
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <button type="button" onclick="openMidtrans({{ (int) ceil($booking->total_harga * 0.5) }}, this)"
+                                class="bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-4 py-3 rounded-xl text-sm transition">
+                            Bayar DP 50%<br>
+                            <span class="text-red-200">Rp {{ number_format(ceil($booking->total_harga * 0.5), 0, ',', '.') }}</span>
+                        </button>
+                        <button type="button" onclick="openMidtrans({{ $booking->sisa_tagihan }}, this)"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-3 rounded-xl text-sm transition">
+                            Bayar Lunas<br>
+                            <span class="text-red-100">Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}</span>
+                        </button>
+                    </div>
+                @else
+                    <button type="button" onclick="openMidtrans({{ $booking->sisa_tagihan }}, this)"
+                            class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-3 rounded-xl text-sm transition">
+                        Bayar Pelunasan Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
+                    </button>
+                @endif
+
+                <p id="midtransError" class="hidden text-sm text-red-200 mt-3" role="alert"></p>
+            </div>
+        @endif
+
         <!-- Info Rekening -->
         <div class="bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6">
             <h3 class="font-bold text-blue-300 mb-4">📋 Info Transfer</h3>
@@ -188,6 +223,50 @@
     </div>
 
     <script>
+        @if(config('services.midtrans.client_key'))
+            function showMidtransError(message) {
+                const error = document.getElementById('midtransError');
+                error.textContent = message;
+                error.classList.remove('hidden');
+            }
+
+            async function openMidtrans(nominal, button) {
+                const originalText = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML = 'Menyiapkan pembayaran…';
+                document.getElementById('midtransError').classList.add('hidden');
+
+                try {
+                    const response = await fetch('{{ route('customer.pembayaran.midtrans', $booking) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: JSON.stringify({ nominal }),
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(Object.values(data.errors ?? {}).flat().join(' ') || data.message || 'Tidak dapat membuat transaksi Midtrans.');
+                    }
+
+                    window.snap.pay(data.snap_token, {
+                        onSuccess: () => window.location.href = '{{ route('customer.booking.show', $booking) }}',
+                        onPending: () => window.location.href = '{{ route('customer.booking.show', $booking) }}',
+                        onError: () => showMidtransError('Pembayaran gagal diproses. Silakan coba kembali.'),
+                        onClose: () => showMidtransError('Jendela pembayaran ditutup. Anda dapat melanjutkan pembayaran sebelum batas waktu berakhir.'),
+                    });
+                } catch (error) {
+                    showMidtransError(error.message);
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+            }
+        @endif
+
         // Preview bukti transfer
         function previewBukti(input) {
             const container = document.getElementById('previewContainer');
@@ -289,4 +368,8 @@
             setInterval(updateCountdown, 1000);
         }
     </script>
+    @if(config('services.midtrans.client_key'))
+        <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+                data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+    @endif
 </x-app-layout>

@@ -9,9 +9,7 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Anton&display=swap" rel="stylesheet">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -21,7 +19,9 @@
         .font-display { font-family: 'Anton', sans-serif; letter-spacing: 0.5px; }
     </style>
 </head>
-<body class="font-sans antialiased bg-neutral-950 min-h-screen pb-24 md:pb-0 relative">
+<body class="font-sans antialiased bg-neutral-950 text-white">
+
+<div class="flex min-h-screen bg-neutral-950 flex-col">
     <!-- Ambient Glow -->
     <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div class="absolute -top-48 -left-24 w-96 h-96 rounded-full bg-red-600/20 blur-3xl"></div>
@@ -30,9 +30,16 @@
 
     @include('layouts.navigation')
 
-    <!-- Page Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{ $slot }}
+    <!-- MAIN CONTENT CONTAINER (Offset md:pl-64) -->
+    <main class="flex-1 min-w-0 flex flex-col md:pl-64">
+        <!-- PAGE CONTENT -->
+        <div class="flex-1 px-4 py-6 pb-36 md:pb-12">
+            <div class="max-w-6xl mx-auto">
+                {{ $slot }}
+            </div>
+        </div>
     </main>
+</div>
+
 </body>
 </html>

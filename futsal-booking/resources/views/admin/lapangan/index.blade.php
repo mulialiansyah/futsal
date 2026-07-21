@@ -6,7 +6,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             @foreach($lapangans as $lapangan)
                 <div class="bg-white/10 border border-white/20 rounded-2xl overflow-hidden">
-                    <div class="p-4 flex items-start gap-4">
+                    <div class="p-4 flex items-center gap-4">
                         @if($lapangan->image)
                             <img src="{{ Storage::url($lapangan->image) }}" alt="{{ $lapangan->nama_lapangan }}" class="w-24 h-24 object-cover rounded-xl">
                         @else
@@ -17,20 +17,7 @@
                             </div>
                         @endif
                         <div class="flex-1">
-                            <h3 class="font-bold text-white mb-1">{{ $lapangan->nama_lapangan }}</h3>
-                            <div class="flex items-center gap-1 text-sm text-neutral-400 mb-1">
-                                <span>📍</span>
-                                <span>1.6 km</span>
-                            </div>
-                            <div class="flex items-center gap-1 mb-2">
-                                <div class="flex items-center text-amber-400">
-                                    ⭐
-                                </div>
-                                <span class="text-sm text-neutral-300">4.2 (40)</span>
-                            </div>
-                            <p class="font-semibold text-white">
-                                Rp {{ number_format($lapangan->harga_per_jam ?? 100000, 0, ',', '.') }}/jam
-                            </p>
+                            <h3 class="font-bold text-white text-lg">{{ $lapangan->nama_lapangan }}</h3>
                         </div>
                     </div>
                     <div class="px-4 pb-4">

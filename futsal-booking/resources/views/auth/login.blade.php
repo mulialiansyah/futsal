@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>FutsalKIte - Login</title>
+    <title>FutsalKIte - Masuk</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -320,8 +320,8 @@
              x-transition:enter-start="opacity-0 translateX(20px)"
              x-transition:enter-end="opacity-100 translateX(0)">
 
-            <div class="form-title">WELCOME BACK</div>
-            <div class="form-subtitle">Kindly enter your details to proceed</div>
+            <div class="form-title">SELAMAT DATANG KEMBALI</div>
+            <div class="form-subtitle">Silakan masukkan detail Anda untuk melanjutkan</div>
 
             <!-- Session Status -->
             @if (session('status'))
@@ -335,7 +335,7 @@
 
                 <div class="field">
                     <label for="email">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Enter your email">
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Masukkan email Anda">
                     @error('email')
                         <div class="error-msg">{{ $message }}</div>
                     @enderror
@@ -351,18 +351,18 @@
 
                 <div class="row-between">
                     <label class="remember-label">
-                        <input type="checkbox" name="remember"> Remember me
+                        <input type="checkbox" name="remember"> Ingat saya
                     </label>
                     @if (Route::has('password.request'))
-                        <a class="forgot-link" href="{{ route('password.request') }}">Forgot password?</a>
+                        <a class="forgot-link" href="{{ route('password.request') }}">Lupa password?</a>
                     @endif
                 </div>
 
-                <button type="submit" class="btn-primary">Sign in</button>
+                <button type="submit" class="btn-primary">Masuk</button>
 
                 <div class="center-text">
-                    Don't have an account?
-                    <button type="button" class="toggle-btn" @click="isLogin = false">Sign up for free</button>
+                    Belum punya akun?
+                    <button type="button" class="toggle-btn" @click="isLogin = false">Daftar gratis</button>
                 </div>
             </form>
         </div>
@@ -373,15 +373,15 @@
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100">
 
-            <div class="form-title">CREATE ACCOUNT</div>
-            <div class="form-subtitle">Join <span>FutsalKIte</span> today — it's free!</div>
+            <div class="form-title">BUAT AKUN</div>
+            <div class="form-subtitle">Gabung <span>FutsalKIte</span> hari ini — gratis!</div>
 
             <form method="POST" action="{{ route('register') }}">
                 @csrf
 
                 <div class="field">
-                    <label for="name">Full Name</label>
-                    <input id="name" type="text" name="name" value="{{ old('name') }}" required placeholder="Enter your name">
+                    <label for="name">Nama Lengkap</label>
+                    <input id="name" type="text" name="name" value="{{ old('name') }}" required placeholder="Masukkan nama Anda">
                     @error('name')
                         <div class="error-msg">{{ $message }}</div>
                     @enderror
@@ -389,7 +389,7 @@
 
                 <div class="field">
                     <label for="email_reg">Email</label>
-                    <input id="email_reg" type="email" name="email" value="{{ old('email') }}" required placeholder="Enter your email">
+                    <input id="email_reg" type="email" name="email" value="{{ old('email') }}" required placeholder="Masukkan email Anda">
                     @error('email')
                         <div class="error-msg">{{ $message }}</div>
                     @enderror
@@ -404,15 +404,15 @@
                 </div>
 
                 <div class="field">
-                    <label for="password_confirmation">Confirm Password</label>
+                    <label for="password_confirmation">Konfirmasi Password</label>
                     <input id="password_confirmation" type="password" name="password_confirmation" required placeholder="••••••••">
                 </div>
 
-                <button type="submit" class="btn-primary">Sign up</button>
+                <button type="submit" class="btn-primary">Daftar</button>
 
                 <div class="center-text">
-                    Already have an account?
-                    <button type="button" class="toggle-btn" @click="isLogin = true">Sign in here</button>
+                    Sudah punya akun?
+                    <button type="button" class="toggle-btn" @click="isLogin = true">Masuk di sini</button>
                 </div>
             </form>
         </div>

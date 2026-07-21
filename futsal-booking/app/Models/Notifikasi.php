@@ -27,21 +27,26 @@ class Notifikasi extends Model
 
     /**
      * Static helper to send a notification to a user.
-     *
-     * @param int $userId
-     * @param string $judul
-     * @param string $pesan
-     * @param string $tipe
-     * @return Notifikasi
      */
     public static function kirim(int $userId, string $judul, string $pesan, string $tipe): self
     {
         return self::create([
             'user_id' => $userId,
-            'judul'   => $judul,
-            'pesan'   => $pesan,
-            'tipe'    => $tipe,
+            'judul' => $judul,
+            'pesan' => $pesan,
+            'tipe' => $tipe,
             'is_read' => false,
         ]);
+    }
+
+    /**
+     * Static helper to send a notification to all admin users.
+     */
+    public static function kirimKeAdmin(string $judul, string $pesan, string $tipe): void
+    {
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            self::kirim($admin->id, $judul, $pesan, $tipe);
+        }
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\IsAdmin;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,13 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/notification',
+        ]);
         $middleware->alias([
-            'isAdmin' => \App\Http\Middleware\IsAdmin::class,
+            'isAdmin' => IsAdmin::class,
         ]);
         // Replace default RedirectIfAuthenticated with our custom one
         $middleware->replace(
-            \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
-            \App\Http\Middleware\RedirectIfAuthenticated::class
+            RedirectIfAuthenticated::class,
+            App\Http\Middleware\RedirectIfAuthenticated::class
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {

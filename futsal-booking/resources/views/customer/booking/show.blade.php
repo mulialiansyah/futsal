@@ -105,9 +105,15 @@
                 @php
                     $hasPending = $booking->pembayarans->where('status_verifikasi', 'pending')->isNotEmpty();
                     $hasRejected = $booking->pembayarans->where('status_verifikasi', 'ditolak')->isNotEmpty();
+                    $hasMidtransPending = $booking->pembayarans->where('status_verifikasi', 'pending')->where('metode_pembayaran', 'midtrans')->isNotEmpty();
                 @endphp
 
-                @if(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && !$hasPending)
+                @if(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && $hasMidtransPending)
+                    <a href="{{ route('customer.pembayaran.create', $booking) }}"
+                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition">
+                        Lanjutkan Midtrans
+                    </a>
+                @elseif(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && !$hasPending)
                     <a href="{{ route('customer.pembayaran.create', $booking) }}"
                        class="bg-amber-400 hover:bg-amber-500 text-neutral-900 px-4 py-2 rounded-xl text-sm font-bold transition">
                         💳 {{ $booking->status_booking === 'pending' ? 'Bayar DP / Lunas' : 'Bayar Pelunasan' }}
@@ -129,6 +135,7 @@
                                 <div>
                                     <p class="text-xs text-neutral-400">Pembayaran #{{ $idx + 1 }} - {{ $payment->created_at->format('d M Y H:i') }}</p>
                                     <p class="font-bold text-white text-lg">Rp {{ number_format($payment->nominal, 0, ',', '.') }}</p>
+                                    <p class="text-xs text-neutral-400 mt-1">{{ $payment->metode_pembayaran === 'midtrans' ? 'Midtrans' : 'Transfer manual' }}</p>
                                 </div>
                                 @php
                                     $verifikasi = [

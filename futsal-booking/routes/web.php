@@ -1,32 +1,47 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Customer\BookingController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\AdminLapanganController; // <-- Pakai controller utama admin lapangan
-use App\Http\Controllers\Admin\AdminTarifController;
-use App\Http\Controllers\Admin\AdminHariLiburController;
 use App\Http\Controllers\Admin\AdminBookingController;
-use App\Http\Controllers\Admin\AdminPembayaranController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminHariLiburController;
+use App\Http\Controllers\Admin\AdminLapanganController;
 use App\Http\Controllers\Admin\AdminLaporanController;
+use App\Http\Controllers\Admin\AdminPembayaranController;
+use App\Http\Controllers\Admin\AdminTarifController;
 use App\Http\Controllers\Admin\KetersediaanController;
+use App\Http\Controllers\Customer\BookingController;
+use App\Http\Controllers\Customer\LapanganController as CustomerLapanganController;
+use App\Http\Controllers\Customer\NotifikasiController;
+use App\Http\Controllers\Customer\PembayaranController as CustomerPembayaranController;
+use App\Http\Controllers\MidtransNotificationController;
+use App\Http\Controllers\ProfileController;
+use App\Models\Lapangan;
+use App\Models\Tarif;
 use Illuminate\Support\Facades\Route;
 
 // ===== PUBLIC ROUTES =====
 Route::get('/', function () {
-    $lapangans = \App\Models\Lapangan::all();
-    $tarifs = \App\Models\Tarif::all();
+    $lapangans = Lapangan::all();
+    $tarifs = Tarif::all();
+
     return view('welcome', compact('lapangans', 'tarifs'));
 });
 
 Route::view('/syarat-ketentuan', 'syarat-ketentuan')->name('syarat-ketentuan');
 Route::view('/kebijakan-privasi', 'kebijakan-privasi')->name('kebijakan-privasi');
 
-// ===== DASHBOARD REDIRECTOR =====
+// ===== BROWSE LAPANGAN (Publik, tanpa login) =====
+Route::prefix('lapangan')->name('customer.lapangan.')->group(function () {
+    Route::get('/', [CustomerLapanganController::class, 'index'])->name('index');
+    Route::get('/denah', [CustomerLapanganController::class, 'denah'])->name('denah');
+    Route::get('/{lapangan}', [CustomerLapanganController::class, 'show'])->name('show');
+    Route::get('/{lapangan}/slots', [CustomerLapanganController::class, 'slots'])->name('slots');
+});
+
 Route::get('/dashboard', function () {
     if (auth()->user()->isAdmin()) {
         return redirect()->route('admin.dashboard');
     }
+
     return redirect()->route('customer.booking.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -37,56 +52,54 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-use App\Http\Controllers\Customer\PembayaranController as CustomerPembayaranController;
-use App\Http\Controllers\Customer\LapanganController as CustomerLapanganController;
-
 // ===== CUSTOMER ROUTES (Penyewa) =====
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
-    // Browse & Detail Lapangan
-    Route::get('lapangan', [CustomerLapanganController::class, 'index'])->name('lapangan.index');
-    Route::get('lapangan/{lapangan}', [CustomerLapanganController::class, 'show'])->name('lapangan.show');
-    Route::get('lapangan/{lapangan}/slots', [CustomerLapanganController::class, 'slots'])->name('lapangan.slots');
-
     // Booking
     Route::resource('booking', BookingController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
-    
+
     // Pembayaran customer
     Route::get('booking/{booking}/bayar', [CustomerPembayaranController::class, 'create'])->name('pembayaran.create');
     Route::post('booking/{booking}/bayar', [CustomerPembayaranController::class, 'store'])->name('pembayaran.store');
+    Route::post('booking/{booking}/midtrans', [CustomerPembayaranController::class, 'createMidtransTransaction'])->name('pembayaran.midtrans');
 
     // Notifikasi
-    Route::post('notifikasi/baca-semua', [\App\Http\Controllers\Customer\NotifikasiController::class, 'markAllRead'])->name('notifikasi.readAll');
-    Route::post('notifikasi/{notifikasi}/baca', [\App\Http\Controllers\Customer\NotifikasiController::class, 'markRead'])->name('notifikasi.read');
+    Route::post('notifikasi/baca-semua', [NotifikasiController::class, 'markAllRead'])->name('notifikasi.readAll');
+    Route::post('notifikasi/{notifikasi}/baca', [NotifikasiController::class, 'markRead'])->name('notifikasi.read');
 });
+
+Route::post('midtrans/notification', MidtransNotificationController::class)->name('midtrans.notification');
 
 // ===== ADMIN ROUTES (Hanya Akses Admin Resmi) =====
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard Admin
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
     // Master Data Resources
     Route::resource('lapangan', AdminLapanganController::class);
     Route::resource('tarif', AdminTarifController::class);
     Route::resource('hari-libur', AdminHariLiburController::class);
-    
+
     // Kelola Booking
-    Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
-    Route::get('/booking/{booking}', [AdminBookingController::class, 'show'])->name('booking.show');
-    Route::patch('/booking/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('booking.update-status');
-    
+    Route::get('booking', [AdminBookingController::class, 'index'])->name('booking.index');
+    Route::get('booking/{booking}', [AdminBookingController::class, 'show'])->name('booking.show');
+    Route::patch('booking/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('booking.update-status');
+
     // Kelola Pembayaran
-    Route::get('/pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');
-    Route::get('/pembayaran/{pembayaran}', [AdminPembayaranController::class, 'show'])->name('pembayaran.show');
-    Route::patch('/pembayaran/{pembayaran}/verify', [AdminPembayaranController::class, 'verify'])->name('pembayaran.verify');
-    Route::post('/booking/{booking}/confirm-cash', [AdminPembayaranController::class, 'confirmCash'])->name('pembayaran.confirm-cash');
-    
+    Route::get('pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');
+    Route::get('pembayaran/{pembayaran}', [AdminPembayaranController::class, 'show'])->name('pembayaran.show');
+    Route::patch('pembayaran/{pembayaran}/verify', [AdminPembayaranController::class, 'verify'])->name('pembayaran.verify');
+    Route::post('booking/{booking}/confirm-cash', [AdminPembayaranController::class, 'confirmCash'])->name('pembayaran.confirm-cash');
     // Laporan
-    Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
+    Route::get('laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
 
     // Kelola Ketersediaan Lapangan
-    Route::get('/ketersediaan', [KetersediaanController::class, 'index'])->name('ketersediaan.index');
-    Route::post('/ketersediaan', [KetersediaanController::class, 'store'])->name('ketersediaan.store');
-    Route::delete('/ketersediaan/{ketersediaan}', [KetersediaanController::class, 'destroy'])->name('ketersediaan.destroy');
+    Route::get('ketersediaan', [KetersediaanController::class, 'index'])->name('ketersediaan.index');
+    Route::post('ketersediaan', [KetersediaanController::class, 'store'])->name('ketersediaan.store');
+    Route::delete('ketersediaan/{ketersediaan}', [KetersediaanController::class, 'destroy'])->name('ketersediaan.destroy');
+
+    // Notifikasi Admin
+    Route::post('notifikasi/baca-semua', [NotifikasiController::class, 'markAllRead'])->name('notifikasi.readAll');
+    Route::post('notifikasi/{notifikasi}/baca', [NotifikasiController::class, 'markRead'])->name('notifikasi.read');
 });
 
 require __DIR__.'/auth.php';

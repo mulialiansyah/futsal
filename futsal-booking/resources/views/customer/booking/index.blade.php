@@ -39,7 +39,16 @@
                                     $statusColor = $statusColors[$booking->status_booking] ?? $statusColors['pending'];
                                 @endphp
                                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusColor }}">
-                                    {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
+                                    @php
+                                        $statusLabels = [
+                                            'pending' => 'Menunggu Pembayaran',
+                                            'dp_dibayar' => 'DP Dibayar',
+                                            'lunas' => 'Lunas',
+                                            'expired' => 'Kedaluwarsa',
+                                            'batal' => 'Dibatalkan'
+                                        ];
+                                    @endphp
+                                    {{ $statusLabels[$booking->status_booking] ?? ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
                                 </span>
                             </div>
                             <div class="flex flex-wrap gap-4 text-sm">

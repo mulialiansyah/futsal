@@ -10,6 +10,7 @@ Sistem booking lapangan futsal berbasis Laravel dengan fitur manajemen admin dan
 - Manajemen hari libur (atur tanggal merah yang dianggap sebagai weekend)
 - Manajemen booking (lihat semua booking, ubah status booking)
 - Manajemen pembayaran (lihat bukti transfer, verifikasi pembayaran)
+- Pembayaran Midtrans terverifikasi otomatis melalui webhook
 - Generate laporan penjualan berdasarkan rentang tanggal
 - Dashboard dengan statistik (total booking, total lapangan, pembayaran pending)
 
@@ -18,6 +19,8 @@ Sistem booking lapangan futsal berbasis Laravel dengan fitur manajemen admin dan
 - Membuat booking lapangan baru (pilih lapangan, tanggal, jam, durasi)
 - Melihat detail booking
 - Membatalkan booking
+- Melihat denah lapangan dan status ketersediaan per tanggal/jam
+- Membayar DP atau pelunasan secara online melalui Midtrans Snap
 
 ## Spesifikasi Sistem
 
@@ -74,6 +77,26 @@ Sistem booking lapangan futsal berbasis Laravel dengan fitur manajemen admin dan
    php artisan serve
    ```
 7. Akses aplikasi di http://127.0.0.1:8000
+
+## Konfigurasi Midtrans (Sandbox)
+
+1. Buat atau masuk ke akun [Midtrans Sandbox](https://dashboard.sandbox.midtrans.com/).
+2. Salin **Server Key** dan **Client Key** dari menu **Settings → Access Keys** ke file `.env`:
+   ```env
+   MIDTRANS_SERVER_KEY=SB-Mid-server-...
+   MIDTRANS_CLIENT_KEY=SB-Mid-client-...
+   MIDTRANS_IS_PRODUCTION=false
+   ```
+3. Untuk menerima status pembayaran otomatis, aplikasi harus dapat diakses dari internet melalui HTTPS. Isi URL webhook publik:
+   ```env
+   MIDTRANS_NOTIFICATION_URL=https://domain-anda.com/midtrans/notification
+   ```
+4. Atur URL notifikasi yang sama pada dashboard Midtrans bila tidak menggunakan `MIDTRANS_NOTIFICATION_URL`, lalu segarkan konfigurasi Laravel:
+   ```bash
+   php artisan config:clear
+   ```
+
+Endpoint webhook memverifikasi `signature_key` dari Midtrans sebelum mengubah status pembayaran dan booking. Jangan memasukkan Server Key ke JavaScript atau repositori.
 
 ## Akun Demo
 
