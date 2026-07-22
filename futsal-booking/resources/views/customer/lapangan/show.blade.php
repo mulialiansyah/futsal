@@ -12,20 +12,11 @@
 
         {{-- Foto Lapangan --}}
         <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl overflow-hidden">
-            @if($lapangan->image)
-                <div class="h-72 bg-neutral-800 overflow-hidden">
-                    <img src="{{ asset('storage/' . $lapangan->image) }}"
-                         class="w-full h-full object-cover"
-                         alt="{{ $lapangan->nama_lapangan }}">
-                </div>
-            @else
-                <div class="h-48 flex items-center justify-center text-neutral-500 bg-neutral-800">
-                    <div class="text-center">
-                        <div class="text-5xl mb-2">⚽</div>
-                        <div class="text-sm">Belum ada foto lapangan</div>
-                    </div>
-                </div>
-            @endif
+            <div class="h-72 bg-neutral-800 overflow-hidden">
+                <img src="{{ $lapangan->fotoUtama->url }}"
+                     class="w-full h-full object-cover"
+                     alt="{{ $lapangan->nama_lapangan }}">
+            </div>
         </div>
 
         {{-- Info Lapangan --}}

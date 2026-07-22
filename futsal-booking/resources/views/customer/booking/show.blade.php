@@ -10,6 +10,16 @@
 
     <div class="max-w-3xl mx-auto space-y-5">
         <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6">
+            <div class="flex items-center gap-4 mb-6 rounded-xl border border-white/10 bg-white/5 p-3">
+                <img src="{{ $booking->lapangan->fotoUtama->url }}"
+                     alt="{{ $booking->lapangan->nama_lapangan }}"
+                     class="h-20 w-28 rounded-lg object-cover">
+                <div>
+                    <p class="text-xs text-neutral-400">Lapangan yang kamu pesan</p>
+                    <p class="font-bold text-white">{{ $booking->lapangan->nama_lapangan }}</p>
+                    <p class="text-xs text-neutral-400 capitalize">{{ $booking->lapangan->jenis_lapangan }} · {{ $booking->lapangan->tipe_venue }}</p>
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div class="bg-white/5 border border-white/10 rounded-xl p-4">

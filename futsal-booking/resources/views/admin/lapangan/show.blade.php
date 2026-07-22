@@ -26,11 +26,9 @@
             </div>
             <div>
                 <label class="block text-sm text-neutral-400 mb-2">Gambar</label>
-                @if($lapangan->image)
-                    <img src="{{ Storage::url($lapangan->image) }}" alt="{{ $lapangan->nama_lapangan }}" class="w-full h-64 object-cover rounded-lg border border-white/10">
-                @else
-                    <div class="w-full h-64 bg-neutral-800 rounded-lg flex items-center justify-center text-neutral-500">No Image</div>
-                @endif
+                <img src="{{ $lapangan->fotoUtama->url }}"
+                     alt="{{ $lapangan->nama_lapangan }}"
+                     class="w-full h-64 object-cover rounded-lg border border-white/10">
             </div>
         </div>
     </div>

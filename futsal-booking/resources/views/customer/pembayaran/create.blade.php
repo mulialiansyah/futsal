@@ -18,6 +18,15 @@
             <h3 class="font-bold text-white mb-4 text-sm uppercase tracking-wide text-neutral-400">
                 Detail Booking
             </h3>
+            <div class="flex items-center gap-3 mb-4 rounded-xl border border-white/10 bg-white/5 p-3">
+                <img src="{{ $booking->lapangan->fotoUtama->url }}"
+                     alt="{{ $booking->lapangan->nama_lapangan }}"
+                     class="h-16 w-24 rounded-lg object-cover">
+                <div>
+                    <p class="text-xs text-neutral-400">Lapangan yang akan dibayar</p>
+                    <p class="font-semibold text-white">{{ $booking->lapangan->nama_lapangan }}</p>
+                </div>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div class="bg-white/5 border border-white/10 rounded-xl p-4">
                     <div class="text-xs text-neutral-400 mb-1">Lapangan</div>
