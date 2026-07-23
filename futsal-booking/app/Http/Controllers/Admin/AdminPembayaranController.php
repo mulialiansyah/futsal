@@ -48,6 +48,12 @@ class AdminPembayaranController extends Controller
             $minimalDp = $booking->total_harga * 0.5; // 50% DP rule
 
             if ($totalTerbayar >= $booking->total_harga) {
+                // Lunas: tolak semua pembayaran lain yang pending
+                $booking->pembayarans()
+                    ->where('id', '!=', $pembayaran->id)
+                    ->where('status_verifikasi', 'pending')
+                    ->update(['status_verifikasi' => 'ditolak']);
+                
                 // Lunas
                 $booking->update([
                     'status_booking' => 'lunas',
@@ -137,6 +143,11 @@ class AdminPembayaranController extends Controller
         $lapanganNama = $booking->lapangan->nama_lapangan;
 
         if ($totalTerbayar >= $booking->total_harga) {
+            // Lunas: tolak semua pembayaran lain yang pending
+            $booking->pembayarans()
+                ->where('status_verifikasi', 'pending')
+                ->update(['status_verifikasi' => 'ditolak']);
+                
             $booking->update([
                 'status_booking' => 'lunas',
                 'pelunasan_deadline' => null,

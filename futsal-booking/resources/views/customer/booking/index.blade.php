@@ -90,7 +90,7 @@
                                 @endif
                             @endif
 
-                            @if($hasPending)
+                            @if($hasPending && $booking->status_booking !== 'batal')
                                 <span class="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-4 py-2 rounded-xl text-sm font-semibold">
                                     ⏰ Menunggu Verifikasi
                                 </span>

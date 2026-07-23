@@ -91,7 +91,9 @@
 
         <div class="space-y-8">
             @foreach ($kategoriDenah as $kategori => $infoKategori)
-                @php($lapanganKategori = $lapangans->where('kategori', $kategori))
+                @php
+                    $lapanganKategori = $lapangans->where('kategori', $kategori);
+                @endphp
 
                 @if ($lapanganKategori->isNotEmpty())
                     <section class="bg-neutral-900 border border-white/10 backdrop-blur-xl rounded-2xl p-5 sm:p-6">

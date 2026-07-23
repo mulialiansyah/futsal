@@ -120,12 +120,8 @@ class BookingController extends Controller
             ->where('tanggal_main', $request->tanggal_main)
             ->whereIn('status_booking', ['pending', 'dp_dibayar', 'lunas'])
             ->where(function ($query) use ($jamMulaiStr, $jamSelesaiStr) {
-                $query->whereBetween('jam_mulai', [$jamMulaiStr, $jamSelesaiStr])
-                    ->orWhereBetween('jam_selesai', [$jamMulaiStr, $jamSelesaiStr])
-                    ->orWhere(function ($q) use ($jamMulaiStr, $jamSelesaiStr) {
-                        $q->where('jam_mulai', '<=', $jamMulaiStr)
-                            ->where('jam_selesai', '>=', $jamSelesaiStr);
-                    });
+                $query->where('jam_mulai', '<', $jamSelesaiStr)
+                    ->where('jam_selesai', '>', $jamMulaiStr);
             })->exists();
 
         if ($bentrok) {
@@ -137,6 +133,12 @@ class BookingController extends Controller
         // Hitung harga via PricingService (kategori + hari + jam)
         $lapangan = Lapangan::findOrFail($request->lapangan_id);
         $totalHarga = PricingService::hitungHarga($lapangan->kategori, $tanggal, $jamMulai, (int) $request->durasi_jam);
+
+        if ($totalHarga <= 0) {
+            return back()
+                ->withErrors(['jam_mulai' => 'Tarif untuk jadwal yang dipilih belum tersedia. Silakan pilih jadwal lain atau hubungi admin.'])
+                ->withInput();
+        }
 
         // Create booking + payment deadline (auto-release)
         $booking = Booking::create([

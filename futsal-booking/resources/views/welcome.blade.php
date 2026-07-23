@@ -244,83 +244,110 @@
         @endif
     </section>
 
-    <!-- ===== FEATURE: BOOKING REAL-TIME ===== -->
-    <section id="tarif" class="bg-neutral-50 py-20">
+    <!-- ===== TARIF ===== -->
+    <section id="tarif" class="bg-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 gap-14 items-center">
-                <div class="relative">
-                    <div class="absolute -inset-6 bg-red-50 rounded-[2rem] -z-10"></div>
-                    <div class="rounded-2xl border border-neutral-200 shadow-xl overflow-hidden bg-white">
-                        <div class="flex items-center gap-1.5 px-4 py-3 bg-neutral-50 border-b border-neutral-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                            <span class="ml-3 text-[11px] text-neutral-400 font-medium">futsalkite.id/booking</span>
-                        </div>
-                        <div class="p-5 space-y-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-sm text-neutral-800">Tarif Lapangan</span>
-                                <span class="text-xs text-red-600 font-semibold">Lihat semua</span>
+            <div class="text-center mb-12">
+                <div class="text-xs font-bold uppercase tracking-widest text-red-600 mb-3">HARGA</div>
+                <h2 class="font-display text-3xl sm:text-4xl text-neutral-900 mb-3">Transparan, tidak ada biaya tersembunyi</h2>
+                <p class="text-neutral-600">Harga menyesuaikan hari dan jam main secara otomatis.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Standar -->
+                <div class="rounded-2xl border border-neutral-200 overflow-hidden bg-white">
+                    <div class="p-5 border-b border-neutral-200">
+                        <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-2">Standar</span>
+                        <p class="text-sm text-neutral-500">5 lapangan • sintetis dan vinyl • indoor dan outdoor</p>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekday</div>
+                                <div class="text-xs text-neutral-500">08.00 – 15.00</div>
                             </div>
-                            @foreach($lapangans->take(3) as $index => $lapangan)
-                                @php
-                                    // Cari tarif sesuai kategori lapangan, ambil yang pertama
-                                    $tarifLapangan = $tarifs->where('kategori', $lapangan->kategori)->first();
-                                    $harga = $tarifLapangan ? number_format($tarifLapangan->harga, 0, ',', '.') : '0';
-                                    $jamMulai = $tarifLapangan ? $tarifLapangan->jam_mulai : '00:00';
-                                    $jamSelesai = $tarifLapangan ? $tarifLapangan->jam_selesai : '00:00';
-                                    $statuses = ['available', 'held', 'available'];
-                                    $status = $statuses[$index % 3];
-                                @endphp
-                                <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-neutral-200">
-                                    <div>
-                                        <div class="text-sm font-semibold text-neutral-800">{{ $lapangan->nama_lapangan }}</div>
-                                        <div class="text-xs text-neutral-500">{{ $jamMulai }} - {{ $jamSelesai }}</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-sm font-bold text-neutral-800">Rp{{ $harga }}</div>
-                                        @if ($status === 'available')
-                                            <span class="text-[10px] font-bold uppercase tracking-wide text-emerald-600">Tersedia</span>
-                                        @else
-                                            <span class="text-[10px] font-bold uppercase tracking-wide text-amber-600">Di-hold</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-green-600">Rp 60.000/jam</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekday</div>
+                                <div class="text-xs text-neutral-500">15.00 – 21.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-green-600">Rp 100.000/jam</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekend / Tanggal merah</div>
+                                <div class="text-xs text-neutral-500">08.00 – 15.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-green-600">Rp 80.000/jam</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekend / Tanggal merah</div>
+                                <div class="text-xs text-neutral-500">15.00 – 21.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-green-600">Rp 130.000/jam</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div>
-                    <div class="text-xs font-bold uppercase tracking-widest text-red-600 mb-3">Booking Lapangan</div>
-                    <h2 class="font-display text-3xl sm:text-4xl text-neutral-900 leading-tight mb-5">
-                        Booking dalam hitungan detik, bukan drama rebutan slot.
-                    </h2>
-                    <p class="text-neutral-600 leading-relaxed mb-8">
-                        Cukup pilih tanggal, jam, dan lapangan — sistem langsung kasih tahu slot mana yang kosong. Nggak perlu telepon atau chat admin buat mastiin ketersediaan.
-                    </p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <span class="mt-0.5 w-5 h-5 rounded-full bg-red-600 flex items-center justify-center shrink-0">
-                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <span class="text-sm text-neutral-700">9 lapangan dengan kategori dan harga yang berbeda-beda.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="mt-0.5 w-5 h-5 rounded-full bg-red-600 flex items-center justify-center shrink-0">
-                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <span class="text-sm text-neutral-700">Jadwal real-time, dijamin nggak bakal bentrok sama orang lain.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="mt-0.5 w-5 h-5 rounded-full bg-red-600 flex items-center justify-center shrink-0">
-                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            </span>
-                            <span class="text-sm text-neutral-700">Checkout hold sementara biar slot kamu nggak keburu diambil orang.</span>
-                        </li>
-                    </ul>
+                <!-- Internasional -->
+                <div class="rounded-2xl border border-neutral-200 overflow-hidden bg-white">
+                    <div class="p-5 border-b border-neutral-200">
+                        <span class="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-bold uppercase tracking-wider mb-2">Internasional</span>
+                        <p class="text-sm text-neutral-500">4 lapangan • sintetis dan vinyl • indoor dan outdoor</p>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekday</div>
+                                <div class="text-xs text-neutral-500">08.00 – 15.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-red-600">Rp 80.000/jam</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekday</div>
+                                <div class="text-xs text-neutral-500">15.00 – 21.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-red-600">Rp 120.000/jam</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekend / Tanggal merah</div>
+                                <div class="text-xs text-neutral-500">08.00 – 15.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-red-600">Rp 100.000/jam</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-semibold text-neutral-800">Weekend / Tanggal merah</div>
+                                <div class="text-xs text-neutral-500">15.00 – 21.00</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-red-600">Rp 150.000/jam</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <p class="text-center text-xs text-neutral-500 mt-6">* Jenis permukaan (sintetis/vinyl) dan tipe area (indoor/outdoor) tidak mempengaruhi harga — murni preferensi kamu.</p>
         </div>
     </section>
 

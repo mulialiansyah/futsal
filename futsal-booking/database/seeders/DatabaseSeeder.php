@@ -46,17 +46,17 @@ class DatabaseSeeder extends Seeder
         // ===== LAPANGAN (9 total: 5 standar, 4 internasional) =====
         $lapangans = [
             // Standar: 2 sintetis + 3 vinyl | 2 outdoor + 3 indoor
-            ['nama_lapangan' => 'Standar A1', 'kategori' => 'standar', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'outdoor'],
-            ['nama_lapangan' => 'Standar A2', 'kategori' => 'standar', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'outdoor'],
-            ['nama_lapangan' => 'Standar A3', 'kategori' => 'standar', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
-            ['nama_lapangan' => 'Standar A4', 'kategori' => 'standar', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
-            ['nama_lapangan' => 'Standar A5', 'kategori' => 'standar', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
+            ['nama_lapangan' => 'Lapangan Standar A', 'kategori' => 'standar', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'outdoor'],
+            ['nama_lapangan' => 'Lapangan Standar B', 'kategori' => 'standar', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'outdoor'],
+            ['nama_lapangan' => 'Lapangan Standar C', 'kategori' => 'standar', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
+            ['nama_lapangan' => 'Lapangan Standar D', 'kategori' => 'standar', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
+            ['nama_lapangan' => 'Lapangan Standar E', 'kategori' => 'standar', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
 
             // Internasional: 2 sintetis + 2 vinyl | 1 outdoor + 3 indoor
-            ['nama_lapangan' => 'Internasional B1', 'kategori' => 'internasional', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'outdoor'],
-            ['nama_lapangan' => 'Internasional B2', 'kategori' => 'internasional', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'indoor'],
-            ['nama_lapangan' => 'Internasional B3', 'kategori' => 'internasional', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
-            ['nama_lapangan' => 'Internasional B4', 'kategori' => 'internasional', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
+            ['nama_lapangan' => 'Lapangan Inter A', 'kategori' => 'internasional', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'outdoor'],
+            ['nama_lapangan' => 'Lapangan Inter B', 'kategori' => 'internasional', 'jenis_lapangan' => 'sintetis', 'tipe_venue' => 'indoor'],
+            ['nama_lapangan' => 'Lapangan Inter C', 'kategori' => 'internasional', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
+            ['nama_lapangan' => 'Lapangan Inter D', 'kategori' => 'internasional', 'jenis_lapangan' => 'vinyl',    'tipe_venue' => 'indoor'],
         ];
 
         foreach ($lapangans as $data) {

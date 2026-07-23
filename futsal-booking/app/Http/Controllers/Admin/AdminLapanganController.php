@@ -12,6 +12,7 @@ class AdminLapanganController extends Controller
     public function index()
     {
         $lapangans = Lapangan::all();
+
         return view('admin.lapangan.index', compact('lapangans'));
     }
 
@@ -27,7 +28,7 @@ class AdminLapanganController extends Controller
             'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
             'tipe_venue' => 'required|in:indoor,outdoor',
-            'image' => 'nullable|file|max:10240', // File bebas, max 10MB
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         if ($request->hasFile('image')) {
@@ -56,7 +57,7 @@ class AdminLapanganController extends Controller
             'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
             'tipe_venue' => 'required|in:indoor,outdoor',
-            'image' => 'nullable|file|max:10240', // File bebas, max 10MB
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         if ($request->hasFile('image')) {

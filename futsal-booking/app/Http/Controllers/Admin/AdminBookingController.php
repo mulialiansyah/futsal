@@ -72,6 +72,9 @@ class AdminBookingController extends Controller
                     'booking'
                 );
             } elseif ($booking->status_booking === 'batal') {
+                // Update semua pembayaran pending menjadi ditolak
+                $booking->pembayarans()->where('status_verifikasi', 'pending')->update(['status_verifikasi' => 'ditolak']);
+                
                 Notifikasi::kirim(
                     $booking->user_id,
                     'Booking Dibatalkan ❌',

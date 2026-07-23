@@ -4,28 +4,39 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use Carbon\Carbon;
+use App\Models\Lapangan;
 use Illuminate\Http\Request;
 
 class AdminLaporanController extends Controller
 {
     public function index(Request $request)
     {
+        $validated = $request->validate([
+            'tanggal_mulai' => ['nullable', 'date'],
+            'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
+            'lapangan_id' => ['nullable', 'integer', 'exists:lapangans,id'],
+            'status_booking' => ['nullable', 'in:dp_dibayar,lunas'],
+        ]);
+
         $query = Booking::with(['user', 'lapangan', 'pembayarans']);
 
         // Filter: Tanggal Mulai & Selesai
-        if ($request->filled('tanggal_mulai') && $request->filled('tanggal_selesai')) {
-            $query->whereBetween('tanggal_main', [$request->tanggal_mulai, $request->tanggal_selesai]);
+        if (! empty($validated['tanggal_mulai'])) {
+            $query->whereDate('tanggal_main', '>=', $validated['tanggal_mulai']);
+        }
+
+        if (! empty($validated['tanggal_selesai'])) {
+            $query->whereDate('tanggal_main', '<=', $validated['tanggal_selesai']);
         }
 
         // Filter: Lapangan
-        if ($request->filled('lapangan_id')) {
-            $query->where('lapangan_id', $request->lapangan_id);
+        if (! empty($validated['lapangan_id'])) {
+            $query->where('lapangan_id', $validated['lapangan_id']);
         }
 
         // Filter: Status (DP Dibayar / Lunas)
-        if ($request->filled('status_booking')) {
-            $query->where('status_booking', $request->status_booking);
+        if (! empty($validated['status_booking'])) {
+            $query->where('status_booking', $validated['status_booking']);
         } else {
             // Default untuk laporan biasanya hanya menampilkan yang valid (sudah bayar)
             $query->whereIn('status_booking', ['dp_dibayar', 'lunas']);
@@ -41,15 +52,15 @@ class AdminLaporanController extends Controller
         // Lapangan Paling Ramai & Ringkasan per lapangan
         $ringkasanLapangan = $bookings->groupBy('lapangan_id')->map(function ($items) {
             return [
-                'nama_lapangan' => $items->first()->lapangan->nama,
+                'nama_lapangan' => $items->first()->lapangan->nama_lapangan,
                 'total_booking' => $items->count(),
                 'total_pendapatan' => $items->sum('total_harga'),
             ];
-        })->sortByDesc('total_pendapatan')->values();
+        })->sortByDesc('total_booking')->values();
 
         $lapanganPalingRamai = $ringkasanLapangan->first()['nama_lapangan'] ?? '-';
 
-        $lapangans = \App\Models\Lapangan::all();
+        $lapangans = Lapangan::orderBy('nama_lapangan')->get();
 
         return view('admin.laporan.index', compact(
             'bookings',

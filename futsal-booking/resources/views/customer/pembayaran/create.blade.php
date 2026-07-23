@@ -55,7 +55,7 @@
                 <div class="mt-4 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-2">
                     <span class="text-sm text-yellow-300">⏰ Sisa waktu pembayaran:</span>
                     <span class="font-mono font-bold text-yellow-300 text-xl"
-                          data-countdown="{{ $booking->payment_deadline->timestamp">
+                          data-countdown="{{ $booking->payment_deadline->timestamp }}">
                         {{ $booking->sisa_waktu_format ?? '00:00:00' }}
                     </span>
                 </div>
