@@ -1,3 +1,83 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    /* Efek tombol utama: terasa responsif tanpa mengganggu link navigasi. */
+    .button-effect,
+    button.btn-primary,
+    a.inline-flex[class*="bg-"],
+    a[class*="font-bold"][class*="bg-"] {
+        transition-property: transform, box-shadow, filter, background-color, border-color, color;
+        transition-duration: 180ms;
+        transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+        will-change: transform;
+    }
+
+    .button-effect:hover,
+    button.btn-primary:hover,
+    a.inline-flex[class*="bg-"]:hover,
+    a[class*="font-bold"][class*="bg-"]:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-effect:active,
+    button.btn-primary:active,
+    a.inline-flex[class*="bg-"]:active,
+    a[class*="font-bold"][class*="bg-"]:active {
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
+    }
+
+    .button-effect:focus-visible,
+    button.btn-primary:focus-visible,
+    a.inline-flex[class*="bg-"]:focus-visible,
+    a[class*="font-bold"][class*="bg-"]:focus-visible {
+        outline: 2px solid rgb(251 191 36);
+        outline-offset: 3px;
+    }
+
+    .button-effect:disabled {
+        cursor: not-allowed;
+        transform: none;
+        filter: none;
+        box-shadow: none;
+    }
+
+    .is-loading {
+        position: relative;
+        cursor: wait !important;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .is-loading::before {
+        content: '';
+        display: inline-block;
+        width: 0.9rem;
+        height: 0.9rem;
+        margin-right: 0.5rem;
+        vertical-align: -0.15rem;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 9999px;
+        animation: button-spinner 650ms linear infinite;
+    }
+}
+
+@keyframes button-spinner {
+    to { transform: rotate(360deg); }
+}
+
+/* Strip foto bola pada topbar area customer dan admin. */
+.football-topbar {
+    background-color: #080808 !important;
+    background-image:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.88) 50%, rgba(0, 0, 0, 0.58) 100%),
+        url('/images/navbar-football-monochrome.png') !important;
+    background-position: center, center right !important;
+    background-size: cover !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}

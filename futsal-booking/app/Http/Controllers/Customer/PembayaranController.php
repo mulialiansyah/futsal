@@ -58,8 +58,13 @@ class PembayaranController extends Controller
         }
 
         $booking->load(['lapangan', 'pembayarans']);
+        $midtransPayment = $booking->pembayarans
+            ->where('metode_pembayaran', 'midtrans')
+            ->where('status_verifikasi', 'pending')
+            ->sortByDesc('created_at')
+            ->first();
 
-        return view('customer.pembayaran.create', compact('booking'));
+        return view('customer.pembayaran.create', compact('booking', 'midtransPayment'));
     }
 
     /**
@@ -94,6 +99,7 @@ class PembayaranController extends Controller
             return response()->json([
                 'snap_token' => $pembayaranTertunda->midtrans_snap_token,
                 'nominal' => $pembayaranTertunda->nominal,
+                'order_id' => $pembayaranTertunda->midtrans_order_id,
             ]);
         }
 
@@ -122,68 +128,47 @@ class PembayaranController extends Controller
         return response()->json([
             'snap_token' => $snapToken,
             'nominal' => $validated['nominal'],
+            'order_id' => $orderId,
         ]);
     }
 
-    /**
-     * Simpan bukti bayar
-     */
+    /** Simpan screenshot sebagai bukti pendukung untuk transaksi Midtrans yang sama. */
     public function store(Request $request, Booking $booking)
     {
         abort_if($booking->user_id !== Auth::id(), 403);
 
-        if ($booking->pembayarans()->where('status_verifikasi', 'pending')->exists()) {
-            return redirect()->route('customer.booking.show', $booking)
-                ->with('error', 'Selesaikan atau tunggu hasil pembayaran yang masih diproses terlebih dahulu.');
-        }
-
         $request->validate([
-            'nominal' => 'required|integer|min:1',
+            'midtrans_order_id' => 'required|string',
             'bukti_transfer' => 'required|image|max:5120',
         ], [
-            'nominal.required' => 'Masukkan nominal yang kamu transfer.',
-            'nominal.min' => 'Nominal tidak valid.',
-            'bukti_transfer.required' => 'Upload foto/screenshot bukti transfer.',
+            'midtrans_order_id.required' => 'Mulai pembayaran melalui Midtrans terlebih dahulu.',
+            'bukti_transfer.required' => 'Upload screenshot pembayaran Midtrans.',
             'bukti_transfer.image' => 'File harus berupa gambar.',
             'bukti_transfer.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
-        // Double-check booking masih valid
-        if (! in_array($booking->status_booking, ['pending', 'dp_dibayar'])) {
-            return redirect()->route('customer.booking.index')
-                ->with('error', 'Booking tidak valid.');
+        $pembayaran = $booking->pembayarans()
+            ->where('metode_pembayaran', 'midtrans')
+            ->where('midtrans_order_id', $request->input('midtrans_order_id'))
+            ->whereIn('status_verifikasi', ['pending', 'diterima'])
+            ->first();
+
+        if (! $pembayaran) {
+            return back()->withInput()->with('error', 'Transaksi Midtrans tidak ditemukan. Silakan mulai pembayaran kembali.');
         }
 
-        if ($booking->status_booking === 'pending' && $booking->isExpired()) {
-            return redirect()->route('customer.booking.index')
-                ->with('error', 'Waktu pembayaran sudah habis. Silakan booking ulang.');
-        }
-
-        if ($booking->status_booking === 'dp_dibayar' && $booking->isPelunasanExpired()) {
-            return redirect()->route('customer.booking.index')
-                ->with('error', 'Batas waktu pelunasan sudah lewat. Booking dibatalkan.');
-        }
-
-        // Upload foto bukti transfer
         $path = $request->file('bukti_transfer')->store('bukti_transfer', 'public');
-
-        Pembayaran::create([
-            'booking_id' => $booking->id,
-            'nominal' => $request->nominal,
-            'bukti_transfer' => $path,
-            'metode_pembayaran' => 'transfer_manual',
-            'status_verifikasi' => 'pending',
-        ]);
+        $pembayaran->update(['bukti_transfer' => $path]);
 
         $booking->load(['user', 'lapangan']);
         Notifikasi::kirimKeAdmin(
-            'Bukti Pembayaran Baru 💳',
-            "Customer {$booking->user->name} mengunggah bukti pembayaran sebesar Rp ".number_format($request->nominal, 0, ',', '.')." untuk booking {$booking->lapangan->nama_lapangan}.",
+            'Screenshot Pembayaran Midtrans Baru 💳',
+            "Customer {$booking->user->name} mengunggah screenshot pembayaran Midtrans sebesar Rp ".number_format($pembayaran->nominal, 0, ',', '.')." untuk booking {$booking->lapangan->nama_lapangan}.",
             'pembayaran'
         );
 
         return redirect()->route('customer.booking.show', $booking)
-            ->with('success', 'Bukti pembayaran berhasil diupload! Tunggu verifikasi dari admin.');
+            ->with('success', 'Screenshot pembayaran berhasil diunggah. Status pembayaran tetap dikonfirmasi otomatis oleh Midtrans.');
     }
 
     private function ensureBookingCanBePaid(Booking $booking): void

@@ -145,7 +145,7 @@
                                 <div>
                                     <p class="text-xs text-neutral-400">Pembayaran #{{ $idx + 1 }} - {{ $payment->created_at->format('d M Y H:i') }}</p>
                                     <p class="font-bold text-white text-lg">Rp {{ number_format($payment->nominal, 0, ',', '.') }}</p>
-                                    <p class="text-xs text-neutral-400 mt-1">{{ $payment->metode_pembayaran === 'midtrans' ? 'Midtrans' : 'Transfer manual' }}</p>
+                                    <p class="text-xs text-neutral-400 mt-1">{{ $payment->metode_pembayaran === 'midtrans' ? 'Midtrans' : 'Metode lama' }}</p>
                                 </div>
                                 @php
                                     $verifikasi = [
@@ -166,7 +166,7 @@
 
                             @if($payment->bukti_transfer)
                                 <div class="mt-3">
-                                    <p class="text-xs text-neutral-400 mb-2">Bukti Transfer:</p>
+                                    <p class="text-xs text-neutral-400 mb-2">Screenshot Pembayaran:</p>
                                     <img src="{{ asset('storage/' . $payment->bukti_transfer) }}"
                                          class="max-w-xs rounded-xl border border-white/10 object-contain max-h-32">
                                 </div>

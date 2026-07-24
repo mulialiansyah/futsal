@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'FutsalKIte') }} - Admin</title>
+    <title>{{ config('app.name', 'FutsalKite') }} - Admin</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,9 +22,122 @@
         body { font-family: 'Figtree', sans-serif; }
         .font-display { font-family: 'Anton', sans-serif; letter-spacing: 0.5px; }
         [x-cloak] { display: none !important; }
+
+        /* ====== KICKING SILHOUETTE LOADER ====== */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.8rem;
+            z-index: 9999;
+            font-family: 'Figtree', sans-serif;
+        }
+
+        .loader-stage {
+            position: relative;
+            width: 220px;
+            height: 160px;
+        }
+
+        .loader-ground {
+            position: absolute;
+            bottom: 18px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .loader-figure {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-70px);
+            width: 60px;
+            height: 110px;
+        }
+
+        .loader-figure svg { width: 100%; height: 100%; display: block; }
+
+        .loader-torso-group {
+            transform-origin: 30px 55px;
+            animation: loaderLean 0.9s ease-in-out infinite;
+        }
+
+        .loader-kick-leg {
+            transform-origin: 26px 68px;
+            animation: loaderKick 0.9s ease-in-out infinite;
+        }
+
+        .loader-plant-leg {
+            transform-origin: 34px 68px;
+        }
+
+        @keyframes loaderLean {
+            0%, 100% { transform: rotate(0deg); }
+            35% { transform: rotate(-6deg); }
+            50% { transform: rotate(4deg); }
+        }
+
+        @keyframes loaderKick {
+            0%, 100% { transform: rotate(0deg); }
+            30% { transform: rotate(-25deg); }
+            50% { transform: rotate(55deg); }
+            70% { transform: rotate(20deg); }
+        }
+
+        .loader-ball {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            width: 22px;
+            height: 22px;
+            margin-left: 8px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 30% 25%, rgba(255,255,255,0.6), rgba(255,255,255,0) 45%),
+                #f3f4f6;
+            animation: loaderKicked 0.9s ease-in-out infinite;
+        }
+
+        .loader-ball::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background-image:
+                radial-gradient(circle at 50% 20%, #111827 0 3.2px, transparent 4px),
+                radial-gradient(circle at 22% 50%, #111827 0 2.8px, transparent 3.6px),
+                radial-gradient(circle at 78% 50%, #111827 0 2.8px, transparent 3.6px),
+                radial-gradient(circle at 35% 80%, #111827 0 2.8px, transparent 3.6px),
+                radial-gradient(circle at 65% 80%, #111827 0 2.8px, transparent 3.6px);
+        }
+
+        @keyframes loaderKicked {
+            0%, 45% { transform: translate(0, 0) scale(1); opacity: 1; }
+            55% { transform: translate(70px, -18px) scale(0.85); opacity: 1; }
+            65% { transform: translate(130px, 4px) scale(0.7); opacity: 0; }
+            66%, 99% { opacity: 0; }
+            100% { transform: translate(0, 0) scale(1); opacity: 0; }
+        }
+
+        .loader-label {
+            font-size: 0.9rem;
+            color: #e5e7eb;
+            opacity: 0.6;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
     </style>
 </head>
-<body class="bg-neutral-950 text-white">
+<body class="bg-neutral-950 text-white"
+      x-data="{ isLoading: false }"
+      @loading-start="isLoading = true"
+      @loading-end="isLoading = false">
 
 <div class="flex min-h-screen bg-neutral-950 flex-col">
 
@@ -34,7 +147,7 @@
             <!-- Logo -->
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-2 py-1">
                 <span class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_3px_rgba(239,68,68,0.8)]"></span>
-                <span class="font-display text-2xl text-white tracking-wide">FutsalKIte</span>
+                <span class="font-display text-2xl text-white tracking-wide">FutsalKite</span>
                 <span class="text-[10px] font-extrabold uppercase bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/30 ml-auto">Admin</span>
             </a>
 
@@ -83,8 +196,6 @@
                     <span>Pembayaran</span>
                 </a>
 
-                <p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest px-3 pt-4 mb-2">Pengaturan</p>
-
                 <a href="{{ route('admin.hari-libur.index') }}" 
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all {{ request()->routeIs('admin.hari-libur.*') ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30' : 'text-neutral-300 hover:bg-white/5 hover:text-white' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -118,18 +229,22 @@
     </aside>
 
     <!-- TOPBAR (Mobile Header & Desktop Header Offset) -->
-    <header class="sticky top-0 z-30 relative bg-neutral-950/95 backdrop-blur-md border-b border-white/10 md:pl-64">
+    <header class="football-topbar sticky top-0 z-30 relative backdrop-blur-md border-b border-white/10 md:pl-64"
+            style="background-color: #080808; overflow: hidden;">
+        <img src="{{ asset('images/navbar-football-monochrome.png') }}" alt="" aria-hidden="true"
+             class="pointer-events-none absolute inset-y-0 right-0 h-full w-80 object-cover object-right opacity-90">
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-96 bg-gradient-to-l from-transparent via-black/35 to-black"></div>
         <!-- ambient glow -->
-        <div class="pointer-events-none absolute inset-0 -z-10">
+        <div class="hidden pointer-events-none absolute inset-0 -z-10">
             <div class="absolute -top-24 left-10 w-72 h-72 rounded-full bg-red-600/20 blur-3xl"></div>
             <div class="absolute -top-24 right-24 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl"></div>
         </div>
         
-        <div class="relative px-4 py-3.5 flex items-center justify-between max-w-6xl mx-auto">
+        <div class="relative z-10 px-4 py-3.5 flex items-center justify-between max-w-6xl mx-auto">
             <!-- Mobile Logo (Hidden on Desktop/Tablet) -->
             <div class="flex items-center gap-2 md:hidden">
                 <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_2px_rgba(239,68,68,0.7)]"></span>
-                <span class="font-display text-xl text-white">FutsalKIte</span>
+                <span class="font-display text-xl text-white">FutsalKite</span>
             </div>
 
             <!-- Desktop Title indicator (Hidden on Mobile) -->
@@ -176,30 +291,45 @@
                         </div>
                         <div class="max-h-80 overflow-y-auto divide-y divide-white/5">
                             @forelse($latestNotifications as $notif)
-                                <div class="px-4 py-3 hover:bg-white/5 transition relative {{ !$notif->is_read ? 'bg-white/[0.02]' : '' }}">
-                                    <div class="flex justify-between items-start gap-2">
-                                        <p class="text-sm font-semibold {{ !$notif->is_read ? 'text-white font-bold' : 'text-neutral-300' }}">
-                                            {{ $notif->judul }}
-                                        </p>
-                                        @if(!$notif->is_read)
-                                            <form action="{{ route('admin.notifikasi.read', $notif) }}" method="POST" class="m-0 p-0">
-                                                @csrf
-                                                <button type="submit" class="text-[10px] text-amber-400 hover:text-amber-300 bg-transparent border-0 p-0 cursor-pointer" title="Tandai dibaca">
-                                                    ✓
-                                                </button>
-                                            </form>
-                                        @endif
+                                @if(!$notif->is_read)
+                                    <form action="{{ route('admin.notifikasi.read', $notif) }}" method="POST" class="m-0 p-0">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left px-4 py-3 hover:bg-white/5 transition relative bg-white/[0.02] cursor-pointer">
+                                            <div class="flex justify-between items-start gap-2">
+                                                <p class="text-sm font-semibold text-white font-bold">
+                                                    {{ $notif->judul }}
+                                                </p>
+                                                <span class="text-[10px] text-amber-400 hover:text-amber-300">✓</span>
+                                            </div>
+                                            <p class="text-xs text-neutral-400 mt-1 leading-relaxed">{{ $notif->pesan }}</p>
+                                            <div class="flex items-center justify-between mt-1.5">
+                                                <span class="text-[10px] text-neutral-500">
+                                                    {{ $notif->created_at->diffForHumans() }}
+                                                </span>
+                                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 uppercase tracking-wider font-semibold">
+                                                    {{ $notif->tipe }}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="px-4 py-3 hover:bg-white/5 transition relative">
+                                        <div class="flex justify-between items-start gap-2">
+                                            <p class="text-sm font-semibold text-neutral-300">
+                                                {{ $notif->judul }}
+                                            </p>
+                                        </div>
+                                        <p class="text-xs text-neutral-400 mt-1 leading-relaxed">{{ $notif->pesan }}</p>
+                                        <div class="flex items-center justify-between mt-1.5">
+                                            <span class="text-[10px] text-neutral-500">
+                                                {{ $notif->created_at->diffForHumans() }}
+                                            </span>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 uppercase tracking-wider font-semibold">
+                                                {{ $notif->tipe }}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-neutral-400 mt-1 leading-relaxed">{{ $notif->pesan }}</p>
-                                    <div class="flex items-center justify-between mt-1.5">
-                                        <span class="text-[10px] text-neutral-500">
-                                            {{ $notif->created_at->diffForHumans() }}
-                                        </span>
-                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400 uppercase tracking-wider font-semibold">
-                                            {{ $notif->tipe }}
-                                        </span>
-                                    </div>
-                                </div>
+                                @endif
                             @empty
                                 <div class="px-4 py-8 text-center text-neutral-500 text-sm">
                                     <span class="text-2xl mb-1 block">📭</span>
@@ -287,10 +417,38 @@
                     </div>
                     <span class="text-xs font-semibold">Pembayaran</span>
                 </a>
+                <a href="{{ route('admin.hari-libur.index') }}" 
+                   class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.hari-libur.*') ? 'text-amber-400' : 'text-neutral-500' }}">
+                    <div class="{{ request()->routeIs('admin.hari-libur.*') ? 'bg-amber-400/20' : '' }} p-2 rounded-xl transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold">Hari Libur</span>
+                </a>
+                <a href="{{ route('admin.ketersediaan.index') }}" 
+                   class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.ketersediaan.*') ? 'text-amber-400' : 'text-neutral-500' }}">
+                    <div class="{{ request()->routeIs('admin.ketersediaan.*') ? 'bg-amber-400/20' : '' }} p-2 rounded-xl transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold">Ketersediaan</span>
+                </a>
             </div>
         </nav>
     </main>
 </div>
+
+<x-loader label="Memuat data..." />
+
+<script>
+    // Auto-trigger loading for all form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function() {
+                window.dispatchEvent(new CustomEvent('loading-start'));
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

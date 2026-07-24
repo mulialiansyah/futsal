@@ -7,7 +7,7 @@
             </svg>
         </a>
         <h2 class="text-2xl sm:text-3xl font-bold text-white">
-            Upload Bukti Pembayaran
+            Pembayaran Midtrans
         </h2>
     </div>
 
@@ -62,13 +62,13 @@
             @endif
         </div>
 
-        <!-- Pembayaran Online Midtrans -->
+        <!-- Pembayaran Midtrans -->
         @if(config('services.midtrans.client_key'))
             <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div>
-                        <h3 class="font-bold text-red-200">💳 Bayar Online dengan Midtrans</h3>
-                        <p class="text-xs text-red-200/70 mt-1">Pilih metode pembayaran di halaman aman Midtrans: QRIS, e-wallet, transfer bank, atau kartu.</p>
+                        <h3 class="font-bold text-red-200">💳 Bayar melalui Midtrans</h3>
+                        <p class="text-xs text-red-200/70 mt-1">Pilih QRIS, e-wallet, transfer bank, atau kartu pada halaman pembayaran aman Midtrans.</p>
                     </div>
                     <span class="shrink-0 px-2.5 py-1 rounded-full bg-red-500/20 text-red-200 text-[11px] font-bold">OTOMATIS</span>
                 </div>
@@ -97,37 +97,10 @@
             </div>
         @endif
 
-        <!-- Info Rekening -->
-        <div class="bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6">
-            <h3 class="font-bold text-blue-300 mb-4">📋 Info Transfer</h3>
-            <div class="space-y-3 text-sm">
-                <div class="flex justify-between items-center">
-                    <span class="text-blue-200">Bank</span>
-                    <span class="font-bold text-white">BCA</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-blue-200">No. Rekening</span>
-                    <span class="font-bold text-white">1234567890</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-blue-200">Atas Nama</span>
-                    <span class="font-bold text-white">FutsalKIte</span>
-                </div>
-                <div class="flex justify-between items-center border-t border-blue-500/30 pt-3 mt-3">
-                    <span class="text-blue-200 font-semibold">Total Transfer</span>
-                    <span class="font-extrabold text-white text-lg">
-                        Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
-                    </span>
-                </div>
-            </div>
-            <p class="text-xs text-blue-300/80 mt-4">
-                * Transfer sesuai nominal di atas. Pembayaran berbeda nominal bisa memperlambat verifikasi.
-            </p>
-        </div>
-
-        <!-- Form Upload -->
-        <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6">
-            <h3 class="font-bold text-white mb-4">Upload Bukti Transfer</h3>
+        <!-- Screenshot bukti Midtrans -->
+        <div id="buktiMidtransSection" class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6 {{ $midtransPayment ? '' : 'hidden' }}">
+            <h3 class="font-bold text-white mb-2">Upload Screenshot Pembayaran</h3>
+            <p class="text-xs text-neutral-400 mb-4">Setelah pembayaran selesai di Midtrans, upload screenshot status pembayarannya di sini. Screenshot ini terhubung ke transaksi Midtrans yang sama.</p>
 
             @if($errors->any())
                 <div class="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-sm text-red-300">
@@ -143,53 +116,15 @@
                   action="{{ route('customer.pembayaran.store', $booking) }}"
                   enctype="multipart/form-data">
                 @csrf
-
-                <!-- Nominal -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-white mb-2">
-                        Nominal yang Ditransfer (Rp) <span class="text-red-400">*</span>
-                    </label>
-                    <input type="number" name="nominal" id="inputNominal"
-                           value="{{ old('nominal', $booking->sisa_tagihan) }}"
-                           min="1" required
-                           class="w-full bg-white/5 border border-white/20 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition @error('nominal') border-red-500/50 focus:ring-red-500 @enderror">
-                    
-                    @if($booking->status_booking === 'pending' && $booking->pembayarans->isEmpty())
-                        <div class="flex flex-wrap gap-2 mt-3">
-                            <button type="button" onclick="setNominal({{ $booking->total_harga / 2 }})"
-                                    class="text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 px-4 py-2 rounded-xl transition">
-                                Set DP 50% (Rp {{ number_format($booking->total_harga / 2, 0, ',', '.') }})
-                            </button>
-                            <button type="button" onclick="setNominal({{ $booking->total_harga }})"
-                                    class="text-xs bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 px-4 py-2 rounded-xl transition">
-                                Set Lunas 100% (Rp {{ number_format($booking->total_harga, 0, ',', '.') }})
-                            </button>
-                        </div>
-                    @endif
-
-                    <p class="text-xs text-neutral-400 mt-3">
-                        Isi sesuai nominal yang sudah kamu transfer.
-                    </p>
-                    @error('nominal')
-                        <p class="text-red-400 text-xs mt-2">{{ $message }}</p>
-                    @enderror
-                    <p id="nominalError" class="text-red-400 text-xs mt-2 hidden"></p>
-                </div>
-
-                <script>
-                    function setNominal(amount) {
-                        document.getElementById('inputNominal').value = amount;
-                        document.getElementById('nominalError').classList.add('hidden');
-                    }
-                </script>
+                <input type="hidden" name="midtrans_order_id" id="midtransOrderId" value="{{ old('midtrans_order_id', $midtransPayment?->midtrans_order_id) }}">
 
                 <!-- Upload Foto -->
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-white mb-2">
-                        Foto Bukti Transfer <span class="text-red-400">*</span>
+                        Screenshot Pembayaran Midtrans <span class="text-red-400">*</span>
                     </label>
                     <p class="text-xs text-neutral-400 mb-4">
-                        Screenshot atau foto struk transfer. Format: JPG, PNG. Maks 5MB.
+                        Screenshot status pembayaran dari Midtrans. Format: JPG, PNG. Maks 5MB.
                     </p>
 
                     <!-- Drop Zone -->
@@ -198,7 +133,7 @@
                          onclick="document.getElementById('buktiInput').click()">
                         <div class="text-5xl mb-3">📷</div>
                         <div class="text-sm font-semibold text-white">
-                            Klik untuk upload bukti transfer
+                            Klik untuk upload screenshot
                         </div>
                         <div class="text-xs text-neutral-400 mt-1">atau drag & drop di sini</div>
                     </div>
@@ -212,7 +147,7 @@
                         <img id="previewImg"
                              class="max-w-full max-h-64 rounded-xl border border-white/10 object-contain mx-auto">
                         <p class="text-xs text-neutral-400 text-center mt-2">
-                            Preview bukti transfer
+                            Preview screenshot pembayaran
                         </p>
                     </div>
 
@@ -262,8 +197,8 @@
                     }
 
                     window.snap.pay(data.snap_token, {
-                        onSuccess: () => window.location.href = '{{ route('customer.booking.show', $booking) }}',
-                        onPending: () => window.location.href = '{{ route('customer.booking.show', $booking) }}',
+                        onSuccess: () => showBuktiMidtrans(data.order_id),
+                        onPending: () => showBuktiMidtrans(data.order_id),
                         onError: () => showMidtransError('Pembayaran gagal diproses. Silakan coba kembali.'),
                         onClose: () => showMidtransError('Jendela pembayaran ditutup. Anda dapat melanjutkan pembayaran sebelum batas waktu berakhir.'),
                     });
@@ -276,7 +211,13 @@
             }
         @endif
 
-        // Preview bukti transfer
+        function showBuktiMidtrans(orderId) {
+            document.getElementById('midtransOrderId').value = orderId;
+            document.getElementById('buktiMidtransSection').classList.remove('hidden');
+            document.getElementById('buktiMidtransSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Preview screenshot pembayaran
         function previewBukti(input) {
             const container = document.getElementById('previewContainer');
             const img = document.getElementById('previewImg');
@@ -315,35 +256,16 @@
             }
         });
 
-        // Clear nominal error when typing
-        document.getElementById('inputNominal').addEventListener('input', function() {
-            document.getElementById('nominalError').classList.add('hidden');
-            this.classList.remove('border-red-500/50', 'focus:ring-red-500');
-        });
-
         // Form Submit Frontend Validation
         document.getElementById('pembayaranForm').addEventListener('submit', function(e) {
             let isValid = true;
 
-            // 1. Validasi Nominal
-            const nominalInput = document.getElementById('inputNominal');
-            const nominalError = document.getElementById('nominalError');
-            if (!nominalInput.value || parseInt(nominalInput.value) <= 0) {
-                nominalError.textContent = 'Nominal transfer wajib diisi dan harus lebih dari 0.';
-                nominalError.classList.remove('hidden');
-                nominalInput.classList.add('border-red-500/50', 'focus:ring-red-500');
-                isValid = false;
-            } else {
-                nominalError.classList.add('hidden');
-                nominalInput.classList.remove('border-red-500/50', 'focus:ring-red-500');
-            }
-
-            // 2. Validasi Bukti Transfer
+            // Validasi screenshot pembayaran
             const fileInput = document.getElementById('buktiInput');
             const buktiError = document.getElementById('buktiError');
             const dropZoneEl = document.getElementById('dropZone');
             if (fileInput.files.length === 0) {
-                buktiError.textContent = 'Foto bukti transfer wajib diunggah.';
+                buktiError.textContent = 'Screenshot pembayaran wajib diunggah.';
                 buktiError.classList.remove('hidden');
                 dropZoneEl.classList.add('border-red-500/50', 'bg-red-500/10');
                 isValid = false;

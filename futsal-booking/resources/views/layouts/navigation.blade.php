@@ -88,8 +88,12 @@
 </aside>
 
 <!-- ===== TOP BAR ===== -->
-<header class="sticky top-0 z-30 bg-neutral-950/95 backdrop-blur-md border-b border-white/10 md:pl-64">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<header class="football-topbar sticky top-0 z-30 backdrop-blur-md border-b border-white/10 md:pl-64"
+        style="background-color: #080808; overflow: hidden;">
+    <img src="{{ asset('images/navbar-football-monochrome.png') }}" alt="" aria-hidden="true"
+         class="pointer-events-none absolute inset-y-0 right-0 h-full w-80 object-cover object-right opacity-90">
+    <div class="pointer-events-none absolute inset-y-0 right-0 w-96 bg-gradient-to-l from-transparent via-black/35 to-black"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <!-- Logo (Mobile only) -->
         <a href="{{ url('/') }}" class="flex items-center gap-2 md:hidden">
             <span class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_2px_rgba(239,68,68,0.7)]"></span>

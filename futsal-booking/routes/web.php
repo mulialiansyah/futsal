@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
     // Booking
     Route::resource('booking', BookingController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
+    Route::get('booking/{booking}/berhasil', [BookingController::class, 'success'])->name('booking.success');
 
     // Pembayaran customer
     Route::get('booking/{booking}/bayar', [CustomerPembayaranController::class, 'create'])->name('pembayaran.create');

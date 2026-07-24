@@ -48,9 +48,9 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-400 mb-2">Bukti Transfer</label>
+                <label class="block text-sm font-medium text-neutral-400 mb-2">Screenshot Pembayaran</label>
                 @if($pembayaran->bukti_transfer)
-                    <img src="{{ Storage::url($pembayaran->bukti_transfer) }}" alt="Bukti Transfer" class="w-64 h-64 object-cover rounded-lg border border-white/10">
+                    <img src="{{ Storage::url($pembayaran->bukti_transfer) }}" alt="Screenshot Pembayaran" class="w-64 h-64 object-cover rounded-lg border border-white/10">
                 @else
                     <div class="w-64 h-64 bg-neutral-800 rounded-lg flex items-center justify-center text-neutral-500 border border-white/10">No Bukti</div>
                 @endif

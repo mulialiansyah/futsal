@@ -1,10 +1,15 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto py-6">
 
-        <!-- ===== GREETING ===== -->
-        <div class="pt-2 pb-6">
-            <h1 class="font-display text-2xl sm:text-3xl text-white">Halo, {{ auth()->user()->name ?? 'Penyewa' }} 👋</h1>
-            <p class="text-neutral-400 text-sm mt-1">Pilih lapangan, atur jadwal, langsung main.</p>
+        <div class="overflow-hidden rounded-2xl border border-[#23282A] bg-[#14181A] shadow-2xl shadow-black/20">
+            <!-- ===== HEADER ===== -->
+            <div class="border-b border-[#23282A] px-5 pt-5 pb-4">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400">Booking Lapangan</p>
+                <h1 class="mt-1 font-display text-2xl text-white">Mau main jam berapa?</h1>
+                <p class="mt-1 text-sm text-neutral-400">Pilih lapangan dan jadwal yang paling pas buat kamu.</p>
+            </div>
+
+            <div class="px-5 py-5">
         </div>
 
         @if ($errors->any())
@@ -17,13 +22,13 @@
             </div>
         @endif
 
-        <form action="{{ route('customer.booking.store') }}" method="POST" id="bookingForm">
+        <form action="{{ route('customer.booking.store') }}" method="POST" id="bookingForm" class="space-y-5">
             @csrf
 
             <!-- ===== PILIH LAPANGAN — KARTU FOTO ===== -->
-            <div class="mb-8">
+            <div>
                 <div class="flex items-center justify-between mb-3">
-                    <label class="block text-sm font-bold text-white">Pilih Lapangan</label>
+                    <label class="block text-xs font-medium text-neutral-400">📍 Pilih Lapangan</label>
                     <span class="text-xs text-neutral-500">{{ $lapangans->count() }} lapangan tersedia</span>
                 </div>
 
@@ -39,7 +44,7 @@
                     @endforeach
                 </select>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="lapanganCards">
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" id="lapanganCards">
                     @foreach($lapangans as $lapangan)
                         @php
                             $imgUrl = $lapangan->foto_utama
@@ -48,7 +53,7 @@
                             $isSelected = (old('lapangan_id') ?? request('lapangan_id')) == $lapangan->id;
                         @endphp
                         <button type="button"
-                                class="lapangan-card text-left rounded-2xl overflow-hidden border-2 bg-neutral-900 transition {{ $isSelected ? 'border-amber-400' : 'border-white/10 hover:border-white/30' }}"
+                                class="lapangan-card text-left rounded-xl overflow-hidden border bg-[#0B0F0C] transition {{ $isSelected ? 'border-emerald-500 bg-[#16321F]' : 'border-[#23282A] hover:border-neutral-500' }}"
                                 data-id="{{ $lapangan->id }}"
                                 data-kategori="{{ $lapangan->kategori }}">
                             <div class="relative h-24 sm:h-28">
@@ -56,7 +61,7 @@
                                 <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[10px] font-bold text-white">
                                     {{ $lapangan->kategori_label }}
                                 </span>
-                                <div class="lapangan-check absolute top-2 right-2 w-5 h-5 rounded-full bg-amber-400 items-center justify-center {{ $isSelected ? 'flex' : 'hidden' }}">
+                                <div class="lapangan-check absolute top-2 right-2 w-5 h-5 rounded-full bg-emerald-500 items-center justify-center {{ $isSelected ? 'flex' : 'hidden' }}">
                                     <svg class="w-3 h-3 text-neutral-950" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                     </svg>
@@ -76,12 +81,12 @@
             </div>
 
             <!-- ===== TANGGAL MAIN ===== -->
-            <div class="mb-6">
-                <label for="tanggal_main" class="block text-sm font-bold text-white mb-2">Tanggal Main</label>
+            <div>
+                <label for="tanggal_main" class="block text-xs font-medium text-neutral-400 mb-2">📅 Tanggal Main</label>
                 <input type="date" name="tanggal_main" id="tanggal_main" required
                        value="{{ old('tanggal_main') ?? request('tanggal_main') }}"
                        min="{{ now()->addDays(2)->toDateString() }}"
-                       class="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent @error('tanggal_main') border-red-500 @enderror">
+                       class="w-full bg-[#0B0F0C] border border-[#23282A] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent @error('tanggal_main') border-red-500 @enderror">
                 <p class="text-neutral-500 text-xs mt-1.5">* Minimal H-2 (2 hari sebelum main). Harga weekend/tanggal merah berbeda dengan weekday.</p>
                 @error('tanggal_main')
                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
@@ -101,43 +106,43 @@
             </div>
 
             <!-- ===== JAM MULAI & DURASI ===== -->
-            <div class="grid grid-cols-2 gap-4 mb-2">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label for="jamMulai" class="block text-sm font-bold text-white mb-2">Jam Mulai</label>
+                    <label for="jamMulai" class="block text-xs font-medium text-neutral-400 mb-2">🕒 Jam Mulai</label>
                     <input type="time" name="jam_mulai" id="jamMulai" required
                            value="{{ old('jam_mulai') ?? request('jam_mulai') }}"
-                           min="08:00" max="21:00"
-                           class="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent @error('jam_mulai') border-red-500 @enderror">
+                           min="08:00" max="21:00" step="60"
+                           class="w-full bg-[#0B0F0C] border border-[#23282A] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent @error('jam_mulai') border-red-500 @enderror">
                     <p class="text-neutral-500 text-xs mt-1.5">* Jam operasional 08:00 - 21:00</p>
                     @error('jam_mulai')
                         <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
-                    <label for="durasiJam" class="block text-sm font-bold text-white mb-2">Durasi Main</label>
-                    <select name="durasi_jam" id="durasiJam" required
-                            class="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent @error('durasi_jam') border-red-500 @enderror">
-                        <option value="">— Pilih —</option>
-                        @foreach([1, 2, 3, 4] as $jam)
-                            <option value="{{ $jam }}" {{ old('durasi_jam') == $jam ? 'selected' : '' }}>{{ $jam }} Jam</option>
-                        @endforeach
-                    </select>
+                    <label for="durasiJam" class="block text-xs font-medium text-neutral-400 mb-2">⏱ Durasi Main (Jam)</label>
+                    <input type="number" name="durasi_jam" id="durasiJam" required min="1" max="24"
+                           value="{{ old('durasi_jam') }}"
+                           placeholder="Masukkan jumlah jam"
+                           class="w-full bg-[#0B0F0C] border border-[#23282A] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent @error('durasi_jam') border-red-500 @enderror">
                     @error('durasi_jam')
                         <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
-            <!-- Jam Selesai otomatis -->
-            <div class="mb-6">
-                <div class="bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 flex justify-between items-center">
-                    <span class="text-sm text-neutral-400">Jam Selesai (otomatis):</span>
+            <!-- Ringkasan waktu otomatis -->
+            <div>
+                <div class="bg-[#0B0F0C] border border-[#23282A] rounded-xl px-4 py-3 flex justify-between items-center">
+                    <div>
+                        <span class="block text-[11px] text-neutral-400">Waktu Main</span>
+                        <span class="text-xs text-neutral-500" id="tanggalRingkasan">Pilih tanggal main</span>
+                    </div>
                     <span class="font-bold text-white" id="jamSelesaiDisplay">—</span>
                 </div>
             </div>
 
             <!-- ===== HARGA PREVIEW ===== -->
-            <div class="bg-neutral-900 border border-white/10 rounded-2xl p-5 mb-8">
+            <div class="bg-[#0B0F0C] border border-[#23282A] rounded-xl p-4">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-sm text-neutral-400">Tipe Hari:</span>
                     <span class="text-sm font-semibold text-white" id="tipeHariDisplay">—</span>
@@ -153,13 +158,15 @@
                 <p class="text-neutral-500 text-xs mt-3">* Harga final dihitung ulang otomatis oleh sistem. Waktu pembayaran 1 jam setelah booking.</p>
             </div>
 
-            <div class="flex justify-end">
+            <div class="pt-1">
                 <button type="submit" id="submitBtn"
-                        class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3.5 rounded-full shadow-lg shadow-red-600/30 transition duration-200 text-center">
-                    Booking Sekarang
+                        class="group w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3.5 rounded-full shadow-lg shadow-emerald-950/40 transition duration-200 text-center">
+                    Booking Sekarang <span class="ml-1 transition-transform group-hover:translate-x-1 inline-block">›</span>
                 </button>
             </div>
         </form>
+            </div>
+        </div>
     </div>
 
     <!-- ===== FLOATING CHAT KE ADMIN ===== -->
@@ -181,13 +188,13 @@
         document.querySelectorAll('.lapangan-card').forEach(card => {
             card.addEventListener('click', () => {
                 document.querySelectorAll('.lapangan-card').forEach(c => {
-                    c.classList.remove('border-amber-400');
-                    c.classList.add('border-white/10');
+                    c.classList.remove('border-emerald-500', 'bg-[#16321F]');
+                    c.classList.add('border-[#23282A]');
                     c.querySelector('.lapangan-check').classList.add('hidden');
                     c.querySelector('.lapangan-check').classList.remove('flex');
                 });
-                card.classList.remove('border-white/10');
-                card.classList.add('border-amber-400');
+                card.classList.remove('border-[#23282A]');
+                card.classList.add('border-emerald-500', 'bg-[#16321F]');
                 card.querySelector('.lapangan-check').classList.remove('hidden');
                 card.querySelector('.lapangan-check').classList.add('flex');
 
@@ -221,12 +228,21 @@
             const durasi         = parseInt(document.getElementById('durasiJam').value || 0);
 
             const selesaiEl  = document.getElementById('jamSelesaiDisplay');
+            const tanggalRingkasanEl = document.getElementById('tanggalRingkasan');
             const totalEl    = document.getElementById('totalHarga');
             const tipeHariEl = document.getElementById('tipeHariDisplay');
             const dpEl       = document.getElementById('dpHarga');
 
             const opt      = lapanganSelect.options[lapanganSelect.selectedIndex];
             const kategori = opt ? opt.dataset.kategori : null;
+
+            if (tanggalMain) {
+                tanggalRingkasanEl.textContent = new Intl.DateTimeFormat('id-ID', {
+                    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+                }).format(new Date(tanggalMain + 'T00:00:00'));
+            } else {
+                tanggalRingkasanEl.textContent = 'Pilih tanggal main';
+            }
 
             if (!jamMulai || !durasi) {
                 selesaiEl.textContent  = '—';
@@ -250,7 +266,8 @@
 
             const jamSelesai    = Math.floor(totalMenit / 60);
             const menitSelesai  = totalMenit % 60;
-            selesaiEl.textContent = String(jamSelesai).padStart(2, '0') + ':' + String(menitSelesai).padStart(2, '0');
+            const waktuSelesai = String(jamSelesai).padStart(2, '0') + ':' + String(menitSelesai).padStart(2, '0');
+            selesaiEl.textContent = `${jamMulai} – ${waktuSelesai}`;
 
             const weekend          = isWeekendOrHoliday(tanggalMain);
             tipeHariEl.textContent = weekend ? 'Weekend / Tanggal Merah' : 'Weekday';
@@ -324,6 +341,12 @@
     <style>
         /* Pertahankan warna kontrol; cukup cerahkan ikon tanggal dan panah durasi. */
         #bookingForm input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(1);
+            opacity: 1;
+        }
+
+        #bookingForm input[type="time"]::-webkit-calendar-picker-indicator {
             cursor: pointer;
             filter: invert(1);
             opacity: 1;

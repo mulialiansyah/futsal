@@ -63,14 +63,66 @@
         .slider-btn.next {
             right: 16px;
         }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Palet monokrom untuk tampilan yang lebih matang dan konsisten. */
+        .monochrome-page {
+            background: #f3f3f1;
+            color: #171717;
+        }
+        .nav-football {
+            background-color: #090909 !important;
+            background-image:
+                linear-gradient(90deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.90) 45%, rgba(0, 0, 0, 0.58) 100%),
+                url('{{ asset('images/navbar-football-monochrome.png') }}') !important;
+            background-position: center, center right !important;
+            background-size: cover !important;
+            border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+        }
+        .nav-football .nav-ambient {
+            display: none;
+        }
+        .monochrome-page .text-red-500,
+        .monochrome-page .text-red-600,
+        .monochrome-page .text-amber-300,
+        .monochrome-page .text-green-600,
+        .monochrome-page .text-pink-700,
+        .monochrome-page .text-blue-700 {
+            color: #404040 !important;
+        }
+        .monochrome-page .bg-red-600,
+        .monochrome-page .bg-red-500,
+        .monochrome-page .bg-amber-300,
+        .monochrome-page .hover\\:bg-red-700:hover {
+            background-color: #181818 !important;
+        }
+        .monochrome-page .hero-section .bg-amber-300 {
+            background-color: #f5f5f4 !important;
+        }
+        .monochrome-page .hero-section .text-red-500,
+        .monochrome-page .hero-section .text-amber-300 {
+            color: #f5f5f4 !important;
+        }
+        .monochrome-page .bg-blue-100,
+        .monochrome-page .bg-pink-100 {
+            background-color: #e5e5e5 !important;
+        }
+        .monochrome-page .border-red-500 {
+            border-color: #262626 !important;
+        }
+        .monochrome-page .shadow-red-600\\/30 {
+            --tw-shadow-color: rgba(0, 0, 0, 0.26) !important;
+        }
     </style>
 </head>
-<body class="font-sans antialiased bg-white text-neutral-900">
+<body class="monochrome-page font-sans antialiased text-neutral-900">
 
     <!-- ===== NAVBAR ===== -->
-    <header x-data="{ mobileOpen: false }" class="sticky top-0 z-50 relative bg-neutral-950/95 backdrop-blur-md border-b border-white/10 overflow-hidden">
+    <header x-data="{ mobileOpen: false }" class="nav-football sticky top-0 z-50 relative backdrop-blur-md border-b border-white/10 overflow-hidden">
         <!-- ambient glow -->
-        <div class="pointer-events-none absolute inset-0 -z-10">
+        <div class="nav-ambient pointer-events-none absolute inset-0 -z-10">
             <div class="absolute -top-24 left-10 w-72 h-72 rounded-full bg-red-600/20 blur-3xl"></div>
             <div class="absolute -top-24 right-24 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl"></div>
         </div>
@@ -114,7 +166,7 @@
     </header>
 
     <!-- ===== HERO ===== -->
-    <section class="relative">
+    <section class="hero-section relative">
         <div class="relative h-[560px] overflow-hidden">
             <img src="{{ asset('images/bg-landing.jpg') }}"
                  onerror="this.src='https://images.unsplash.com/photo-1551958219-acbc608c6377?q=80&w=1920&auto=format&fit=crop'"
@@ -176,6 +228,8 @@
             <div class="slider-container" x-data="{
                 currentSlide: 0,
                 totalSlides: {{ $lapangans->count() }},
+                isPhotoOpen: false,
+                selectedPhoto: { name: '', url: '' },
                 slidesPerView: window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 768 ? 2 : 1),
                 maxSlide() {
                     return Math.max(0, this.totalSlides - this.slidesPerView);
@@ -195,9 +249,17 @@
                     if (this.currentSlide > this.maxSlide()) {
                         this.currentSlide = this.maxSlide();
                     }
+                },
+                openPhoto(name, url) {
+                    this.selectedPhoto = { name, url };
+                    this.isPhotoOpen = true;
+                },
+                closePhoto() {
+                    this.isPhotoOpen = false;
                 }
             }"
-            x-init="window.addEventListener('resize', () => updateSlidesPerView())">
+            x-init="window.addEventListener('resize', () => updateSlidesPerView()); $watch('isPhotoOpen', value => document.body.classList.toggle('overflow-hidden', value))"
+            @keydown.escape.window="closePhoto()">
                 
                 <button class="slider-btn prev" @click="prev()" x-show="currentSlide > 0">
                     <svg class="w-6 h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -207,12 +269,15 @@
                 
                 <div class="slider-track" :style="'transform: translateX(-' + (currentSlide * (100 / slidesPerView)) + '%)'">
                     @foreach($lapangans as $lapangan)
+                        @php
+                            $imgUrl = $lapangan->foto_utama ? $lapangan->foto_utama->url : 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop';
+                        @endphp
                         <div class="slider-slide px-3">
-                            <div class="rounded-2xl border border-neutral-200 overflow-hidden bg-white shadow-sm hover:shadow-lg transition-shadow">
+                            <button type="button"
+                                    @click="openPhoto(@js($lapangan->nama_lapangan), @js($imgUrl))"
+                                    class="w-full rounded-2xl border border-neutral-200 overflow-hidden bg-white text-left shadow-sm hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-shadow cursor-zoom-in"
+                                    :aria-label="'Lihat foto ' + @js($lapangan->nama_lapangan)">
                                 <div class="relative h-48 overflow-hidden">
-                                    @php
-                                        $imgUrl = $lapangan->foto_utama ? $lapangan->foto_utama->url : 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop';
-                                    @endphp
                                     <img src="{{ $imgUrl }}"
                                          alt="{{ $lapangan->nama_lapangan }}"
                                          class="w-full h-full object-cover">
@@ -226,7 +291,7 @@
                                     <h3 class="font-bold text-lg text-neutral-900 mb-1">{{ $lapangan->nama_lapangan }}</h3>
                                     <p class="text-sm text-neutral-500">{{ $lapangan->deskripsi_singkat }}</p>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                     @endforeach
                 </div>
@@ -236,6 +301,30 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
+
+                <div x-show="isPhotoOpen"
+                     x-cloak
+                     x-transition.opacity
+                     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 sm:p-8"
+                     role="dialog"
+                     aria-modal="true"
+                     :aria-label="'Foto ' + selectedPhoto.name"
+                     @click.self="closePhoto()">
+                    <div class="relative w-full max-w-5xl" x-transition.scale.origin.center>
+                        <button type="button"
+                                @click="closePhoto()"
+                                class="absolute -top-3 -right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-neutral-800 shadow-lg transition hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                aria-label="Tutup foto">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18"/>
+                            </svg>
+                        </button>
+                        <img :src="selectedPhoto.url"
+                             :alt="selectedPhoto.name"
+                             class="max-h-[80vh] w-full rounded-2xl bg-neutral-900 object-contain shadow-2xl">
+                        <p class="mt-3 text-center text-sm font-semibold text-white" x-text="selectedPhoto.name"></p>
+                    </div>
+                </div>
             </div>
         @else
             <div class="text-center py-16 border-2 border-dashed border-neutral-300 rounded-2xl">

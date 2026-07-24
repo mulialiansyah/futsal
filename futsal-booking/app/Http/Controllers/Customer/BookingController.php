@@ -167,8 +167,7 @@ class BookingController extends Controller
             'booking'
         );
 
-        return redirect()->route('customer.booking.index')
-            ->with('success', 'Booking berhasil dibuat! Lakukan pembayaran (DP Minimal 50% atau Lunas) dalam 1 jam.');
+        return redirect()->route('customer.booking.success', $booking);
     }
 
     public function show(Booking $booking)
@@ -177,6 +176,15 @@ class BookingController extends Controller
         $booking->load(['lapangan', 'pembayarans']);
 
         return view('customer.booking.show', compact('booking'));
+    }
+
+    /** Halaman konfirmasi setelah booking berhasil dibuat. */
+    public function success(Booking $booking)
+    {
+        abort_if($booking->user_id !== Auth::id(), 403);
+        $booking->load(['lapangan', 'user']);
+
+        return view('customer.booking.success', compact('booking'));
     }
 
     public function destroy(Booking $booking)
