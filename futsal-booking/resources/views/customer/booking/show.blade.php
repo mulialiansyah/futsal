@@ -97,7 +97,7 @@
             <div class="flex gap-3">
                 @if($booking->status_booking === 'pending')
                     <form method="POST" action="{{ route('customer.booking.destroy', $booking) }}"
-                          onsubmit="return confirm('Yakin batalkan booking ini?');" class="flex-1">
+                          data-confirm-message="Yakin batalkan booking ini?" class="flex-1">
                         @csrf @method('DELETE')
                         <button class="w-full bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl transition">
                             Batalkan Booking

@@ -23,6 +23,30 @@
         .font-display { font-family: 'Anton', sans-serif; letter-spacing: 0.5px; }
         [x-cloak] { display: none !important; }
 
+        /* Navigasi bawah admin: dua baris di mobile agar delapan menu tidak saling berhimpitan. */
+        @media (max-width: 767px) {
+            .admin-mobile-nav-list {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 0.25rem 0.5rem;
+            }
+
+            .admin-mobile-nav-list > a {
+                min-width: 0;
+                text-align: center;
+            }
+
+            .admin-mobile-nav-list > a > span:last-child {
+                display: flex;
+                min-height: 1.75rem;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.625rem;
+                line-height: 0.75rem;
+                overflow-wrap: anywhere;
+            }
+        }
+
         /* ====== KICKING SILHOUETTE LOADER ====== */
         .loader-overlay {
             position: fixed;
@@ -356,8 +380,8 @@
         </div>
 
         <!-- BOTTOM NAV (Mobile Only - Hidden on Desktop & Tablet: md:hidden) -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-neutral-950/95 backdrop-blur-md border-t border-white/10 z-50 px-4 py-3 md:hidden">
-            <div class="max-w-md mx-auto flex items-center justify-around">
+        <nav class="admin-mobile-nav fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-neutral-950/95 px-3 py-2 backdrop-blur-md md:hidden">
+            <div class="admin-mobile-nav-list max-w-md mx-auto">
                 <a href="{{ route('admin.dashboard') }}" 
                    class="flex flex-col items-center gap-1 {{ request()->routeIs('admin.dashboard') ? 'text-amber-400' : 'text-neutral-500' }}">
                     <div class="{{ request()->routeIs('admin.dashboard') ? 'bg-amber-400/20' : '' }} p-2 rounded-xl transition-all">
@@ -423,6 +447,7 @@
 </div>
 
 <x-loader label="Memuat data..." />
+<x-confirm-modal />
 
 <script>
     // Auto-trigger loading for all form submissions

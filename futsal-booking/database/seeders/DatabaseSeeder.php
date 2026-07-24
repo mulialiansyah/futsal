@@ -14,34 +14,87 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ===== USERS =====
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
-        User::create([
-            'name' => 'Admin Baru',
-            'email' => 'adminbaru@example.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-        ]);
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'role' => 'penyewa',
-        ]);
-        User::create([
-            'name' => 'aloy',
-            'email' => 'aloy@gmail.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'role' => 'penyewa',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
+        User::firstOrCreate(
+            ['email' => 'adminbaru@example.com'],
+            [
+                'name' => 'Admin Baru',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+            ]
+        );
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'role' => 'penyewa',
+            ]
+        );
+        User::firstOrCreate(
+            ['email' => 'aloy@gmail.com'],
+            [
+                'name' => 'aloy',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'role' => 'penyewa',
+            ]
+        );
+
+        // ===== DUMMY PENYEWA USERS (30 users) =====
+        $dummyUsers = [
+            ['name' => 'Budi Santoso', 'email' => 'budi.santoso@gmail.com'],
+            ['name' => 'Siti Rahayu', 'email' => 'siti.rahayu@gmail.com'],
+            ['name' => 'Ahmad Fauzi', 'email' => 'ahmad.fauzi@gmail.com'],
+            ['name' => 'Dewi Lestari', 'email' => 'dewi.lestari@gmail.com'],
+            ['name' => 'Rizky Pratama', 'email' => 'rizky.pratama@gmail.com'],
+            ['name' => 'Putri Ayu', 'email' => 'putri.ayu@gmail.com'],
+            ['name' => 'Eko Kurniawan', 'email' => 'eko.kurniawan@gmail.com'],
+            ['name' => 'Rina Wati', 'email' => 'rina.wati@gmail.com'],
+            ['name' => 'Fajar Nugraha', 'email' => 'fajar.nugraha@gmail.com'],
+            ['name' => 'Maya Sari', 'email' => 'maya.sari@gmail.com'],
+            ['name' => 'Dimas Anggara', 'email' => 'dimas.anggara@gmail.com'],
+            ['name' => 'Linda Permata', 'email' => 'linda.permata@gmail.com'],
+            ['name' => 'Rian Hidayat', 'email' => 'rian.hidayat@gmail.com'],
+            ['name' => 'Fitri Handayani', 'email' => 'fitri.handayani@gmail.com'],
+            ['name' => 'Adi Prasetyo', 'email' => 'adi.prasetyo@gmail.com'],
+            ['name' => 'Wulan Sari', 'email' => 'wulan.sari@gmail.com'],
+            ['name' => 'Bayu Setiawan', 'email' => 'bayu.setiawan@gmail.com'],
+            ['name' => 'Nurul Hidayah', 'email' => 'nurul.hidayah@gmail.com'],
+            ['name' => 'Gilang Ramadhan', 'email' => 'gilang.ramadhan@gmail.com'],
+            ['name' => 'Ani Wijaya', 'email' => 'ani.wijaya@gmail.com'],
+            ['name' => 'Hendra Gunawan', 'email' => 'hendra.gunawan@gmail.com'],
+            ['name' => 'Siska Amalia', 'email' => 'siska.amalia@gmail.com'],
+            ['name' => 'Yudi Saputra', 'email' => 'yudi.saputra@gmail.com'],
+            ['name' => 'Ratna Dewi', 'email' => 'ratna.dewi@gmail.com'],
+            ['name' => 'Doni Pratama', 'email' => 'doni.pratama@gmail.com'],
+            ['name' => 'Indah Pertiwi', 'email' => 'indah.pertiwi@gmail.com'],
+            ['name' => 'Feri Irawan', 'email' => 'feri.irawan@gmail.com'],
+            ['name' => 'Susi Susanti', 'email' => 'susi.susanti@gmail.com'],
+            ['name' => 'Agus Salim', 'email' => 'agus.salim@gmail.com'],
+        ];
+
+        foreach ($dummyUsers as $user) {
+            User::firstOrCreate(
+                ['email' => $user['email']],
+                [
+                    'name' => $user['name'],
+                    'email_verified_at' => now(),
+                    'password' => Hash::make('password'),
+                    'role' => 'penyewa',
+                ]
+            );
+        }
 
         // ===== LAPANGAN (9 total: 5 standar, 4 internasional) =====
         $lapangans = [
@@ -109,7 +162,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($hariLibur as $data) {
-            HariLibur::create($data);
+            HariLibur::firstOrCreate(
+                ['tanggal' => $data['tanggal']],
+                $data
+            );
         }
     }
 }

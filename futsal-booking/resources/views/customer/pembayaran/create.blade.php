@@ -11,85 +11,102 @@
         </h2>
     </div>
 
-    <div class="max-w-2xl mx-auto space-y-6">
+    <div class="max-w-xl mx-auto space-y-5">
 
-        <!-- Info Booking -->
-        <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6">
-            <h3 class="font-bold text-white mb-4 text-sm uppercase tracking-wide text-neutral-400">
-                Detail Booking
-            </h3>
-            <div class="flex items-center gap-3 mb-4 rounded-xl border border-white/10 bg-white/5 p-3">
-                <img src="{{ $booking->lapangan->fotoUtama->url }}"
-                     alt="{{ $booking->lapangan->nama_lapangan }}"
-                     class="h-16 w-24 rounded-lg object-cover">
+        <!-- Ringkasan booking -->
+        <div class="rounded-3xl border border-neutral-800 bg-neutral-900/90 p-5 sm:p-6 shadow-xl shadow-black/20">
+            <div class="mb-4 flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-xs text-neutral-400">Lapangan yang akan dibayar</p>
-                    <p class="font-semibold text-white">{{ $booking->lapangan->nama_lapangan }}</p>
+                    <h3 class="text-lg font-extrabold text-white">Detail Booking</h3>
+                    <p class="mt-1 text-xs text-neutral-500">{{ \Carbon\Carbon::parse($booking->created_at)->isoFormat('D MMM YYYY, HH:mm') }}</p>
                 </div>
+                <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wide text-emerald-400">MIDTRANS</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                    <div class="text-xs text-neutral-400 mb-1">Lapangan</div>
-                    <div class="font-semibold text-white">{{ $booking->lapangan->nama_lapangan }}</div>
-                    <div class="text-xs text-neutral-500">{{ $booking->lapangan->kategori_label ?? '' }}</div>
-                </div>
-                <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                    <div class="text-xs text-neutral-400 mb-1">Tanggal & Jam</div>
-                    <div class="font-semibold text-white">
-                        {{ \Carbon\Carbon::parse($booking->tanggal_main)->isoFormat('D MMM YYYY') }}
+
+            <div class="mb-4 flex gap-3 rounded-2xl bg-neutral-800 p-3.5">
+                @if($booking->lapangan->fotoUtama)
+                    <img src="{{ $booking->lapangan->fotoUtama->url }}"
+                         alt="{{ $booking->lapangan->nama_lapangan }}"
+                         class="h-24 w-28 shrink-0 rounded-xl object-cover sm:h-28 sm:w-32">
+                @else
+                    <div class="flex h-24 w-28 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-neutral-700 to-neutral-950 sm:h-28 sm:w-32">
+                        <svg class="h-14 w-14" viewBox="0 0 100 100" aria-hidden="true">
+                            <circle cx="50" cy="50" r="46" fill="#f4f4f4" stroke="#111" stroke-width="3"/>
+                            <polygon points="50,28 61,36 57,49 43,49 39,36" fill="#111"/>
+                            <g stroke="#111" stroke-width="2.5" fill="none">
+                                <path d="M50 28 L50 12"/><path d="M61 36 L74 26"/><path d="M57 49 L68 60"/><path d="M43 49 L32 60"/><path d="M39 36 L26 26"/>
+                            </g>
+                        </svg>
                     </div>
-                    <div class="text-xs text-neutral-500">
-                        {{ substr($booking->jam_mulai, 0, 5) }} - {{ substr($booking->jam_selesai, 0, 5) }}
-                    </div>
-                </div>
-                <div class="bg-green-500/20 border border-green-500/30 rounded-xl p-4 col-span-1 sm:col-span-2">
-                    <div class="text-xs text-neutral-400 mb-1">Total yang harus dibayar (Sisa Tagihan)</div>
-                    <div class="font-extrabold text-green-300 text-2xl">
-                        Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
+                @endif
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-bold text-white">{{ $booking->lapangan->nama_lapangan }}</p>
+                    <p class="mt-0.5 text-xs text-neutral-400">Booking Futsal · {{ $booking->lapangan->kategori_label ?? $booking->lapangan->kategori }}</p>
+                    <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-neutral-400">
+                        <span>📅 {{ \Carbon\Carbon::parse($booking->tanggal_main)->isoFormat('D MMM YYYY') }}</span>
+                        <span>🕒 {{ substr($booking->jam_mulai, 0, 5) }}–{{ substr($booking->jam_selesai, 0, 5) }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Countdown -->
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between rounded-2xl bg-neutral-800 px-4 py-3.5">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-base">💳</span>
+                        <span class="text-sm font-semibold text-neutral-200">Total Tagihan</span>
+                    </div>
+                    <span class="text-sm font-extrabold text-emerald-400">Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}</span>
+                </div>
             @if($booking->payment_deadline)
-                <div class="mt-4 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <span class="text-sm text-yellow-300">⏰ Sisa waktu pembayaran:</span>
-                    <span class="font-mono font-bold text-yellow-300 text-xl"
-                          data-countdown="{{ $booking->payment_deadline->timestamp }}">
-                        {{ $booking->sisa_waktu_format ?? '00:00:00' }}
-                    </span>
+                <div class="flex items-center justify-between rounded-2xl bg-neutral-800 px-4 py-3.5">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400/15 text-base">⏱</span>
+                        <span class="text-sm font-semibold text-neutral-200">Sisa Waktu Bayar</span>
+                    </div>
+                    <span class="font-mono text-sm font-extrabold text-amber-300" data-countdown="{{ $booking->payment_deadline->timestamp }}">{{ $booking->sisa_waktu_format ?? '00:00:00' }}</span>
                 </div>
             @endif
+            </div>
         </div>
 
-        <!-- Pembayaran Midtrans -->
+        <!-- Pilihan pembayaran Midtrans -->
         @if(config('services.midtrans.client_key'))
-            <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
-                <div class="flex items-start justify-between gap-4 mb-4">
+            <div>
+                <div class="mb-3 flex items-end justify-between gap-3">
                     <div>
-                        <h3 class="font-bold text-red-200">💳 Bayar melalui Midtrans</h3>
-                        <p class="text-xs text-red-200/70 mt-1">Pilih QRIS, e-wallet, transfer bank, atau kartu pada halaman pembayaran aman Midtrans.</p>
+                        <h3 class="font-bold text-white">Pilih Metode Pembayaran</h3>
+                        <p class="mt-1 text-xs text-neutral-400">QRIS, e-wallet, transfer bank, atau kartu.</p>
                     </div>
-                    <span class="shrink-0 px-2.5 py-1 rounded-full bg-red-500/20 text-red-200 text-[11px] font-bold">OTOMATIS</span>
                 </div>
-
                 @if($booking->status_booking === 'pending')
-                    <div class="grid sm:grid-cols-2 gap-3">
-                        <button type="button" onclick="openMidtrans({{ (int) ceil($booking->total_harga * 0.5) }}, this)"
-                                class="bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-4 py-3 rounded-xl text-sm transition">
-                            Bayar DP 50%<br>
-                            <span class="text-red-200">Rp {{ number_format(ceil($booking->total_harga * 0.5), 0, ',', '.') }}</span>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <button type="button" data-payment-option data-nominal="{{ (int) ceil($booking->total_harga * 0.5) }}" onclick="pilihPembayaran(this)" class="payment-option relative min-h-48 overflow-hidden rounded-2xl bg-amber-400 p-5 text-left text-neutral-950 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/20 focus:outline-none focus:ring-2 focus:ring-white">
+                            <span class="absolute -right-6 -top-2 h-5 w-24 rotate-45 bg-black/15"></span><span class="absolute bottom-3 right-8 h-16 w-5 rotate-45 bg-black/15"></span>
+                            <span class="relative block text-sm font-extrabold">Bayar DP 50%</span>
+                            <span class="relative mt-2 block text-2xl font-black">Rp {{ number_format(ceil($booking->total_harga * 0.5), 0, ',', '.') }}</span>
+                            <span class="relative mt-1 block text-xs text-neutral-800/75">Lunasi sisanya di lokasi</span>
+                            <span class="relative mt-5 block rounded-xl bg-neutral-950 py-2.5 text-center text-sm font-extrabold text-white">Pilih</span>
                         </button>
-                        <button type="button" onclick="openMidtrans({{ $booking->sisa_tagihan }}, this)"
-                                class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-3 rounded-xl text-sm transition">
-                            Bayar Lunas<br>
-                            <span class="text-red-100">Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}</span>
+                        <button type="button" data-payment-option data-nominal="{{ $booking->sisa_tagihan }}" onclick="pilihPembayaran(this)" class="payment-option relative min-h-48 overflow-hidden rounded-2xl bg-red-500 p-5 text-left text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20 focus:outline-none focus:ring-2 focus:ring-white">
+                            <span class="absolute -right-6 -top-2 h-5 w-24 rotate-45 bg-black/15"></span><span class="absolute bottom-3 right-8 h-16 w-5 rotate-45 bg-black/15"></span>
+                            <span class="relative block text-sm font-extrabold">Bayar Lunas</span>
+                            <span class="relative mt-2 block text-2xl font-black">Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}</span>
+                            <span class="relative mt-1 block text-xs text-white/80">Langsung lunas, tanpa sisa tagihan</span>
+                            <span class="relative mt-5 block rounded-xl bg-white py-2.5 text-center text-sm font-extrabold text-neutral-900">Pilih</span>
                         </button>
                     </div>
+                    <button type="button" id="lanjutBayarBtn" disabled onclick="lanjutPembayaran(this)" class="mt-5 w-full rounded-xl bg-white py-3.5 text-sm font-extrabold text-neutral-900 opacity-50 transition hover:bg-neutral-200 disabled:cursor-not-allowed">
+                        Pilih nominal pembayaran terlebih dahulu
+                    </button>
                 @else
                     <button type="button" onclick="openMidtrans({{ $booking->sisa_tagihan }}, this)"
-                            class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-3 rounded-xl text-sm transition">
+                            class="relative w-full overflow-hidden rounded-2xl bg-red-500 px-5 py-5 text-left text-white transition hover:bg-red-600">
+                        <span class="absolute -right-6 -top-2 h-5 w-24 rotate-45 bg-black/15"></span>
+                        <span class="relative block text-sm font-extrabold">Bayar Pelunasan</span>
+                        <span class="relative mt-1 block text-2xl font-black">Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}</span>
+                        <span class="relative mt-4 block rounded-xl bg-white py-2.5 text-center text-sm font-extrabold text-neutral-900">
                         Bayar Pelunasan Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
+                        </span>
                     </button>
                 @endif
 
@@ -168,6 +185,27 @@
 
     <script>
         @if(config('services.midtrans.client_key'))
+            let nominalTerpilih = null;
+
+            function pilihPembayaran(button) {
+                nominalTerpilih = Number(button.dataset.nominal);
+                document.querySelectorAll('[data-payment-option]').forEach(option => {
+                    option.classList.remove('ring-2', 'ring-white', 'scale-[0.98]');
+                });
+                button.classList.add('ring-2', 'ring-white', 'scale-[0.98]');
+
+                const lanjutBtn = document.getElementById('lanjutBayarBtn');
+                lanjutBtn.disabled = false;
+                lanjutBtn.classList.remove('opacity-50');
+                lanjutBtn.textContent = `Lanjut Bayar Rp ${nominalTerpilih.toLocaleString('id-ID')}`;
+            }
+
+            function lanjutPembayaran(button) {
+                if (nominalTerpilih) {
+                    openMidtrans(nominalTerpilih, button);
+                }
+            }
+
             function showMidtransError(message) {
                 const error = document.getElementById('midtransError');
                 error.textContent = message;

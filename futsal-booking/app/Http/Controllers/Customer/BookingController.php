@@ -94,15 +94,20 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // Validasi jam mulai dalam jam operasional (08:00 - 21:00)
-        if ($request->jam_mulai < self::JAM_BUKA || $request->jam_mulai > self::JAM_TUTUP) {
+        // Booking hanya boleh dimulai dalam jam operasional: 08:00 sampai sebelum 21:00.
+        // Gunakan hitungan menit agar 00:00--07:59 tidak keliru dianggap valid.
+        $jamMulai = Carbon::createFromFormat('H:i', $request->jam_mulai);
+        $menitMulai = ($jamMulai->hour * 60) + $jamMulai->minute;
+        $menitBuka = 8 * 60;
+        $menitTutup = 21 * 60;
+
+        if ($menitMulai < $menitBuka || $menitMulai >= $menitTutup) {
             return back()
-                ->withErrors(['jam_mulai' => 'Jam mulai harus antara '.self::JAM_BUKA.' - '.self::JAM_TUTUP.'.'])
+                ->withErrors(['jam_mulai' => 'Jam mulai hanya tersedia pukul '.self::JAM_BUKA.' sampai sebelum '.self::JAM_TUTUP.'.'])
                 ->withInput();
         }
 
         // Hitung jam selesai di server
-        $jamMulai = Carbon::createFromFormat('H:i', $request->jam_mulai);
         $jamSelesai = $jamMulai->copy()->addHours((int) $request->durasi_jam);
 
         // Tolak kalau durasi bikin lewat jam tutup (21:00) atau lewat tengah malam

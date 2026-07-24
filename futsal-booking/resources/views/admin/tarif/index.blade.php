@@ -7,14 +7,14 @@
                 'description' => 'Lapangan sintetis & vinyl reguler',
                 'dot' => 'bg-sky-400',
                 'card' => 'border-amber-400/40',
-                'button' => 'border-white/15 hover:bg-white/5 text-white',
+                'button' => 'border-white/15 hover:border-amber-500 hover:bg-amber-500 hover:text-black text-white transition-all duration-200',
             ],
             'internasional' => [
                 'label' => 'Internasional',
                 'description' => 'Lapangan standar kompetisi',
                 'dot' => 'bg-violet-400',
                 'card' => 'border-amber-400/40',
-                'button' => 'bg-amber-400 hover:bg-amber-300 text-neutral-950',
+                'button' => 'border-white/15 hover:border-amber-500 hover:bg-amber-500 hover:text-black text-white transition-all duration-200',
             ],
         ];
     @endphp
@@ -62,7 +62,7 @@
                                             <a href="{{ route('admin.tarif.edit', $tarif) }}" title="Edit" aria-label="Edit tarif" class="p-2 rounded-lg text-neutral-400 hover:bg-sky-400/10 hover:text-sky-400 transition">
                                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                             </a>
-                                            <form action="{{ route('admin.tarif.destroy', $tarif) }}" method="POST" onsubmit="return confirm('Hapus tarif ini?')">
+                                            <form action="{{ route('admin.tarif.destroy', $tarif) }}" method="POST" data-confirm-message="Hapus tarif ini?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" title="Hapus" aria-label="Hapus tarif" class="p-2 rounded-lg text-neutral-400 hover:bg-red-400/10 hover:text-red-400 transition">

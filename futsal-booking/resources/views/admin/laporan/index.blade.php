@@ -55,53 +55,24 @@
         }
     </style>
 
-    <div class="max-w-5xl mx-auto px-6 md:px-10 py-10"
-         x-data="{ tab: 'overview' }">
+    <div class="max-w-5xl mx-auto px-6 md:px-10 py-10">
 
         <h1 class="text-3xl font-extrabold mb-6">Pendapatan Anda</h1>
 
         {{-- Card Pendapatan bulan ini — gaya Analytics Dashboard --}}
         <div class="bg-[#11151d] border border-white/10 rounded-2xl p-7 mb-8">
 
-            <div class="flex items-start justify-between mb-6">
-                <div>
-                    <h2 class="text-xl font-bold mb-1">Ringkasan Pendapatan</h2>
-                    <p class="text-slate-400 text-sm">Statistik performa bulan ini</p>
-                </div>
-
-                {{-- circular progress: transaksi berhasil vs target (contoh) --}}
-                <div class="relative w-14 h-14 shrink-0">
-                    <svg class="progress-ring w-14 h-14" viewBox="0 0 56 56">
-                        <circle cx="28" cy="28" r="24" fill="none" stroke="#232838" stroke-width="5"/>
-                        <circle cx="28" cy="28" r="24" fill="none" stroke="#8b5cf6" stroke-width="5"
-                                stroke-linecap="round"
-                                stroke-dasharray="150.8"
-                                stroke-dashoffset="37.7" />
-                    </svg>
-                    <span class="absolute inset-0 flex items-center justify-center text-xs font-bold">75%</span>
-                </div>
-            </div>
-
-            {{-- Tabs --}}
-            <div class="flex gap-6 border-b border-white/10 mb-6 text-sm font-medium no-print">
-                <button @click="tab = 'overview'"
-                        :class="tab === 'overview' ? 'text-white border-b-2 border-violet-500' : 'text-slate-500'"
-                        class="pb-3 -mb-px transition">Overview</button>
-                <button @click="tab = 'analytics'"
-                        :class="tab === 'analytics' ? 'text-white border-b-2 border-violet-500' : 'text-slate-500'"
-                        class="pb-3 -mb-px transition">Per Lapangan</button>
-                <button @click="tab = 'reports'"
-                        :class="tab === 'reports' ? 'text-white border-b-2 border-violet-500' : 'text-slate-500'"
-                        class="pb-3 -mb-px transition">Riwayat</button>
+            <div class="mb-6">
+                <h2 class="text-xl font-bold mb-1">Ringkasan Pendapatan</h2>
+                <p class="text-slate-400 text-sm">Statistik performa bulan ini</p>
             </div>
 
             {{-- Pendapatan bulan ini --}}
             <div class="bg-[#0b0d12] border border-white/5 rounded-xl p-5 mb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm text-slate-400">Pendapatan bulan ini</span>
-                    <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">+0%</span>
+                    <span class="text-sm text-white">Pendapatan bulan ini</span>
                 </div>
-                <p class="text-3xl font-extrabold mb-3">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
+                <p class="text-3xl font-extrabold mb-3 text-white">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
                 <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <div class="h-full w-0 bg-gradient-to-r from-sky-500 to-violet-500 rounded-full"></div>
                 </div>
@@ -149,18 +120,18 @@
                     <div>
                         <label class="block text-sm text-slate-400 mb-1.5">Lapangan</label>
                         <select name="lapangan_id" class="w-full bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-500">
-                            <option value="">Semua Lapangan</option>
+                            <option value="" class="bg-[#0b0d12] text-white">Semua Lapangan</option>
                             @foreach($lapangans as $lapangan)
-                                <option value="{{ $lapangan->id }}" {{ request('lapangan_id') == $lapangan->id ? 'selected' : '' }} class="text-neutral-900">{{ $lapangan->nama_lapangan }}</option>
+                                <option value="{{ $lapangan->id }}" {{ request('lapangan_id') == $lapangan->id ? 'selected' : '' }} class="bg-[#0b0d12] text-white">{{ $lapangan->nama_lapangan }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm text-slate-400 mb-1.5">Status</label>
                         <select name="status_booking" class="w-full bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-500">
-                            <option value="">Semua Status Valid</option>
-                            <option value="dp_dibayar" {{ request('status_booking') == 'dp_dibayar' ? 'selected' : '' }} class="text-neutral-900">DP Dibayar</option>
-                            <option value="lunas" {{ request('status_booking') == 'lunas' ? 'selected' : '' }} class="text-neutral-900">Lunas</option>
+                            <option value="" class="bg-[#0b0d12] text-white">Semua Status Valid</option>
+                            <option value="dp_dibayar" {{ request('status_booking') == 'dp_dibayar' ? 'selected' : '' }} class="bg-[#0b0d12] text-white">DP Dibayar</option>
+                            <option value="lunas" {{ request('status_booking') == 'lunas' ? 'selected' : '' }} class="bg-[#0b0d12] text-white">Lunas</option>
                         </select>
                     </div>
                 </div>
@@ -255,4 +226,3 @@
     </div>
 
 </x-admin-layout>
-

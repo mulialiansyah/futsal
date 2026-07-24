@@ -49,13 +49,9 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                         </button>
-                                        <button @click="remove(item)" type="button" :disabled="item.removing" title="Hapus" aria-label="Hapus hari libur" class="p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-400/10 transition disabled:opacity-50">
-                                            <svg x-show="!item.removing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                                        <button @click.stop="appConfirm(`Hapus hari libur ${formatTanggal(item.tanggal)}?`).then(ok => { if (ok) hapusHariLibur(item) })" type="button" title="Hapus" aria-label="Hapus hari libur" class="p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-400/10 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.868a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m9.5-4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002-2h6m3 0V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v1"/>
-                                            </svg>
-                                            <svg x-show="item.removing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                                <circle class="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M12 3a9 9 0 0 1 9 9h-3a6 6 0 0 0-6-6V3z"></path>
                                             </svg>
                                         </button>
                                     </div>
@@ -194,27 +190,16 @@
                     }
                 },
 
-                async remove(item) {
-                    if (item.removing) return;
-
-                    this.errorMessage = '';
-                    item.removing = true;
-                    item.visible = false;
-
-                    try {
-                        const response = await fetch(`/admin/hari-libur/${item.id}`, {
-                            method: 'DELETE',
-                            headers: this.headers(),
-                        });
-                        if (!response.ok) throw new Error(await this.responseError(response));
-                        window.setTimeout(() => {
-                            this.items = this.items.filter((currentItem) => currentItem.id !== item.id);
-                        }, 300);
-                    } catch (error) {
-                        item.visible = true;
-                        item.removing = false;
-                        this.errorMessage = error.message || 'Data hari libur gagal dihapus.';
-                    }
+                hapusHariLibur(item) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `{{ url('admin/hari-libur') }}/${item.id}`;
+                    form.innerHTML = `
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="DELETE">
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
                 },
 
                 headers() {

@@ -158,7 +158,7 @@
                                         <td class="px-6 py-3.5 text-center">
                                             <form method="POST"
                                                   action="{{ route('admin.ketersediaan.destroy', $penutupan) }}"
-                                                  onsubmit="return confirm('Buka kembali lapangan ini?')">
+                                                  data-confirm-message="Buka kembali lapangan ini?">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="bg-green-400/20 text-green-400 hover:bg-green-400/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-green-400/30">
                                                     🔓 Buka Kembali

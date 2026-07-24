@@ -84,7 +84,7 @@
                 Customer bayar sisa tagihan langsung di tempat (cash)? Klik tombol di bawah untuk konfirmasi.
             </p>
             <form action="{{ route('admin.pembayaran.confirm-cash', $booking) }}" method="POST"
-                  onsubmit="return confirm('Yakin konfirmasi pelunasan cash Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}?');">
+                  data-confirm-message="Yakin konfirmasi pelunasan cash Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}?">
                 @csrf
                 <input type="hidden" name="nominal" value="{{ $booking->sisa_tagihan }}">
                 <button type="submit"

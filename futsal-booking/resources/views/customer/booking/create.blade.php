@@ -111,7 +111,7 @@
                     <label for="jamMulai" class="block text-xs font-medium text-neutral-400 mb-2">🕒 Jam Mulai</label>
                     <input type="time" name="jam_mulai" id="jamMulai" required
                            value="{{ old('jam_mulai') ?? request('jam_mulai') }}"
-                           min="08:00" max="21:00" step="60"
+                           min="08:00" max="20:00" step="60"
                            class="w-full bg-[#0B0F0C] border border-[#23282A] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent @error('jam_mulai') border-red-500 @enderror">
                     <p class="text-neutral-500 text-xs mt-1.5">* Jam operasional 08:00 - 21:00</p>
                     @error('jam_mulai')
@@ -120,7 +120,7 @@
                 </div>
                 <div>
                     <label for="durasiJam" class="block text-xs font-medium text-neutral-400 mb-2">⏱ Durasi Main (Jam)</label>
-                    <input type="number" name="durasi_jam" id="durasiJam" required min="1" max="24"
+                    <input type="number" name="durasi_jam" id="durasiJam" required min="1" max="4"
                            value="{{ old('durasi_jam') }}"
                            placeholder="Masukkan jumlah jam"
                            class="w-full bg-[#0B0F0C] border border-[#23282A] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent @error('durasi_jam') border-red-500 @enderror">
@@ -183,6 +183,20 @@
         const TARIFS     = @json($tarifs);
         const HOLIDAYS   = @json($holidays);
         const PENUTUPANS = @json($penutupans);
+        let lapanganSedangTutup = false;
+
+        function perbaruiStatusTombolBooking() {
+            const jamMulai = document.getElementById('jamMulai').value;
+            const durasi = parseInt(document.getElementById('durasiJam').value || 0);
+            const submitBtn = document.getElementById('submitBtn');
+            const [jam = 0, menit = 0] = jamMulai ? jamMulai.split(':').map(Number) : [];
+            const menitMulai = (jam * 60) + menit;
+            const jamTidakOperasional = jamMulai && (menitMulai < 8 * 60 || menitMulai >= 21 * 60 || (durasi && menitMulai + (durasi * 60) > 21 * 60));
+
+            submitBtn.disabled = lapanganSedangTutup || jamTidakOperasional;
+            submitBtn.classList.toggle('opacity-50', submitBtn.disabled);
+            submitBtn.classList.toggle('cursor-not-allowed', submitBtn.disabled);
+        }
 
         // === Sinkronisasi kartu foto lapangan dengan select tersembunyi ===
         document.querySelectorAll('.lapangan-card').forEach(card => {
@@ -253,16 +267,21 @@
             }
 
             const [h, m]    = jamMulai.split(':').map(Number);
+            const menitMulai = (h * 60) + m;
             let totalMenit  = (h * 60 + m) + (durasi * 60);
 
-            if (totalMenit > 21 * 60) {
-                selesaiEl.textContent = 'Melewati jam operasional (tutup 21:00)!';
+            if (menitMulai < 8 * 60 || menitMulai >= 21 * 60 || totalMenit > 21 * 60) {
+                selesaiEl.textContent = menitMulai < 8 * 60 || menitMulai >= 21 * 60
+                    ? 'Di luar jam operasional (08:00 – 21:00)!'
+                    : 'Melewati jam operasional (tutup 21:00)!';
                 selesaiEl.classList.add('text-red-400');
                 totalEl.textContent = 'Rp 0';
                 dpEl.textContent    = 'Rp 0';
+                perbaruiStatusTombolBooking();
                 return;
             }
             selesaiEl.classList.remove('text-red-400');
+            perbaruiStatusTombolBooking();
 
             const jamSelesai    = Math.floor(totalMenit / 60);
             const menitSelesai  = totalMenit % 60;
@@ -302,8 +321,8 @@
 
             if (!lapanganId || !tanggal) {
                 warningEl.classList.add('hidden');
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lapanganSedangTutup = false;
+                perbaruiStatusTombolBooking();
                 return;
             }
 
@@ -319,13 +338,12 @@
                     : 'Lapangan sedang ditutup pada tanggal ini.';
                 periodEl.textContent = `Periode tutup: ${closure.tanggal_mulai} s/d ${closure.tanggal_selesai}`;
                 warningEl.classList.remove('hidden');
-                submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                lapanganSedangTutup = true;
             } else {
                 warningEl.classList.add('hidden');
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lapanganSedangTutup = false;
             }
+            perbaruiStatusTombolBooking();
         }
 
         document.getElementById('lapanganSelect').addEventListener('change', () => { hitungJamSelesaiDanHarga(); cekPenutupan(); });

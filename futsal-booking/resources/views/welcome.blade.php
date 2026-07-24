@@ -210,8 +210,8 @@
                     <div class="text-[11px] sm:text-xs uppercase tracking-wide text-neutral-400 font-semibold">Per Jam</div>
                 </div>
                 <div>
-                    <div class="font-display text-2xl sm:text-3xl text-white">24/7</div>
-                    <div class="text-[11px] sm:text-xs uppercase tracking-wide text-neutral-400 font-semibold">Booking Online</div>
+                    <div class="font-display text-2xl sm:text-3xl text-white">08:00–21:00</div>
+                    <div class="text-[11px] sm:text-xs uppercase tracking-wide text-neutral-400 font-semibold">Jam Operasional</div>
                 </div>
             </div>
         </div>

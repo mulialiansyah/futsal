@@ -197,6 +197,7 @@
     </div>
 
 <x-loader label="Memuat data..." />
+<x-confirm-modal />
 
 <script>
     // Auto-trigger loading for all form submissions
