@@ -1,126 +1,117 @@
 <x-app-layout>
     @php
         $kategoriDenah = [
-            'standar' => [
-                'label' => 'Standar',
-                'icon' => '⚽',
-                'badge' => 'bg-blue-500/20 text-blue-300 border-blue-400/30',
-            ],
-            'internasional' => [
-                'label' => 'Internasional',
-                'icon' => '🏆',
-                'badge' => 'bg-red-500/20 text-red-300 border-red-400/30',
-            ],
+            'standar' => ['label' => 'Standar', 'badge' => 'bg-blue-500/15 text-blue-300 border-blue-400/20'],
+            'internasional' => ['label' => 'Internasional', 'badge' => 'bg-rose-500/15 text-rose-300 border-rose-400/20'],
         ];
         $statusTampilan = [
-            'tersedia' => [
-                'label' => 'Tersedia',
-                'card' => 'bg-green-500/10 border-green-400/50 hover:bg-green-500/20',
-                'text' => 'text-green-300',
-                'badge' => 'bg-green-500/20 text-green-200',
-            ],
-            'pending' => [
-                'label' => 'Menunggu bayar',
-                'card' => 'bg-amber-500/10 border-amber-400/50 opacity-80',
-                'text' => 'text-amber-300',
-                'badge' => 'bg-amber-500/20 text-amber-200',
-            ],
-            'dipesan' => [
-                'label' => 'Dipesan',
-                'card' => 'bg-red-500/10 border-red-400/50 opacity-80',
-                'text' => 'text-red-300',
-                'badge' => 'bg-red-500/20 text-red-200',
-            ],
-            'tutup' => [
-                'label' => 'Ditutup',
-                'card' => 'bg-neutral-500/10 border-neutral-400/40 opacity-60',
-                'text' => 'text-neutral-300',
-                'badge' => 'bg-neutral-500/20 text-neutral-200',
-            ],
+            'tersedia' => ['label' => 'Tersedia', 'card' => 'border-emerald-500/50 hover:border-emerald-400', 'dot' => 'bg-emerald-500', 'badge' => 'bg-emerald-500 text-emerald-950'],
+            'pending' => ['label' => 'Menunggu bayar', 'card' => 'border-amber-500/45 opacity-85', 'dot' => 'bg-amber-500', 'badge' => 'bg-amber-500/20 text-amber-200'],
+            'dipesan' => ['label' => 'Dipesan', 'card' => 'border-red-500/45 opacity-85', 'dot' => 'bg-red-500', 'badge' => 'bg-red-500/20 text-red-200'],
+            'tutup' => ['label' => 'Ditutup', 'card' => 'border-slate-600/70 opacity-65', 'dot' => 'bg-slate-500', 'badge' => 'bg-slate-500/25 text-slate-200'],
         ];
     @endphp
 
-    <div class="max-w-5xl mx-auto py-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <style>
+        @keyframes denahFadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .denah-field-card { opacity: 0; animation: denahFadeInUp .45s ease-out forwards; }
+        .denah-field-card:hover { transform: translateY(-2px); }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(1);
+            opacity: 1;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+            background-position: right 0.75rem center !important;
+            background-repeat: no-repeat !important;
+            background-size: 1rem !important;
+            padding-right: 2.5rem !important;
+        }
+    </style>
+
+    <div class="max-w-6xl mx-auto py-6 sm:py-8">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-7">
             <div>
-                <a href="{{ route('customer.lapangan.index') }}" class="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition mb-2">
-                    <span aria-hidden="true">←</span>
-                    Kembali ke daftar lapangan
-                </a>
-                <h2 class="text-2xl sm:text-3xl font-bold text-white">Denah Lapangan</h2>
+                <a href="{{ route('customer.lapangan.index') }}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition mb-2">← Kembali ke daftar lapangan</a>
+                <h1 class="text-3xl font-extrabold text-white">Denah Lapangan</h1>
             </div>
-            <a href="{{ route('customer.booking.create') }}" class="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-neutral-900 font-semibold px-4 py-2.5 rounded-xl text-sm transition">
-                Buat Booking
-                <span aria-hidden="true">→</span>
-            </a>
+            <a href="{{ route('customer.booking.create') }}" class="rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold px-4 py-2.5 transition">Buat Booking →</a>
         </div>
 
-        <div class="bg-neutral-900 border border-white/10 backdrop-blur-xl rounded-2xl p-5 sm:p-6 mb-5">
-            <form method="GET" action="{{ route('customer.lapangan.denah') }}" class="flex flex-wrap gap-4 items-end">
+        <div class="bg-[#11151d] border border-white/5 rounded-xl p-5 sm:p-6 mb-6">
+            <form method="GET" action="{{ route('customer.lapangan.denah') }}" class="flex flex-wrap items-end gap-4">
                 <label class="block">
-                    <span class="block text-xs font-semibold text-neutral-300 mb-2">Tanggal main</span>
+                    <span class="block text-xs text-slate-400 mb-1.5">Tanggal main</span>
                     <input type="date" name="tanggal" value="{{ $tanggal }}" min="{{ now()->addDays(2)->toDateString() }}"
-                           class="bg-neutral-950 border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+                        class="bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500">
                 </label>
                 <label class="block">
-                    <span class="block text-xs font-semibold text-neutral-300 mb-2">Jam mulai</span>
-                    <select name="jam" class="bg-neutral-950 border border-white/10 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+                    <span class="block text-xs text-slate-400 mb-1.5">Jam mulai</span>
+                    <select name="jam" class="bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500">
                         @foreach ($jamOptions as $jamOption)
                             <option value="{{ $jamOption }}" @selected($jam === $jamOption)>{{ $jamOption }}</option>
                         @endforeach
                     </select>
                 </label>
-                <button type="submit" class="bg-amber-400 hover:bg-amber-500 text-neutral-900 font-semibold px-5 py-2.5 rounded-xl text-sm transition">
-                    Cek ketersediaan
-                </button>
+                <button type="submit" class="rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold px-4 py-2 transition">Cek ketersediaan</button>
             </form>
         </div>
 
-        <div class="flex flex-wrap gap-x-5 gap-y-2 text-xs text-neutral-300 mb-5">
-            @foreach ($statusTampilan as $status => $tampilan)
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full {{ $tampilan['badge'] }}" aria-hidden="true"></span>
-                    {{ $tampilan['label'] }}
-                </div>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-300 mb-4">
+            @foreach ($statusTampilan as $tampilan)
+                <span class="flex items-center gap-2"><span class="inline-block h-2 w-2 rounded-full {{ $tampilan['dot'] }}"></span>{{ $tampilan['label'] }}</span>
             @endforeach
         </div>
 
-        <div class="bg-blue-500/10 border border-blue-400/30 rounded-xl px-4 py-3 text-sm text-blue-200 mb-6">
-            Menampilkan status pada <strong>{{ $tanggalCarbon->isoFormat('dddd, D MMMM YYYY') }}</strong> pukul <strong>{{ $jam }}</strong>.
+        <div class="bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm rounded-lg px-4 py-3 mb-8">
+            Menampilkan status pada <span class="font-semibold text-white">{{ $tanggalCarbon->isoFormat('dddd, D MMMM YYYY') }}</span> pukul <span class="font-semibold text-white">{{ $jam }}</span>.
         </div>
 
-        <div class="space-y-8">
+        <div class="space-y-6">
             @foreach ($kategoriDenah as $kategori => $infoKategori)
                 @php
                     $lapanganKategori = $lapangans->where('kategori', $kategori);
                 @endphp
 
                 @if ($lapanganKategori->isNotEmpty())
-                    <section class="bg-neutral-900 border border-white/10 backdrop-blur-xl rounded-2xl p-5 sm:p-6">
+                    <section class="bg-[#11151d] border border-white/5 rounded-xl p-5 sm:p-6">
                         <div class="flex items-center gap-3 mb-5">
-                            <span class="px-3 py-1 rounded-full border text-xs font-bold uppercase tracking-wide {{ $infoKategori['badge'] }}">
-                                {{ $infoKategori['label'] }}
-                            </span>
-                            <span class="text-xs text-neutral-400">{{ $lapanganKategori->count() }} lapangan</span>
+                            <span class="text-xs font-bold tracking-wide px-2.5 py-1 rounded-md border {{ $infoKategori['badge'] }}">{{ $infoKategori['label'] }}</span>
+                            <span class="text-sm text-slate-400">{{ $lapanganKategori->count() }} lapangan</span>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                            @foreach ($lapanganKategori as $lapangan)
+                        <div class="grid grid-cols-1 min-[440px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+                            @foreach ($lapanganKategori as $index => $lapangan)
                                 @php
                                     $status = $statusLapangan->get($lapangan->id, 'tersedia');
                                     $tampilan = $statusTampilan[$status];
+                                    $fotoLapangan = $lapangan->foto_utama?->url;
                                 @endphp
 
                                 @if ($status === 'tersedia')
                                     <a href="{{ route('customer.lapangan.show', $lapangan) }}"
-                                       class="border rounded-xl p-4 text-center transition focus:outline-none focus:ring-2 focus:ring-amber-400 {{ $tampilan['card'] }}">
+                                        class="denah-field-card group overflow-hidden rounded-xl border bg-[#0b0d12] text-center transition duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400 {{ $tampilan['card'] }}"
+                                        style="animation-delay: {{ $index * 70 }}ms">
                                 @else
-                                    <div class="border rounded-xl p-4 text-center {{ $tampilan['card'] }}">
+                                    <div class="denah-field-card overflow-hidden rounded-xl border bg-[#0b0d12] text-center {{ $tampilan['card'] }}" style="animation-delay: {{ $index * 70 }}ms">
                                 @endif
-                                    <div class="text-2xl mb-2" aria-hidden="true">{{ $infoKategori['icon'] }}</div>
-                                    <div class="font-bold text-sm {{ $tampilan['text'] }}">{{ $lapangan->nama_lapangan }}</div>
-                                    <div class="text-xs text-neutral-400 mt-1 capitalize">{{ $lapangan->jenis_lapangan }} · {{ $lapangan->tipe_venue }}</div>
-                                    <span class="inline-block mt-3 px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $tampilan['badge'] }}">{{ $tampilan['label'] }}</span>
+                                    <div class="relative h-28 overflow-hidden bg-slate-800">
+                                        <img src="{{ $fotoLapangan }}" alt="Foto {{ $lapangan->nama_lapangan }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-transparent to-transparent"></div>
+                                        <span class="absolute left-3 top-3 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-black/55 px-2 text-xs font-bold text-white backdrop-blur">{{ $loop->iteration }}</span>
+                                    </div>
+                                    <div class="p-4">
+                                        <p class="font-semibold text-sm text-white mb-1">{{ $lapangan->nama_lapangan }}</p>
+                                        <p class="text-xs text-slate-400 capitalize">{{ $lapangan->jenis_lapangan }} · {{ $lapangan->tipe_venue }}</p>
+                                        <span class="inline-block mt-3 rounded-full px-3 py-1 text-xs font-semibold {{ $tampilan['badge'] }}">{{ $tampilan['label'] }}</span>
+                                    </div>
                                 @if ($status === 'tersedia')
                                     </a>
                                 @else
@@ -133,8 +124,6 @@
             @endforeach
         </div>
 
-        <p class="text-center text-xs text-neutral-500 mt-6">
-            Klik lapangan berstatus tersedia untuk melihat detail dan melanjutkan booking. Status dapat berubah sewaktu-waktu.
-        </p>
+        <p class="text-center text-xs text-slate-500 mt-6">Klik lapangan berstatus tersedia untuk melihat detail dan melanjutkan booking. Status dapat berubah sewaktu-waktu.</p>
     </div>
 </x-app-layout>

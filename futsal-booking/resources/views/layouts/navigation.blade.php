@@ -65,31 +65,13 @@
 
     <!-- Sidebar User Footer -->
     @auth
-    <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 hover:opacity-80 transition">
-            <div class="w-9 h-9 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 font-bold flex items-center justify-center text-sm">
-                {{ strtoupper(substr(Auth::user()->name ?? 'P', 0, 1)) }}
-            </div>
-            <div>
-                <p class="text-xs font-bold text-white leading-tight truncate max-w-[110px]">{{ Auth::user()->name }}</p>
-                <p class="text-[10px] text-neutral-400">Penyewa</p>
-            </div>
-        </a>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="p-2 text-neutral-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition" title="Logout">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-            </button>
-        </form>
-    </div>
+        @include('partials.sidebar-user-card')
     @endauth
 </aside>
 
 <!-- ===== TOP BAR ===== -->
-<header class="football-topbar sticky top-0 z-30 backdrop-blur-md border-b border-white/10 md:pl-64"
-        style="background-color: #080808; overflow: hidden;">
+<header class="football-topbar sticky top-0 z-30 overflow-visible backdrop-blur-md border-b border-white/10 md:pl-64"
+        style="background-color: #080808; overflow: visible;">
     <img src="{{ asset('images/navbar-football-monochrome.png') }}" alt="" aria-hidden="true"
          class="pointer-events-none absolute inset-y-0 right-0 h-full w-80 object-cover object-right opacity-90">
     <div class="pointer-events-none absolute inset-y-0 right-0 w-96 bg-gradient-to-l from-transparent via-black/35 to-black"></div>
