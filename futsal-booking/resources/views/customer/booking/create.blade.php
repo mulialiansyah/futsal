@@ -158,10 +158,30 @@
                 <p class="text-neutral-500 text-xs mt-3">* Harga final dihitung ulang otomatis oleh sistem. Waktu pembayaran 1 jam setelah booking.</p>
             </div>
 
+            <!-- ===== METODE PEMBAYARAN ===== -->
+            <div>
+                <p class="mb-3 text-xs font-medium text-neutral-400">💳 Pilih Metode Pembayaran</p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="cursor-pointer rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 transition hover:bg-emerald-500/15">
+                        <input type="radio" name="metode_pembayaran" value="midtrans" class="sr-only" {{ old('metode_pembayaran', 'midtrans') === 'midtrans' ? 'checked' : '' }}>
+                        <span class="block font-bold text-white">💳 Bayar Online</span>
+                        <span class="mt-1 block text-xs text-neutral-400">Bayar DP atau lunas melalui Midtrans. Batas pembayaran awal 1 jam.</span>
+                    </label>
+                    <label class="cursor-pointer rounded-xl border border-amber-400/40 bg-amber-400/10 p-4 transition hover:bg-amber-400/15">
+                        <input type="radio" name="metode_pembayaran" value="cash" class="sr-only" {{ old('metode_pembayaran') === 'cash' ? 'checked' : '' }}>
+                        <span class="block font-bold text-amber-300">💵 Bayar di Tempat (Cash)</span>
+                        <span class="mt-1 block text-xs text-neutral-400">Bayar langsung di lokasi saat datang. Admin akan mengonfirmasi pembayaran.</span>
+                    </label>
+                </div>
+                @error('metode_pembayaran')
+                    <p class="mt-2 text-xs text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="pt-1">
                 <button type="submit" id="submitBtn"
                         class="group w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3.5 rounded-full shadow-lg shadow-emerald-950/40 transition duration-200 text-center">
-                    Booking Sekarang <span class="ml-1 transition-transform group-hover:translate-x-1 inline-block">›</span>
+                    Buat Booking <span class="ml-1 transition-transform group-hover:translate-x-1 inline-block">›</span>
                 </button>
             </div>
         </form>

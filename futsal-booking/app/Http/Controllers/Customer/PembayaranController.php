@@ -23,6 +23,11 @@ class PembayaranController extends Controller
         // Pastikan booking milik user ini
         abort_if($booking->user_id !== Auth::id(), 403);
 
+        if ($booking->metode_pembayaran === 'cash') {
+            return redirect()->route('customer.booking.show', $booking)
+                ->with('error', 'Booking ini dipilih untuk pembayaran cash di lokasi. Pembayaran akan dikonfirmasi oleh admin.');
+        }
+
         // Pastikan status masih valid untuk dibayar
         if (! in_array($booking->status_booking, ['pending', 'dp_dibayar'])) {
             return redirect()->route('customer.booking.show', $booking)
@@ -73,6 +78,12 @@ class PembayaranController extends Controller
     public function createMidtransTransaction(Request $request, Booking $booking, MidtransService $midtrans): JsonResponse
     {
         abort_if($booking->user_id !== Auth::id(), 403);
+
+        if ($booking->metode_pembayaran === 'cash') {
+            throw ValidationException::withMessages([
+                'booking' => ['Booking ini dipilih untuk pembayaran cash di lokasi.'],
+            ]);
+        }
 
         $this->ensureBookingCanBePaid($booking);
 

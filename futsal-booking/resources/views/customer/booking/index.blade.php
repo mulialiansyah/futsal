@@ -59,7 +59,7 @@
                                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold border {{ $statusColor }}">
                                     @php
                                         $statusLabels = [
-                                            'pending' => 'Menunggu Pembayaran',
+                                            'pending' => $booking->metode_pembayaran === 'cash' ? 'Bayar di Tempat' : 'Menunggu Pembayaran',
                                             'dp_dibayar' => 'DP Dibayar',
                                             'lunas' => 'Lunas',
                                             'expired' => 'Kedaluwarsa',
@@ -94,7 +94,7 @@
                                 $hasRejected = $booking->pembayarans->where('status_verifikasi', 'ditolak')->isNotEmpty();
                             @endphp
 
-                            @if(($booking->status_booking === 'pending' || $booking->status_booking === 'dp_dibayar') && !$hasPending)
+                            @if($booking->metode_pembayaran !== 'cash' && ($booking->status_booking === 'pending' || $booking->status_booking === 'dp_dibayar') && !$hasPending)
                                 @if($booking->status_booking === 'pending' && !$booking->isExpired())
                                     <a href="{{ route('customer.pembayaran.create', $booking) }}"
                                        class="bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 font-semibold py-2 px-4 rounded-xl text-sm transition">

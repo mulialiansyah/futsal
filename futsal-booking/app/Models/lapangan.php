@@ -29,8 +29,8 @@ class Lapangan extends Model
     public function getFotoUtamaAttribute()
     {
         if ($this->image) {
-            return (object)[
-                'url' => Storage::url($this->image)
+            return (object) [
+                'url' => Storage::url($this->image),
             ];
         }
 
@@ -47,8 +47,8 @@ class Lapangan extends Model
             9 => 'lapangan/zSimQvOCLlugW5gin3koD6RAPfr74lXkKvGBU05w.webp',
         ];
 
-        return (object)[
-            'url' => Storage::url($defaultPhotos[$this->id] ?? $defaultPhotos[1])
+        return (object) [
+            'url' => Storage::url($defaultPhotos[$this->id] ?? $defaultPhotos[1]),
         ];
     }
 
@@ -73,7 +73,8 @@ class Lapangan extends Model
     public function getDeskripsiSingkatAttribute(): string
     {
         $jenis = ucfirst($this->jenis_lapangan ?? '-');
-        $tipe  = ucfirst($this->tipe_venue ?? '-');
+        $tipe = ucfirst($this->tipe_venue ?? '-');
+
         return "{$jenis} - {$tipe}";
     }
 }

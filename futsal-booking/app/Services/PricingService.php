@@ -41,7 +41,7 @@ class PricingService
             ->where('jam_selesai', '>', $jamMulai->format('H:i:s'))
             ->first();
 
-        if (!$tarif) {
+        if (! $tarif) {
             return 0; // Tidak ada tarif yang cocok (seharusnya tidak terjadi kalau data lengkap)
         }
 

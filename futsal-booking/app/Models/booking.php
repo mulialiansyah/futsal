@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
@@ -14,6 +14,7 @@ class Booking extends Model
         'jam_mulai',
         'jam_selesai',
         'total_harga',
+        'metode_pembayaran',
         'status_booking',
         'payment_deadline',
         'pelunasan_deadline',
@@ -44,15 +45,16 @@ class Booking extends Model
     }
 
     // ===== ACCESSORS =====
-    
+
     public function getTotalDibayarAttribute(): int
     {
         if ($this->relationLoaded('pembayarans')) {
             return $this->pembayarans->where('status_verifikasi', 'diterima')->sum('nominal');
         }
+
         return $this->pembayarans()->where('status_verifikasi', 'diterima')->sum('nominal');
     }
-    
+
     public function getSisaTagihanAttribute(): int
     {
         return max(0, $this->total_harga - $this->total_dibayar);
@@ -63,7 +65,7 @@ class Booking extends Model
      */
     public function getSisaWaktuAttribute(): ?int
     {
-        if ($this->status_booking !== 'pending' || !$this->payment_deadline) {
+        if ($this->status_booking !== 'pending' || ! $this->payment_deadline) {
             return null;
         }
 
@@ -78,7 +80,7 @@ class Booking extends Model
      */
     public function getSisaWaktuPelunasanAttribute(): ?int
     {
-        if ($this->status_booking !== 'dp_dibayar' || !$this->pelunasan_deadline) {
+        if ($this->status_booking !== 'dp_dibayar' || ! $this->pelunasan_deadline) {
             return null;
         }
 
@@ -94,6 +96,7 @@ class Booking extends Model
     public function getSisaWaktuFormatAttribute(): string
     {
         $sisa = $this->sisa_waktu;
+
         return $this->formatSisaWaktu($sisa);
     }
 
@@ -103,9 +106,10 @@ class Booking extends Model
     public function getSisaWaktuPelunasanFormatAttribute(): string
     {
         $sisa = $this->sisa_waktu_pelunasan;
+
         return $this->formatSisaWaktu($sisa);
     }
-    
+
     private function formatSisaWaktu(?int $sisa): string
     {
         if ($sisa === null || $sisa <= 0) {
@@ -126,8 +130,8 @@ class Booking extends Model
      */
     public function isExpired(): bool
     {
-        return $this->status_booking === 'pending' 
-            && $this->payment_deadline 
+        return $this->status_booking === 'pending'
+            && $this->payment_deadline
             && Carbon::now()->greaterThan($this->payment_deadline);
     }
 
@@ -136,8 +140,8 @@ class Booking extends Model
      */
     public function isPelunasanExpired(): bool
     {
-        return $this->status_booking === 'dp_dibayar' 
-            && $this->pelunasan_deadline 
+        return $this->status_booking === 'dp_dibayar'
+            && $this->pelunasan_deadline
             && Carbon::now()->greaterThan($this->pelunasan_deadline);
     }
 
@@ -151,7 +155,7 @@ class Booking extends Model
             'expired_at' => Carbon::now(),
         ]);
     }
-    
+
     /**
      * Mark booking sebagai batal jika gagal pelunasan
      */

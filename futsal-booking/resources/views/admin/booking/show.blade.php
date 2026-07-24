@@ -76,20 +76,20 @@
         </div>
     </div>
 
-    {{-- Tombol Konfirmasi Pelunasan Cash --}}
-    @if($booking->status_booking === 'dp_dibayar' && $booking->sisa_tagihan > 0)
+    {{-- Tombol Konfirmasi Pembayaran Cash --}}
+    @if(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && $booking->sisa_tagihan > 0 && ($booking->metode_pembayaran === 'cash' || $booking->status_booking === 'dp_dibayar'))
         <div class="rounded-xl bg-amber-500/10 border border-amber-500/20 p-6 mb-6">
-            <h3 class="font-bold text-amber-400 mb-2">💵 Konfirmasi Pelunasan Cash</h3>
+            <h3 class="font-bold text-amber-400 mb-2">💵 Konfirmasi Pembayaran Cash</h3>
             <p class="text-sm text-amber-300 mb-3">
-                Customer bayar sisa tagihan langsung di tempat (cash)? Klik tombol di bawah untuk konfirmasi.
+                Customer telah membayar langsung di tempat (cash)? Klik tombol di bawah untuk mengonfirmasi pembayaran.
             </p>
             <form action="{{ route('admin.pembayaran.confirm-cash', $booking) }}" method="POST"
-                  data-confirm-message="Yakin konfirmasi pelunasan cash Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}?">
+                  data-confirm-message="Yakin konfirmasi pembayaran cash Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}?">
                 @csrf
                 <input type="hidden" name="nominal" value="{{ $booking->sisa_tagihan }}">
                 <button type="submit"
                         class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3 rounded-lg transition w-full">
-                    💵 Konfirmasi Pelunasan Cash — Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
+                    💵 Konfirmasi Pembayaran Cash — Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}
                 </button>
             </form>
         </div>

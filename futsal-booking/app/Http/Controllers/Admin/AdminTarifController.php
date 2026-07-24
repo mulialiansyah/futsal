@@ -11,6 +11,7 @@ class AdminTarifController extends Controller
     public function index()
     {
         $tarifs = Tarif::all();
+
         return view('admin.tarif.index', compact('tarifs'));
     }
 
@@ -75,7 +76,7 @@ class AdminTarifController extends Controller
         // Format Indonesia: 80.000,00 atau 80000,00.
         if (str_contains($harga, ',')) {
             [$harga] = explode(',', $harga, 2);
-        // Format desimal titik: 80000.00.
+            // Format desimal titik: 80000.00.
         } elseif (preg_match('/\.\d{1,2}$/', $harga)) {
             $harga = preg_replace('/\.\d{1,2}$/', '', $harga);
         }

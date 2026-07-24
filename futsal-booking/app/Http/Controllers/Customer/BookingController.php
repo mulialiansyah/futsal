@@ -68,6 +68,7 @@ class BookingController extends Controller
             'tanggal_main' => 'required|date|after:today',
             'jam_mulai' => 'required|date_format:H:i',
             'durasi_jam' => 'required|integer|min:1|max:4',
+            'metode_pembayaran' => 'required|in:midtrans,cash',
         ]);
 
         // Validasi minimal H-2
@@ -146,7 +147,9 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // Create booking + payment deadline (auto-release)
+        $bayarDiTempat = $request->metode_pembayaran === 'cash';
+
+        // Booking cash tetap mengunci slot, tetapi tidak memiliki deadline DP.
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'lapangan_id' => $request->lapangan_id,
@@ -154,22 +157,25 @@ class BookingController extends Controller
             'jam_mulai' => $jamMulaiStr,
             'jam_selesai' => $jamSelesaiStr,
             'total_harga' => $totalHarga,
+            'metode_pembayaran' => $request->metode_pembayaran,
             'status_booking' => 'pending',
-            'payment_deadline' => Carbon::now()->addHour(),
+            'payment_deadline' => $bayarDiTempat ? null : Carbon::now()->addHour(),
         ]);
 
         // Kirim Notifikasi ke Customer
         Notifikasi::kirim(
             Auth::id(),
             'Booking Baru Dibuat ⚽',
-            "Booking untuk lapangan {$lapangan->nama_lapangan} pada tanggal ".Carbon::parse($request->tanggal_main)->isoFormat('D MMMM YYYY')." jam {$jamMulaiStr} berhasil dibuat. Silakan lakukan pembayaran sebelum batas waktu.",
+            $bayarDiTempat
+                ? "Booking untuk lapangan {$lapangan->nama_lapangan} pada tanggal ".Carbon::parse($request->tanggal_main)->isoFormat('D MMMM YYYY')." jam {$jamMulaiStr} berhasil dibuat. Silakan lakukan pembayaran cash di lokasi saat datang."
+                : "Booking untuk lapangan {$lapangan->nama_lapangan} pada tanggal ".Carbon::parse($request->tanggal_main)->isoFormat('D MMMM YYYY')." jam {$jamMulaiStr} berhasil dibuat. Silakan lakukan pembayaran sebelum batas waktu.",
             'booking'
         );
 
         // Kirim Notifikasi ke Admin
         Notifikasi::kirimKeAdmin(
-            'Booking Baru (DP Pending) ⚽',
-            'Customer '.Auth::user()->name." membuat booking untuk lapangan {$lapangan->nama_lapangan} pada tanggal ".Carbon::parse($request->tanggal_main)->isoFormat('D MMMM YYYY')." jam {$jamMulaiStr}.",
+            $bayarDiTempat ? 'Booking Baru (Cash di Lokasi) 💵' : 'Booking Baru (DP Pending) ⚽',
+            'Customer '.Auth::user()->name." membuat booking untuk lapangan {$lapangan->nama_lapangan} pada tanggal ".Carbon::parse($request->tanggal_main)->isoFormat('D MMMM YYYY')." jam {$jamMulaiStr}. ".($bayarDiTempat ? 'Pembayaran dipilih cash di lokasi.' : 'Menunggu pembayaran online.'),
             'booking'
         );
 

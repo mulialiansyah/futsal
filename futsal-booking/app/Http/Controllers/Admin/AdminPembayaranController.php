@@ -53,7 +53,7 @@ class AdminPembayaranController extends Controller
                     ->where('id', '!=', $pembayaran->id)
                     ->where('status_verifikasi', 'pending')
                     ->update(['status_verifikasi' => 'ditolak']);
-                
+
                 // Lunas
                 $booking->update([
                     'status_booking' => 'lunas',
@@ -125,14 +125,17 @@ class AdminPembayaranController extends Controller
     public function confirmCash(Request $request, Booking $booking)
     {
         $request->validate([
-            'nominal' => 'required|integer|min:1',
+            'nominal' => 'required|integer|min:1|max:'.$booking->sisa_tagihan,
         ]);
+
+        abort_unless(in_array($booking->status_booking, ['pending', 'dp_dibayar'], true), 422, 'Booking ini tidak dapat dikonfirmasi pembayarannya.');
 
         // Buat record pembayaran otomatis (tanpa bukti transfer, langsung diterima)
         Pembayaran::create([
             'booking_id' => $booking->id,
             'nominal' => $request->nominal,
             'bukti_transfer' => null, // Cash, tidak ada bukti transfer
+            'metode_pembayaran' => 'cash',
             'status_verifikasi' => 'diterima',
         ]);
 
@@ -147,7 +150,7 @@ class AdminPembayaranController extends Controller
             $booking->pembayarans()
                 ->where('status_verifikasi', 'pending')
                 ->update(['status_verifikasi' => 'ditolak']);
-                
+
             $booking->update([
                 'status_booking' => 'lunas',
                 'pelunasan_deadline' => null,
@@ -156,18 +159,18 @@ class AdminPembayaranController extends Controller
 
         Notifikasi::kirim(
             $booking->user_id,
-            'Pelunasan Cash Dikonfirmasi ✅',
-            "Pembayaran langsung di tempat (Cash) sebesar {$nominalFormatted} untuk sewa lapangan {$lapanganNama} telah dikonfirmasi oleh admin. Status booking: ".ucfirst(str_replace('_', ' ', $booking->fresh()->status_booking)).'.',
+            'Pembayaran Cash Dikonfirmasi ✅',
+            "Pembayaran langsung di tempat (cash) sebesar {$nominalFormatted} untuk sewa lapangan {$lapanganNama} telah dikonfirmasi oleh admin. Status booking: ".ucfirst(str_replace('_', ' ', $booking->fresh()->status_booking)).'.',
             'pembayaran'
         );
 
         Notifikasi::kirimKeAdmin(
-            'Pelunasan Cash Dikonfirmasi 💵',
-            "Pelunasan cash sebesar {$nominalFormatted} untuk lapangan {$lapanganNama} (User: {$booking->user->name}) telah dikonfirmasi.",
+            'Pembayaran Cash Dikonfirmasi 💵',
+            "Pembayaran cash sebesar {$nominalFormatted} untuk lapangan {$lapanganNama} (User: {$booking->user->name}) telah dikonfirmasi.",
             'pembayaran'
         );
 
         return redirect()->route('admin.booking.show', $booking)
-            ->with('success', 'Pelunasan cash berhasil dikonfirmasi! Status: '.$booking->fresh()->status_booking);
+            ->with('success', 'Pembayaran cash berhasil dikonfirmasi! Status: '.$booking->fresh()->status_booking);
     }
 }

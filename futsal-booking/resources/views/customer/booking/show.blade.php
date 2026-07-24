@@ -76,6 +76,13 @@
                 </div>
             @endif
 
+            @if($booking->status_booking === 'pending' && $booking->metode_pembayaran === 'cash')
+                <div class="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/20 p-4">
+                    <p class="text-sm font-bold text-amber-300">💵 Pembayaran cash di lokasi</p>
+                    <p class="mt-1 text-xs text-neutral-300">Silakan bayar Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }} langsung di tempat saat datang. Admin akan mengonfirmasi pembayaran Anda.</p>
+                </div>
+            @endif
+
             @if($booking->status_booking === 'dp_dibayar' && $booking->pelunasan_deadline)
                 <div class="bg-blue-500/20 border border-blue-500/30 rounded-xl p-6 mb-6">
                     <p class="text-sm text-blue-300 font-semibold mb-2">⏰ Waktu Sisa untuk Pelunasan:</p>
@@ -118,12 +125,16 @@
                     $hasMidtransPending = $booking->pembayarans->where('status_verifikasi', 'pending')->where('metode_pembayaran', 'midtrans')->isNotEmpty();
                 @endphp
 
-                @if(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && $hasMidtransPending)
+                @if($booking->metode_pembayaran === 'cash' && $booking->status_booking === 'pending')
+                    <span class="rounded-xl border border-amber-500/30 bg-amber-500/20 px-4 py-2 text-sm font-bold text-amber-300">
+                        💵 Bayar di Tempat
+                    </span>
+                @elseif(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && $hasMidtransPending)
                     <a href="{{ route('customer.pembayaran.create', $booking) }}"
                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition">
                         Lanjutkan Midtrans
                     </a>
-                @elseif(in_array($booking->status_booking, ['pending', 'dp_dibayar']) && !$hasPending)
+                @elseif($booking->metode_pembayaran !== 'cash' && in_array($booking->status_booking, ['pending', 'dp_dibayar']) && !$hasPending)
                     <a href="{{ route('customer.pembayaran.create', $booking) }}"
                        class="bg-amber-400 hover:bg-amber-500 text-neutral-900 px-4 py-2 rounded-xl text-sm font-bold transition">
                         💳 {{ $booking->status_booking === 'pending' ? 'Bayar DP / Lunas' : 'Bayar Pelunasan' }}

@@ -19,6 +19,7 @@ class LapanganController extends Controller
     public function index()
     {
         $lapangans = Lapangan::with('fotoUtama')->latest()->get();
+
         return view('admin.lapangan.index', compact('lapangans'));
     }
 
@@ -34,17 +35,17 @@ class LapanganController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_lapangan'  => 'required|string|max:100',
-            'kategori'       => 'required|in:standar,internasional',
+            'nama_lapangan' => 'required|string|max:100',
+            'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
-            'tipe_venue'     => 'required|in:indoor,outdoor',
-            'foto'           => 'required|array|min:1',
-            'foto.*'         => 'image|mimes:jpg,jpeg,png,webp|max:3072',
-            'foto_utama'     => 'nullable|integer',
+            'tipe_venue' => 'required|in:indoor,outdoor',
+            'foto' => 'required|array|min:1',
+            'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:3072',
+            'foto_utama' => 'nullable|integer',
         ], [
             'foto.required' => 'Upload minimal 1 foto lapangan.',
-            'foto.*.image'  => 'File harus berupa gambar.',
-            'foto.*.max'    => 'Ukuran foto maksimal 3MB.',
+            'foto.*.image' => 'File harus berupa gambar.',
+            'foto.*.max' => 'Ukuran foto maksimal 3MB.',
         ]);
 
         $lapangan = Lapangan::create($request->only([
@@ -56,21 +57,22 @@ class LapanganController extends Controller
         foreach ($files as $index => $file) {
             $path = $file->store('lapangan', 'public');
             $lapangan->fotos()->create([
-                'path'     => $path,
+                'path' => $path,
                 'is_utama' => ($index === 0), // foto pertama jadi utama
             ]);
         }
 
         return redirect()->route('admin.lapangan.index')
-                         ->with('success', "Lapangan \"{$lapangan->nama_lapangan}\" berhasil ditambahkan!");
+            ->with('success', "Lapangan \"{$lapangan->nama_lapangan}\" berhasil ditambahkan!");
     }
 
     // ===== EDIT =====
     public function edit(Lapangan $lapangan)
     {
         $lapangan->load('fotos');
+
         return view('admin.lapangan.edit', [
-            'lapangan'        => $lapangan,
+            'lapangan' => $lapangan,
             'daftarFasilitas' => self::DAFTAR_FASILITAS,
         ]);
     }
@@ -79,14 +81,14 @@ class LapanganController extends Controller
     public function update(Request $request, Lapangan $lapangan)
     {
         $request->validate([
-            'nama_lapangan'  => 'required|string|max:100',
-            'kategori'       => 'required|in:standar,internasional',
+            'nama_lapangan' => 'required|string|max:100',
+            'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
-            'tipe_venue'     => 'required|in:indoor,outdoor',
-            'foto'           => 'nullable|array',
-            'foto.*'         => 'image|mimes:jpg,jpeg,png,webp|max:3072',
-            'hapus_foto'     => 'nullable|array',
-            'foto_utama'     => 'nullable|integer|exists:lapangan_fotos,id',
+            'tipe_venue' => 'required|in:indoor,outdoor',
+            'foto' => 'nullable|array',
+            'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:3072',
+            'hapus_foto' => 'nullable|array',
+            'foto_utama' => 'nullable|integer|exists:lapangan_fotos,id',
         ]);
 
         $lapangan->update($request->only([
@@ -109,7 +111,7 @@ class LapanganController extends Controller
             foreach ($request->file('foto') as $file) {
                 $path = $file->store('lapangan', 'public');
                 $lapangan->fotos()->create([
-                    'path'     => $path,
+                    'path' => $path,
                     'is_utama' => false,
                 ]);
             }
@@ -119,15 +121,15 @@ class LapanganController extends Controller
         if ($request->filled('foto_utama')) {
             $lapangan->fotos()->update(['is_utama' => false]);
             LapanganFoto::where('id', $request->foto_utama)
-                        ->where('lapangan_id', $lapangan->id)
-                        ->update(['is_utama' => true]);
+                ->where('lapangan_id', $lapangan->id)
+                ->update(['is_utama' => true]);
         } elseif ($lapangan->fotos()->where('is_utama', true)->doesntExist()) {
             // Kalau belum ada foto utama, set foto pertama
             $lapangan->fotos()->oldest()->first()?->update(['is_utama' => true]);
         }
 
         return redirect()->route('admin.lapangan.index')
-                         ->with('success', "Lapangan \"{$lapangan->nama_lapangan}\" berhasil diperbarui!");
+            ->with('success', "Lapangan \"{$lapangan->nama_lapangan}\" berhasil diperbarui!");
     }
 
     // ===== DESTROY =====
@@ -139,6 +141,6 @@ class LapanganController extends Controller
         $lapangan->delete();
 
         return redirect()->route('admin.lapangan.index')
-                         ->with('success', 'Lapangan berhasil dihapus.');
+            ->with('success', 'Lapangan berhasil dihapus.');
     }
 }

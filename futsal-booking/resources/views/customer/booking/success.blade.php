@@ -12,7 +12,9 @@
                         <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1F7A4D]">Booking Berhasil</p>
                         <p class="mt-1 font-mono text-xs tracking-wide text-[#1C1C1C]/60">#{{ $bookingCode }}</p>
                     </div>
-                    <span class="ticket-stamp rounded-md border-2 border-[#B8860B] px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[#B8860B]">Menunggu Bayar</span>
+                    <span class="ticket-stamp rounded-md border-2 border-[#B8860B] px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[#B8860B]">
+                        {{ $booking->metode_pembayaran === 'cash' ? 'Bayar di Lokasi' : 'Menunggu Bayar' }}
+                    </span>
                 </div>
 
                 <div class="mt-5 flex items-end justify-between">
@@ -63,7 +65,9 @@
     </div>
 
     <div class="mx-auto flex w-full max-w-sm flex-col gap-3 pb-8 sm:flex-row">
-        <a href="{{ route('customer.pembayaran.create', $booking) }}" class="flex-1 rounded-full bg-emerald-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-emerald-500">Lanjut Pembayaran</a>
+        @if($booking->metode_pembayaran !== 'cash')
+            <a href="{{ route('customer.pembayaran.create', $booking) }}" class="flex-1 rounded-full bg-emerald-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-emerald-500">Lanjut Pembayaran</a>
+        @endif
         <a href="{{ route('customer.booking.show', $booking) }}" class="flex-1 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10">Lihat Detail</a>
     </div>
 

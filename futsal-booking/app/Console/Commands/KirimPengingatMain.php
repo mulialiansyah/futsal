@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Booking;
 use App\Models\Notifikasi;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class KirimPengingatMain extends Command
 {
@@ -44,7 +44,7 @@ class KirimPengingatMain extends Command
                 ->where('pesan', 'like', "%[Booking #{$b->id}]%")
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 $lapanganNama = $b->lapangan->nama_lapangan;
                 $jam = substr($b->jam_mulai, 0, 5);
 

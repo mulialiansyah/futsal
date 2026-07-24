@@ -57,13 +57,17 @@ FutsalKite adalah sistem manajemen booking lapangan futsal berbasis web yang mem
          │
          ├──► Registrasi Akun
          ├──► Login
-         ├──► Lihat Daftar Lapangan
-         ├──► Lihat Detail Lapangan
-         ├──► Cek Ketersediaan Lapangan
+         ├──► Lihat Daftar Lapangan (Publik)
+         ├──► Lihat Detail Lapangan (Publik)
+         ├──► Cek Ketersediaan Lapangan (Denah)
          ├──► Booking Lapangan
-         ├──► Upload Bukti Pembayaran
+         ├──► Lihat Detail Booking
          ├──► Lihat Riwayat Booking
-         ├──► Lihat Status Pembayaran
+         ├──► Upload Bukti Pembayaran (DP/Pelunasan)
+         ├──► Bayar via Midtrans
+         ├──► Lihat Notifikasi
+         ├──► Mark Notifikasi as Read
+         ├──► Edit Profile
          └──► Keluar Akun
 ```
 
@@ -89,17 +93,27 @@ FutsalKite adalah sistem manajemen booking lapangan futsal berbasis web yang mem
          │    ├──► Tambah Hari Libur
          │    ├──► Edit Hari Libur
          │    └──► Hapus Hari Libur
-         ├──║ Manajemen Penutupan Lapangan
-         │    ├──► Tambah Penutupan
-         │    ├──► Edit Penutupan
-         │    └──► Hapus Penutupan
+         ├──║ Manajemen Booking
+         │    ├──► Lihat Daftar Booking
+         │    ├──► Lihat Detail Booking
+         │    └──► Update Status Booking
          ├──║ Verifikasi Pembayaran
-         │    ├──► Terima Pembayaran
-         │    └──► Tolak Pembayaran
+         │    ├──► Lihat Daftar Pembayaran
+         │    ├──► Lihat Detail Pembayaran
+         │    ├──► Verifikasi Transfer (DP/Pelunasan)
+         │    └──► Konfirmasi Cash Payment
          ├──║ Laporan Pendapatan
          │    ├──► Lihat Ringkasan
          │    ├──► Filter Laporan
          │    └──► Cetak Laporan
+         ├──║ Manajemen Ketersediaan
+         │    ├──► Lihat Penutupan Lapangan
+         │    ├──► Tambah Penutupan
+         │    └──► Hapus Penutupan
+         ├──║ Notifikasi
+         │    ├──► Lihat Notifikasi
+         │    ├──► Mark as Read
+         │    └──► Mark All as Read
          └──► Keluar Akun
 ```
 
@@ -342,32 +356,78 @@ Menyimpan data notifikasi untuk pengguna
 │  (Pending)      │       │
 └──────┬──────────┘       │
        │                  │
-       │ 4. Upload Bukti  │
+       │ 4. Pilih Metode   │
        │    Pembayaran    │
        ▼                  │
 ┌─────────────────┐       │
-│  Admin Verifikasi│      │
-└──────┬──────────┘       │
+│  Metode Bayar?  │
+└──────┬──────────┘
+       │
+       ├──────────────────┬──────────────────┐
+       │                  │                  │
+       ▼                  ▼                  ▼
+┌──────────┐      ┌──────────┐      ┌──────────┐
+│ DP Via   │      │ Lunas    │      │ Booking  │
+│ Transfer │      │ Transfer │      │ Batal    │
+└────┬─────┘      └────┬─────┘      └──────────┘
+     │                  │
+     │ 5. Upload Bukti  │ 5. Upload Bukti
+     │    Transfer     │    Transfer
+     ▼                  ▼
+┌─────────────┐   ┌─────────────┐
+│  Admin      │   │  Admin      │
+│  Verifikasi │   │  Verifikasi │
+└──────┬──────┘   └──────┬──────┘
        │                  │
-       │ 5. Diterima?      │
+       │ 6. Diterima?      │ 6. Diterima?
        │                  │
-       ├─────┬────────────┤
-       │     │            │
-       │ Ya  │ Tidak      │
-       │     │            │
-       ▼     ▼            │
-┌──────────┐ ┌──────────┐ │
-│ DP Dibayar│ │ Booking  │ │
-│          │ │ Ditolak  │ │
-└─────┬────┘ └────┬─────┘ │
-      │           │       │
-      │ 6. Pelunasan│     │
-      ▼           │       │
-┌──────────┐     │       │
-│ Lunas    │     │       │
-└──────────┘     │       │
-                 │       │
-                 └───────┘
+       ├─────┬────────────┤ ├─────┬────────────┤
+       │     │            │ │     │            │
+       │ Ya  │ Tidak      │ │ Ya  │ Tidak      │
+       │     │            │ │     │            │
+       ▼     ▼            │ ▼     ▼            │
+┌──────────┐ ┌──────────┐ │┌──────────┐ ┌──────────┐
+│ DP       │ │ Booking  │ ││ Lunas   │ │ Booking  │
+│ Dibayar  │ │ Ditolak  │ ││         │ │ Ditolak  │
+└─────┬────┘ └────┬─────┘ │└──────────┘ └────┬─────┘
+      │           │       │                 │
+      │ 7. Pilih   │       │                 │
+      │    Metode  │       │                 │
+      │ Pelunasan  │       │                 │
+      ▼           │       │                 │
+┌─────────────────┐       │                 │
+│ Metode Pelunasan?│       │                 │
+└──────┬──────────┘       │                 │
+       │                  │                 │
+       ├──────────────────┤                 │
+       │                  │                 │
+       ▼                  ▼                 │
+┌──────────┐      ┌──────────┐             │
+│ Transfer │      │ Cash     │             │
+│ Pelunasan│      │ (Tunai)  │             │
+└────┬─────┘      └────┬─────┘             │
+     │                  │                   │
+     │ 8. Upload Bukti  │ 8. Bayar di       │
+     │    Transfer     │    Lokasi          │
+     ▼                  ▼                   │
+┌─────────────┐   ┌─────────────┐           │
+│  Admin      │   │  Admin      │           │
+│  Verifikasi │   │  Verifikasi │           │
+└──────┬──────┘   └──────┬──────┘           │
+       │                  │                   │
+       │ 9. Diterima?      │ 9. Diterima?      │
+       │                  │                   │
+       ├─────┬────────────┤ ├─────┬────────────┤
+       │     │            │ │     │            │
+       │ Ya  │ Tidak      │ │ Ya  │ Tidak      │
+       │     │            │ │     │            │
+       ▼     ▼            │ ▼     ▼            │
+┌──────────┐ ┌──────────┐ │┌──────────┐ ┌──────────┐
+│ Lunas   │ │ Booking  │ ││ Lunas   │ │ Booking  │
+│         │ │ Ditolak  │ ││ (Tunai) │ │ Ditolak  │
+└──────────┘ └──────────┘ │└──────────┘ └──────────┘
+                 │       │                 │
+                 └───────┴─────────────────┘
 ```
 
 ### 4.2 Proses Verifikasi Pembayaran
@@ -388,35 +448,58 @@ Menyimpan data notifikasi untuk pengguna
        │ 2. Pilih Pembayaran
        ▼
 ┌─────────────────┐
-│  Lihat Bukti    │
-│  Transfer      │
+│  Lihat Detail   │
+│  & Bukti       │
 └──────┬──────────┘
        │
-       │ 3. Verifikasi
+       │ 3. Cek Tipe Pembayaran
        ▼
 ┌─────────────────┐
-│  Valid?         │
+│  Tipe Bayar?    │
 └──────┬──────────┘
        │
-       ├─────┬────────────┐
-       │     │            │
-       │ Ya  │ Tidak      │
-       │     │            │
-       ▼     ▼            │
-┌──────────┐ ┌──────────┐ │
-│ Terima   │ │ Tolak    │ │
-│          │ │          │ │
-└─────┬────┘ └────┬─────┘ │
-      │           │       │
-      │ 4. Update  │       │
-      │    Status  │       │
-      ▼           │       │
-┌──────────┐     │       │
-│ Kirim    │     │       │
-│ Notifikasi│    │       │
-└──────────┘     │       │
-                 │       │
-                 └───────┘
+       ├──────────────────┬──────────────────┐
+       │                  │                  │
+       ▼                  ▼                  ▼
+┌──────────┐      ┌──────────┐      ┌──────────┐
+│ DP       │      │ Pelunasan│      │ Cash     │
+│ Transfer │      │ Transfer │      │ (Tunai)  │
+└────┬─────┘      └────┬─────┘      └────┬─────┘
+     │                  │                  │
+     │ 4. Verifikasi    │ 4. Verifikasi    │ 4. Konfirmasi
+     │    Bukti DP      │    Bukti Pelunasan│    Bayar di
+     ▼                  ▼                  │    Lokasi
+┌─────────────────┐   ┌─────────────────┐   │
+│  Valid?         │   │  Valid?         │   │
+└──────┬──────────┘   └──────┬──────────┘   │
+       │                  │                  │
+       ├─────┬────────────┤ ├─────┬────────────┤
+       │     │            │ │     │            │
+       │ Ya  │ Tidak      │ │ Ya  │ Tidak      │
+       │     │            │ │     │            │
+       ▼     ▼            │ ▼     ▼            │
+┌──────────┐ ┌──────────┐ │┌──────────┐ ┌──────────┐
+│ Status   │ │ Status   │ ││ Status   │ │ Status   │
+│ DP       │ │ Booking  │ ││ Lunas   │ │ Booking  │
+│ Dibayar  │ │ Ditolak  │ ││         │ │ Ditolak  │
+└─────┬────┘ └────┬─────┘ │└──────────┘ └────┬─────┘
+      │           │       │                 │
+      │ 5. Kirim   │       │ 5. Kirim       │
+      │    Notif   │       │    Notif       │
+      ▼           │       ▼                 │
+┌──────────┐     │   ┌──────────┐           │
+│ Kirim    │     │   │ Kirim    │           │
+│ Notif ke │     │   │ Notif ke │           │
+│ Penyewa  │     │   │ Penyewa  │           │
+└──────────┘     │   └──────────┘           │
+                 │                           │
+                 └───────────┬───────────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │  Status Booking │
+                    │  Diperbarui    │
+                    └─────────────────┘
 ```
 
 ### 4.3 Proses Laporan Pendapatan

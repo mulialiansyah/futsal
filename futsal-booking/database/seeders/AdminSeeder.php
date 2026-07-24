@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -32,7 +31,7 @@ class AdminSeeder extends Seeder
         foreach ($admins as $admin) {
             // Cek apakah email sudah terdaftar
             $existingUser = User::where('email', $admin['email'])->first();
-            if (!$existingUser) {
+            if (! $existingUser) {
                 User::create([
                     'name' => $admin['name'],
                     'email' => $admin['email'],

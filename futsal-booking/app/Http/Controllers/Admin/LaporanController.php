@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Lapangan;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class LaporanController extends Controller
 {
@@ -15,7 +14,7 @@ class LaporanController extends Controller
         $lapangans = Lapangan::orderBy('nama_lapangan')->get();
 
         $query = Booking::with(['user', 'lapangan', 'pembayarans'])
-                        ->whereIn('status_booking', ['dp_dibayar', 'lunas']);
+            ->whereIn('status_booking', ['dp_dibayar', 'lunas']);
 
         // Filter tanggal
         if ($request->filled('dari_tanggal')) {
@@ -39,12 +38,12 @@ class LaporanController extends Controller
 
         // Hitung total pendapatan
         $totalPendapatan = $bookings->sum('total_harga');
-        $totalBooking    = $bookings->count();
+        $totalBooking = $bookings->count();
 
         // Summary per lapangan
         $perLapangan = $bookings->groupBy('lapangan.nama_lapangan')
-            ->map(fn($items) => [
-                'jumlah'     => $items->count(),
+            ->map(fn ($items) => [
+                'jumlah' => $items->count(),
                 'pendapatan' => $items->sum('total_harga'),
             ]);
 
@@ -56,4 +55,4 @@ class LaporanController extends Controller
             'perLapangan',
         ));
     }
-}   
+}

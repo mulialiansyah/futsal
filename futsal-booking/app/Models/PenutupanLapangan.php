@@ -15,7 +15,7 @@ class PenutupanLapangan extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai'   => 'date',
+        'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
     ];
 
@@ -45,12 +45,13 @@ class PenutupanLapangan extends Model
 
     public function getDurasiAttribute(): string
     {
-        $mulai   = $this->tanggal_mulai->isoFormat('D MMM YYYY');
+        $mulai = $this->tanggal_mulai->isoFormat('D MMM YYYY');
         $selesai = $this->tanggal_selesai->isoFormat('D MMM YYYY');
 
         if ($this->tanggal_mulai->eq($this->tanggal_selesai)) {
             return $mulai;
         }
+
         return "{$mulai} – {$selesai}";
     }
 }

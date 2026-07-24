@@ -11,6 +11,7 @@ class AdminHariLiburController extends Controller
     public function index()
     {
         $hariLiburs = HariLibur::orderBy('tanggal')->get();
+
         return view('admin.hari-libur.index', compact('hariLiburs'));
     }
 

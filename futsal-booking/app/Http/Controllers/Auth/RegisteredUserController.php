@@ -12,13 +12,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 
-
 class RegisteredUserController extends Controller
 {
     /**
      * Display the registration view.
      */
-    public function create(): \Illuminate\Http\RedirectResponse
+    public function create(): RedirectResponse
     {
         return redirect()->route('login', ['mode' => 'register']);
     }
