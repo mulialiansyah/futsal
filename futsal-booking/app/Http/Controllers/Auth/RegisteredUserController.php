@@ -20,7 +20,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): \Illuminate\Http\RedirectResponse
     {
-        return redirect()->route('login');
+        return redirect()->route('login', ['mode' => 'register']);
     }
 
     /**

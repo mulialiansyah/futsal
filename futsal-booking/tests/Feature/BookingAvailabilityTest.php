@@ -37,8 +37,8 @@ class BookingAvailabilityTest extends TestCase
             'user_id' => $firstCustomer->id,
             'lapangan_id' => $lapangan->id,
             'tanggal_main' => $tanggalMain->toDateString(),
-            'jam_mulai' => '10:00',
-            'jam_selesai' => '12:00',
+            'jam_mulai' => '10:00:00',
+            'jam_selesai' => '12:00:00',
             'total_harga' => 200000,
             'status_booking' => 'pending',
             'payment_deadline' => now()->addHour(),
@@ -79,29 +79,28 @@ class BookingAvailabilityTest extends TestCase
             'user_id' => $firstCustomer->id,
             'lapangan_id' => $lapangan->id,
             'tanggal_main' => $tanggalMain->toDateString(),
-            'jam_mulai' => '10:00',
-            'jam_selesai' => '12:00',
+            'jam_mulai' => '10:00:00',
+            'jam_selesai' => '12:00:00',
             'total_harga' => 200000,
             'status_booking' => 'pending',
             'payment_deadline' => now()->addHour(),
         ]);
 
-        $this->actingAs($secondCustomer)
+        $response = $this->actingAs($secondCustomer)
             ->post(route('customer.booking.store'), [
                 'lapangan_id' => $lapangan->id,
                 'tanggal_main' => $tanggalMain->toDateString(),
                 'jam_mulai' => '12:00',
                 'durasi_jam' => 1,
-            ])
-            ->assertRedirect(route('customer.booking.index'));
+            ]);
 
-        $this->assertDatabaseHas('bookings', [
-            'user_id' => $secondCustomer->id,
-            'lapangan_id' => $lapangan->id,
-            'tanggal_main' => $tanggalMain->toDateString(),
-            'jam_mulai' => '12:00:00',
-            'jam_selesai' => '13:00:00',
-            'status_booking' => 'pending',
-        ]);
+        $createdBooking = Booking::where('user_id', $secondCustomer->id)->sole();
+        $response->assertRedirect(route('customer.booking.success', $createdBooking));
+
+        $this->assertSame($lapangan->id, $createdBooking->lapangan_id);
+        $this->assertSame($tanggalMain->toDateString(), $createdBooking->tanggal_main->toDateString());
+        $this->assertSame('12:00', substr($createdBooking->jam_mulai, 0, 5));
+        $this->assertSame('13:00', substr($createdBooking->jam_selesai, 0, 5));
+        $this->assertSame('pending', $createdBooking->status_booking);
     }
 }

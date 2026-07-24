@@ -9,15 +9,12 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
-     * 
-     * Command ini akan jalan SETIAP MENIT otomatis
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Auto-release expired bookings setiap 1 menit
         $schedule->command('bookings:release-expired')
-                 ->everyMinute()
-                 ->withoutOverlapping();
+            ->everyMinute()
+            ->withoutOverlapping();
     }
 
     /**

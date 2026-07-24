@@ -112,12 +112,13 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        $jamMulaiStr = $jamMulai->format('H:i');
-        $jamSelesaiStr = $jamSelesai->format('H:i');
+        // Gunakan format TIME lengkap agar perbandingan konsisten di semua driver database.
+        $jamMulaiStr = $jamMulai->format('H:i:s');
+        $jamSelesaiStr = $jamSelesai->format('H:i:s');
 
         // Cek bentrok jadwal
         $bentrok = Booking::where('lapangan_id', $request->lapangan_id)
-            ->where('tanggal_main', $request->tanggal_main)
+            ->whereDate('tanggal_main', $request->tanggal_main)
             ->whereIn('status_booking', ['pending', 'dp_dibayar', 'lunas'])
             ->where(function ($query) use ($jamMulaiStr, $jamSelesaiStr) {
                 $query->where('jam_mulai', '<', $jamSelesaiStr)
