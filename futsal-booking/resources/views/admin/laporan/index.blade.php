@@ -26,157 +26,233 @@
         .print-header {
             display: none;
         }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .row-anim {
+            opacity: 0;
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        .row-anim:hover { background: rgba(255,255,255,0.03); }
+
+        .progress-ring { transform: rotate(-90deg); }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(1);
+            opacity: 1;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+            background-position: right 0.75rem center !important;
+            background-repeat: no-repeat !important;
+            background-size: 1rem !important;
+            padding-right: 2.5rem !important;
+        }
     </style>
 
-    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-6">Pendapatan Anda</h1>
+    <div class="max-w-5xl mx-auto px-6 md:px-10 py-10"
+         x-data="{ tab: 'overview' }">
 
-    <!-- Stat Cards -->
-    <div class="mb-8">
-        <h2 class="text-lg font-semibold text-neutral-300 mb-4">Ringkasan Pendapatan</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6">
-                <p class="text-sm text-neutral-400 mb-1">Pendapatan bulan ini</p>
-                <p class="text-3xl font-bold text-white">
-                    Rp {{ number_format($totalPendapatan, 0, ',', '.') }}
-                </p>
-            </div>
-            <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6">
-                <p class="text-sm text-neutral-400 mb-1">Transaksi Berhasil</p>
-                <p class="text-3xl font-bold text-white">{{ $totalBooking }}</p>
-            </div>
-        </div>
-    </div>
+        <h1 class="text-3xl font-extrabold mb-6">Pendapatan Anda</h1>
 
-    <!-- Filter Form (no-print) -->
-    <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl p-6 mb-6 no-print">
-        <h3 class="text-lg font-semibold text-neutral-300 mb-4">Filter Laporan</h3>
-        <form action="{{ route('admin.laporan.index') }}" method="GET">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="tanggal_mulai" class="block text-sm font-medium text-neutral-300 mb-2">Tanggal Mulai</label>
-                    <input type="date" name="tanggal_mulai" id="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="w-full bg-white/5 border border-white/20 text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
-                </div>
-                <div>
-                    <label for="tanggal_selesai" class="block text-sm font-medium text-neutral-300 mb-2">Tanggal Selesai</label>
-                    <input type="date" name="tanggal_selesai" id="tanggal_selesai" value="{{ request('tanggal_selesai') }}" class="w-full bg-white/5 border border-white/20 text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
-                </div>
-                <div>
-                    <label for="lapangan_id" class="block text-sm font-medium text-neutral-300 mb-2">Lapangan</label>
-                    <select name="lapangan_id" id="lapangan_id" class="w-full bg-white/5 border border-white/20 text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
-                        <option value="">Semua Lapangan</option>
-                        @foreach($lapangans as $lapangan)
-                            <option value="{{ $lapangan->id }}" {{ request('lapangan_id') == $lapangan->id ? 'selected' : '' }} class="text-neutral-900">{{ $lapangan->nama_lapangan }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="status_booking" class="block text-sm font-medium text-neutral-300 mb-2">Status</label>
-                    <select name="status_booking" id="status_booking" class="w-full bg-white/5 border border-white/20 text-white rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
-                        <option value="">Semua Status Valid</option>
-                        <option value="dp_dibayar" {{ request('status_booking') == 'dp_dibayar' ? 'selected' : '' }} class="text-neutral-900">DP Dibayar</option>
-                        <option value="lunas" {{ request('status_booking') == 'lunas' ? 'selected' : '' }} class="text-neutral-900">Lunas</option>
-                    </select>
-                </div>
-            </div>
+        {{-- Card Pendapatan bulan ini — gaya Analytics Dashboard --}}
+        <div class="bg-[#11151d] border border-white/10 rounded-2xl p-7 mb-8">
 
-            <div class="flex flex-wrap justify-end gap-3">
-                <a href="{{ route('admin.laporan.index') }}" class="px-4 py-2 border border-white/20 rounded-xl text-neutral-300 hover:bg-white/10 transition">Reset</a>
-                <button type="submit" class="px-4 py-2 bg-amber-400 text-neutral-900 font-semibold rounded-xl hover:bg-amber-500 transition">Filter</button>
-                <button type="button" onclick="window.print()" class="px-4 py-2 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 0 002-2v-4a2 0 00-2-2H5a2 0 00-2 2v4a2 0 002 2h2m1 3h8a2 0 002-2V9a2 0 00-2-2h-1V6a2 0 00-2-2H8a2 0 00-2 2v1H5a2 0 00-2 2v6a2 0 002 2h1v2a2 0 002 2z"/>
+            <div class="flex items-start justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold mb-1">Ringkasan Pendapatan</h2>
+                    <p class="text-slate-400 text-sm">Statistik performa bulan ini</p>
+                </div>
+
+                {{-- circular progress: transaksi berhasil vs target (contoh) --}}
+                <div class="relative w-14 h-14 shrink-0">
+                    <svg class="progress-ring w-14 h-14" viewBox="0 0 56 56">
+                        <circle cx="28" cy="28" r="24" fill="none" stroke="#232838" stroke-width="5"/>
+                        <circle cx="28" cy="28" r="24" fill="none" stroke="#8b5cf6" stroke-width="5"
+                                stroke-linecap="round"
+                                stroke-dasharray="150.8"
+                                stroke-dashoffset="37.7" />
                     </svg>
+                    <span class="absolute inset-0 flex items-center justify-center text-xs font-bold">75%</span>
+                </div>
+            </div>
+
+            {{-- Tabs --}}
+            <div class="flex gap-6 border-b border-white/10 mb-6 text-sm font-medium no-print">
+                <button @click="tab = 'overview'"
+                        :class="tab === 'overview' ? 'text-white border-b-2 border-violet-500' : 'text-slate-500'"
+                        class="pb-3 -mb-px transition">Overview</button>
+                <button @click="tab = 'analytics'"
+                        :class="tab === 'analytics' ? 'text-white border-b-2 border-violet-500' : 'text-slate-500'"
+                        class="pb-3 -mb-px transition">Per Lapangan</button>
+                <button @click="tab = 'reports'"
+                        :class="tab === 'reports' ? 'text-white border-b-2 border-violet-500' : 'text-slate-500'"
+                        class="pb-3 -mb-px transition">Riwayat</button>
+            </div>
+
+            {{-- Pendapatan bulan ini --}}
+            <div class="bg-[#0b0d12] border border-white/5 rounded-xl p-5 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-slate-400">Pendapatan bulan ini</span>
+                    <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">+0%</span>
+                </div>
+                <p class="text-3xl font-extrabold mb-3">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
+                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full w-0 bg-gradient-to-r from-sky-500 to-violet-500 rounded-full"></div>
+                </div>
+            </div>
+
+            {{-- Mini stats --}}
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-[#0b0d12] border border-white/5 rounded-xl p-4">
+                    <p class="text-xs text-slate-400 mb-1">Transaksi Berhasil</p>
+                    <p class="text-lg font-bold">{{ $totalBooking }}</p>
+                </div>
+                <div class="bg-[#0b0d12] border border-white/5 rounded-xl p-4">
+                    <p class="text-xs text-slate-400 mb-1">Total Booking</p>
+                    <p class="text-lg font-bold">{{ $totalBooking }}</p>
+                </div>
+                <div class="bg-[#0b0d12] border border-white/5 rounded-xl p-4">
+                    <p class="text-xs text-slate-400 mb-1">Rata-rata / Booking</p>
+                    <p class="text-lg font-bold">Rp {{ $totalBooking > 0 ? number_format($totalPendapatan / $totalBooking, 0, ',', '.') : 0 }}</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6 no-print">
+                <button onclick="document.getElementById('print-area').scrollIntoView({behavior: 'smooth'})" class="flex-1 rounded-lg bg-gradient-to-r from-sky-500 to-violet-500 hover:opacity-90 text-sm font-semibold py-2.5 transition">
+                    Lihat Detail
+                </button>
+                <button onclick="window.print()" class="flex-1 rounded-lg border border-white/15 hover:bg-white/5 text-sm font-semibold py-2.5 transition">
                     Cetak / PDF
                 </button>
             </div>
-        </form>
-    </div>
-
-    <!-- Ringkasan Per Lapangan -->
-    <div id="print-area">
-        <div class="print-header">
-            <h1 style="font-size: 24px; font-weight: bold;">Laporan Penjualan Futsal</h1>
-            <p>Periode: {{ request('tanggal_mulai') ? \Carbon\Carbon::parse(request('tanggal_mulai'))->format('d M Y') : 'Awal' }} s/d {{ request('tanggal_selesai') ? \Carbon\Carbon::parse(request('tanggal_selesai'))->format('d M Y') : 'Sekarang' }}</p>
-            <p>Tanggal Cetak: {{ \Carbon\Carbon::now()->format('d M Y H:i') }}</p>
-            <hr style="margin-top: 10px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
         </div>
 
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold text-neutral-300 mb-4">Ringkasan Per Lapangan</h3>
-            <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-white/20">
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400">Nama Lapangan</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-neutral-400">Total Booking</th>
-                                <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-neutral-400">Total Pendapatan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/10">
-                            @forelse($ringkasanLapangan as $ringkasan)
-                                <tr class="hover:bg-white/5">
-                                    <td class="px-6 py-3.5 text-white">{{ $ringkasan['nama_lapangan'] }}</td>
-                                    <td class="px-6 py-3.5 text-center text-neutral-300">{{ $ringkasan['total_booking'] }}</td>
-                                    <td class="px-6 py-3.5 text-right text-neutral-300">Rp {{ number_format($ringkasan['total_pendapatan'], 0, ',', '.') }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-10 text-center text-neutral-500">Tidak ada data</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+        {{-- Filter --}}
+        <div class="bg-[#11151d] border border-white/5 rounded-xl p-6 mb-8 no-print">
+            <h2 class="font-semibold mb-4">Filter Laporan</h2>
+            <form action="{{ route('admin.laporan.index') }}" method="GET">
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1.5">Tanggal Mulai</label>
+                        <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="w-full bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1.5">Tanggal Selesai</label>
+                        <input type="date" name="tanggal_selesai" value="{{ request('tanggal_selesai') }}" class="w-full bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1.5">Lapangan</label>
+                        <select name="lapangan_id" class="w-full bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-500">
+                            <option value="">Semua Lapangan</option>
+                            @foreach($lapangans as $lapangan)
+                                <option value="{{ $lapangan->id }}" {{ request('lapangan_id') == $lapangan->id ? 'selected' : '' }} class="text-neutral-900">{{ $lapangan->nama_lapangan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1.5">Status</label>
+                        <select name="status_booking" class="w-full bg-[#0b0d12] border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-violet-500">
+                            <option value="">Semua Status Valid</option>
+                            <option value="dp_dibayar" {{ request('status_booking') == 'dp_dibayar' ? 'selected' : '' }} class="text-neutral-900">DP Dibayar</option>
+                            <option value="lunas" {{ request('status_booking') == 'lunas' ? 'selected' : '' }} class="text-neutral-900">Lunas</option>
+                        </select>
+                    </div>
                 </div>
+                <div class="flex justify-end gap-3">
+                    <a href="{{ route('admin.laporan.index') }}" class="rounded-lg border border-white/15 hover:bg-white/5 text-sm font-medium px-4 py-2 transition">Reset</a>
+                    <button type="submit" class="rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold px-4 py-2 transition">Filter</button>
+                    <button type="button" onclick="window.print()" class="rounded-lg border border-white/15 hover:bg-white/5 text-sm font-medium px-4 py-2 transition">Cetak / PDF</button>
+                </div>
+            </form>
+        </div>
+
+        {{-- Print Area --}}
+        <div id="print-area">
+            <div class="print-header">
+                <h1 style="font-size: 24px; font-weight: bold;">Laporan Penjualan Futsal</h1>
+                <p>Periode: {{ request('tanggal_mulai') ? \Carbon\Carbon::parse(request('tanggal_mulai'))->format('d M Y') : 'Awal' }} s/d {{ request('tanggal_selesai') ? \Carbon\Carbon::parse(request('tanggal_selesai'))->format('d M Y') : 'Sekarang' }}</p>
+                <p>Tanggal Cetak: {{ \Carbon\Carbon::now()->format('d M Y H:i') }}</p>
+                <hr style="margin-top: 10px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
+            </div>
+
+            {{-- Ringkasan Per Lapangan --}}
+            <h2 class="font-semibold text-lg mb-3">Ringkasan Per Lapangan</h2>
+            <div class="bg-[#11151d] border border-white/5 rounded-xl overflow-hidden mb-8">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-xs text-slate-400 border-b border-white/5">
+                            <th class="px-6 py-3 font-medium">NAMA LAPANGAN</th>
+                            <th class="px-6 py-3 font-medium">TOTAL BOOKING</th>
+                            <th class="px-6 py-3 font-medium">TOTAL PENDAPATAN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($ringkasanLapangan as $i => $ringkasan)
+                            <tr class="row-anim border-b border-white/5 last:border-0 transition-colors"
+                                style="animation-delay: {{ $i * 60 }}ms">
+                                <td class="px-6 py-4">{{ $ringkasan['nama_lapangan'] }}</td>
+                                <td class="px-6 py-4">{{ $ringkasan['total_booking'] }}</td>
+                                <td class="px-6 py-4">Rp {{ number_format($ringkasan['total_pendapatan'], 0, ',', '.') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="px-6 py-10 text-center text-slate-500">Tidak ada data</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Detail Transaksi --}}
+            <h2 class="font-semibold text-lg mb-3">Detail Transaksi</h2>
+            <div class="bg-[#11151d] border border-white/5 rounded-xl overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-xs text-slate-400 border-b border-white/5">
+                            <th class="px-6 py-3 font-medium">PENYEWA</th>
+                            <th class="px-6 py-3 font-medium">LAPANGAN</th>
+                            <th class="px-6 py-3 font-medium">TANGGAL</th>
+                            <th class="px-6 py-3 font-medium">JAM</th>
+                            <th class="px-6 py-3 font-medium">STATUS</th>
+                            <th class="px-6 py-3 font-medium">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($bookings as $i => $booking)
+                            <tr class="row-anim border-b border-white/5 last:border-0 transition-colors"
+                                style="animation-delay: {{ $i * 60 }}ms">
+                                <td class="px-6 py-4">{{ $booking->user->name }}</td>
+                                <td class="px-6 py-4">{{ $booking->lapangan->nama_lapangan }}</td>
+                                <td class="px-6 py-4">{{ $booking->tanggal_main->format('d M Y') }}</td>
+                                <td class="px-6 py-4">{{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }}</td>
+                                <td class="px-6 py-4">
+                                    @if($booking->status_booking == 'dp_dibayar')
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-amber-500/30 text-white border-amber-500/50">DP Dibayar</span>
+                                    @elseif($booking->status_booking == 'lunas')
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-green-500/30 text-white border-green-500/50">Lunas</span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-white/10 text-neutral-300 border-white/20">{{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-slate-500">Tidak ada transaksi pada periode ini</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- Detail Transaksi -->
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold text-neutral-300 mb-4">Detail Transaksi</h3>
-            <div class="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-white/20">
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400">Penyewa</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400">Lapangan</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400">Jam</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-400">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-neutral-400">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/10">
-                            @forelse($bookings as $booking)
-                                <tr class="hover:bg-white/5">
-                                    <td class="px-6 py-3.5">
-                                        <div class="font-medium text-white">{{ $booking->user->name }}</div>
-                                    </td>
-                                    <td class="px-6 py-3.5 text-neutral-300">{{ $booking->lapangan->nama_lapangan }}</td>
-                                    <td class="px-6 py-3.5 text-neutral-400">{{ $booking->tanggal_main->format('d M Y') }}</td>
-                                    <td class="px-6 py-3.5 text-neutral-400">{{ \Carbon\Carbon::parse($booking->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->jam_selesai)->format('H:i') }}</td>
-                                    <td class="px-6 py-3.5">
-                                        @if($booking->status_booking == 'dp_dibayar')
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-amber-500/20 text-amber-300 border-amber-500/30">DP Dibayar</span>
-                                        @elseif($booking->status_booking == 'lunas')
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-green-500/20 text-green-300 border-green-500/30">Lunas</span>
-                                        @else
-                                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-white/10 text-neutral-300 border-white/20">{{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-3.5 text-right font-medium text-white">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-10 text-center text-neutral-500">Tidak ada transaksi pada periode ini</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
 
 </x-admin-layout>
+

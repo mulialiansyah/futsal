@@ -30,9 +30,10 @@
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">Pilih Lapangan</label>
                         <select name="lapangan_id" required
                                 class="w-full bg-white/10 border border-white/30 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 @error('lapangan_id') border-red-500 @enderror">
-                            <option value="">— Pilih lapangan —</option>
+                            <option value="" class="bg-white text-neutral-900">— Pilih lapangan —</option>
                             @foreach($lapangans as $lapangan)
                                 <option value="{{ $lapangan->id }}"
+                                        class="bg-white text-neutral-900"
                                         {{ old('lapangan_id') == $lapangan->id ? 'selected' : '' }}>
                                     {{ $lapangan->nama_lapangan }}
                                     ({{ $lapangan->kategori }})
@@ -159,7 +160,7 @@
                                                   action="{{ route('admin.ketersediaan.destroy', $penutupan) }}"
                                                   onsubmit="return confirm('Buka kembali lapangan ini?')">
                                                 @csrf @method('DELETE')
-                                                <button class="bg-green-400/20 text-green-400 hover:bg-green-400/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-green-400/30">
+                                                <button type="submit" class="bg-green-400/20 text-green-400 hover:bg-green-400/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-green-400/30">
                                                     🔓 Buka Kembali
                                                 </button>
                                             </form>

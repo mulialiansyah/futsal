@@ -52,7 +52,7 @@
 
             <div class="mb-8">
                 <label for="harga" class="block text-sm font-medium text-neutral-400 mb-2">Harga</label>
-                <input type="number" name="harga" id="harga" value="{{ old('harga', $tarif->harga) }}" required class="w-full bg-neutral-800 border border-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="harga" id="harga" value="{{ old('harga', $tarif->harga) }}" inputmode="decimal" required placeholder="Contoh: 80000,00" class="w-full bg-neutral-800 border border-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('harga')
                     <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
                 @enderror

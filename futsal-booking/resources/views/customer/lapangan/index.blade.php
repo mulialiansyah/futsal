@@ -116,7 +116,7 @@
                                 <div class="text-xs text-neutral-400">Mulai dari</div>
                                 <div class="font-extrabold text-amber-400 text-lg">
                                     @if(isset($tarifPreview[$lapangan->kategori]))
-                                        Rp {{ number_format($tarifPreview[$lapangan->kategori]->harga, 0, ',', '.') }}/jam
+                                        Rp {{ number_format($tarifPreview[$lapangan->kategori]->harga, 2, ',', '.') }}/jam
                                     @else
                                         -
                                     @endif

@@ -345,7 +345,7 @@
         <!-- PAGE CONTENT -->
         <div class="flex-1 px-4 py-6 pb-36 md:pb-12">
             <div class="max-w-6xl mx-auto">
-                <h1 class="text-2xl font-bold mb-1">Halo, {{ Auth::user()->name }} 👋</h1>
+                <h1 class="text-2xl font-bold mb-1">Halo, {{ Auth::user()->name }}</h1>
                 <p class="text-sm text-neutral-400 mb-6">Kelola lapangan futsal kamu hari ini</p>
                 
                 <!-- Main Slot -->

@@ -108,7 +108,7 @@
                                     {{ substr($tarif->jam_mulai, 0, 5) }} – {{ substr($tarif->jam_selesai, 0, 5) }}
                                 </td>
                                 <td class="px-5 py-3 text-right font-extrabold text-amber-400">
-                                    Rp {{ number_format($tarif->harga, 0, ',', '.') }}
+                                    Rp {{ number_format($tarif->harga, 2, ',', '.') }}
                                 </td>
                             </tr>
                         @endforeach
