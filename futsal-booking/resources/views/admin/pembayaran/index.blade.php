@@ -37,5 +37,13 @@
                 </tbody>
             </table>
         </div>
+        @if(method_exists($pembayarans, 'links'))
+            <div class="px-6 py-4 bg-white/5 border-t border-white/10 flex items-center justify-between text-xs text-neutral-400">
+                <span>Menampilkan {{ $pembayarans->firstItem() ?? 0 }}-{{ $pembayarans->lastItem() ?? 0 }} dari {{ $pembayarans->total() }} pembayaran</span>
+                <div class="flex gap-2">
+                    {{ $pembayarans->links() }}
+                </div>
+            </div>
+        @endif
     </div>
 </x-admin-layout>

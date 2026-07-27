@@ -64,9 +64,10 @@
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-xs font-semibold text-neutral-300 mb-1">Keterangan (opsional)</label>
+                        <label class="block text-xs font-semibold text-neutral-300 mb-1">Keterangan / Alasan Penutupan <span class="text-red-400">*</span></label>
                         <input type="text" name="keterangan"
                                value="{{ old('keterangan') }}"
+                               required
                                placeholder="Contoh: Renovasi lapangan, Turnamen internal..."
                                class="w-full bg-white/10 border border-white/30 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400">
                     </div>
@@ -83,7 +84,7 @@
                 <p class="font-bold mb-1">⚠️ Catatan:</p>
                 <ul class="space-y-1 list-disc list-inside">
                     <li>Lapangan yang ditutup tidak bisa dipesan penyewa.</li>
-                    <li>Booking yang sudah ada sebelumnya tidak terpengaruh.</li>
+                    <li>Booking aktif yang terdampak otomatis dibatalkan, pembayaran pending ditolak, dan DP/Lunas akan diproses refund.</li>
                     <li>Klik "Buka Kembali" untuk membatalkan penutupan.</li>
                 </ul>
             </div>
@@ -95,7 +96,11 @@
                 <div class="px-6 py-4 border-b border-white/20">
                     <h3 class="font-semibold text-lg text-white">Daftar Penutupan</h3>
                     <p class="text-xs text-neutral-400 mt-0.5">
-                        {{ $penutupans->count() }} data penutupan tercatat
+                        @if(method_exists($penutupans, 'total'))
+                            {{ $penutupans->total() }} data penutupan tercatat
+                        @else
+                            {{ $penutupans->count() }} data penutupan tercatat
+                        @endif
                     </p>
                 </div>
 
@@ -170,6 +175,14 @@
                             </tbody>
                         </table>
                     </div>
+                    @if(method_exists($penutupans, 'links'))
+                        <div class="px-6 py-4 bg-white/5 border-t border-white/10 flex items-center justify-between text-xs text-neutral-400">
+                            <span>Menampilkan {{ $penutupans->firstItem() ?? 0 }}-{{ $penutupans->lastItem() ?? 0 }} dari {{ $penutupans->total() }} data penutupan</span>
+                            <div class="flex gap-2">
+                                {{ $penutupans->links() }}
+                            </div>
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>

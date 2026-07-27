@@ -89,8 +89,8 @@
                     <p class="text-lg font-bold">{{ $totalBooking }}</p>
                 </div>
                 <div class="bg-[#0b0d12] border border-white/5 rounded-xl p-4">
-                    <p class="text-xs text-slate-400 mb-1">Rata-rata / Booking</p>
-                    <p class="text-lg font-bold">Rp {{ $totalBooking > 0 ? number_format($totalPendapatan / $totalBooking, 0, ',', '.') : 0 }}</p>
+                    <p class="text-xs text-slate-400 mb-1">Paling Sering Dibooking</p>
+                    <p class="text-base font-bold truncate text-white" title="{{ $lapanganPalingRamai }}">{{ $lapanganPalingRamai }}</p>
                 </div>
             </div>
 
