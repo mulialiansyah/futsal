@@ -142,49 +142,51 @@
                 @endif
             </div>
 
-            @if($booking->pembayarans->isEmpty())
-                <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-4 mb-4 text-center">
-                    <p class="text-sm text-yellow-300 font-semibold">
-                        ⚠️ Belum ada bukti pembayaran.
-                    </p>
-                </div>
-            @else
-                <div class="space-y-4">
-                    @foreach($booking->pembayarans as $idx => $payment)
-                        <div class="border rounded-xl p-4 {{ $payment->status_verifikasi === 'diterima' ? 'border-green-500/30 bg-green-500/10' : ($payment->status_verifikasi === 'ditolak' ? 'border-red-500/30 bg-red-500/10' : 'border-white/10') }}">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <p class="text-xs text-neutral-400">Pembayaran #{{ $idx + 1 }} - {{ $payment->created_at->format('d M Y H:i') }}</p>
-                                    <p class="font-bold text-white text-lg">Rp {{ number_format($payment->nominal, 0, ',', '.') }}</p>
-                                    <p class="text-xs text-neutral-400 mt-1">{{ $payment->metode_pembayaran === 'midtrans' ? 'Midtrans' : 'Metode lama' }}</p>
+            @if($booking->metode_pembayaran !== 'cash')
+                @if($booking->pembayarans->isEmpty())
+                    <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-4 mb-4 text-center">
+                        <p class="text-sm text-yellow-300 font-semibold">
+                            ⚠️ Belum ada bukti pembayaran.
+                        </p>
+                    </div>
+                @else
+                    <div class="space-y-4">
+                        @foreach($booking->pembayarans as $idx => $payment)
+                            <div class="border rounded-xl p-4 {{ $payment->status_verifikasi === 'diterima' ? 'border-green-500/30 bg-green-500/10' : ($payment->status_verifikasi === 'ditolak' ? 'border-red-500/30 bg-red-500/10' : 'border-white/10') }}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <p class="text-xs text-neutral-400">Pembayaran #{{ $idx + 1 }} - {{ $payment->created_at->format('d M Y H:i') }}</p>
+                                        <p class="font-bold text-white text-lg">Rp {{ number_format($payment->nominal, 0, ',', '.') }}</p>
+                                        <p class="text-xs text-neutral-400 mt-1">{{ $payment->metode_pembayaran === 'midtrans' ? 'Midtrans' : 'Metode lama' }}</p>
+                                    </div>
+                                    @php
+                                        $verifikasi = [
+                                            'pending'  => 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+                                            'diterima' => 'bg-green-500/20 text-green-300 border-green-500/30',
+                                            'ditolak'  => 'bg-red-500/20 text-red-300 border-red-500/30',
+                                        ];
+                                        $label = [
+                                            'pending'  => '⏳ Menunggu Verifikasi',
+                                            'diterima' => '✅ Diterima',
+                                            'ditolak'  => '❌ Ditolak',
+                                        ];
+                                    @endphp
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold border {{ $verifikasi[$payment->status_verifikasi] ?? 'bg-neutral-500/20' }}">
+                                        {{ $label[$payment->status_verifikasi] ?? $payment->status_verifikasi }}
+                                    </span>
                                 </div>
-                                @php
-                                    $verifikasi = [
-                                        'pending'  => 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-                                        'diterima' => 'bg-green-500/20 text-green-300 border-green-500/30',
-                                        'ditolak'  => 'bg-red-500/20 text-red-300 border-red-500/30',
-                                    ];
-                                    $label = [
-                                        'pending'  => '⏳ Menunggu Verifikasi',
-                                        'diterima' => '✅ Diterima',
-                                        'ditolak'  => '❌ Ditolak',
-                                    ];
-                                @endphp
-                                <span class="px-2 py-1 rounded-full text-xs font-semibold border {{ $verifikasi[$payment->status_verifikasi] ?? 'bg-neutral-500/20' }}">
-                                    {{ $label[$payment->status_verifikasi] ?? $payment->status_verifikasi }}
-                                </span>
-                            </div>
 
-                            @if($payment->bukti_transfer)
-                                <div class="mt-3">
-                                    <p class="text-xs text-neutral-400 mb-2">Screenshot Pembayaran:</p>
-                                    <img src="{{ asset('storage/' . $payment->bukti_transfer) }}"
-                                         class="max-w-xs rounded-xl border border-white/10 object-contain max-h-32">
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
+                                @if($payment->bukti_transfer)
+                                    <div class="mt-3">
+                                        <p class="text-xs text-neutral-400 mb-2">Screenshot Pembayaran:</p>
+                                        <img src="{{ asset('storage/' . $payment->bukti_transfer) }}"
+                                             class="max-w-xs rounded-xl border border-white/10 object-contain max-h-32">
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             @endif
         </div>
     </div>

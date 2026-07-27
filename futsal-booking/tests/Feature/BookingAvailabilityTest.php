@@ -133,7 +133,7 @@ class BookingAvailabilityTest extends TestCase
             ]);
 
         $createdBooking = Booking::where('user_id', $secondCustomer->id)->sole();
-        $response->assertRedirect(route('customer.booking.success', $createdBooking));
+        $response->assertRedirect(route('customer.pembayaran.create', $createdBooking));
 
         $this->assertSame($lapangan->id, $createdBooking->lapangan_id);
         $this->assertSame($tanggalMain->toDateString(), $createdBooking->tanggal_main->toDateString());

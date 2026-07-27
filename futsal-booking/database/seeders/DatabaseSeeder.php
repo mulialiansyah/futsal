@@ -113,7 +113,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($lapangans as $data) {
-            Lapangan::create($data);
+            Lapangan::firstOrCreate(
+                ['nama_lapangan' => $data['nama_lapangan']],
+                $data
+            );
         }
 
         // ===== TARIF (8 baris: 2 kategori x 2 tipe hari x 2 window jam) =====
@@ -129,7 +132,15 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($tarifs as $data) {
-            Tarif::create($data);
+            Tarif::firstOrCreate(
+                [
+                    'kategori' => $data['kategori'],
+                    'tipe_hari' => $data['tipe_hari'],
+                    'jam_mulai' => $data['jam_mulai'],
+                    'jam_selesai' => $data['jam_selesai'],
+                ],
+                $data
+            );
         }
 
         // ===== HARI LIBUR 2026 (SKB 3 Menteri - 17 libur nasional + 8 cuti bersama) =====

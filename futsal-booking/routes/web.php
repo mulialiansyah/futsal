@@ -104,3 +104,21 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
 });
 
 require __DIR__.'/auth.php';
+
+// External cron service route (for Infinity Free - no cron support)
+Route::get('/artisan/schedule', function () {
+    if (request('token') !== env('CRON_SECRET')) {
+        abort(403, 'Invalid token');
+    }
+    \Illuminate\Support\Facades\Artisan::call('schedule:run');
+    return 'Schedule run completed';
+});
+
+// Temporary route for manual storage:link setup (remove after use)
+Route::get('/artisan/storage-link', function () {
+    if (request('token') !== env('CRON_SECRET')) {
+        abort(403, 'Invalid token');
+    }
+    \Illuminate\Support\Facades\Artisan::call('storage:link');
+    return 'Storage link created. Remove this route after use.';
+});

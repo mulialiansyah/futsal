@@ -61,10 +61,12 @@ FutsalKite adalah sistem manajemen booking lapangan futsal berbasis web yang mem
          ├──► Lihat Detail Lapangan (Publik)
          ├──► Cek Ketersediaan Lapangan (Denah)
          ├──► Booking Lapangan
+         │    ├──► Pilih Metode Pembayaran (Midtrans/Cash)
          ├──► Lihat Detail Booking
          ├──► Lihat Riwayat Booking
          ├──► Upload Bukti Pembayaran (DP/Pelunasan)
          ├──► Bayar via Midtrans
+         ├──► Bayar di Tempat (Cash)
          ├──► Lihat Notifikasi
          ├──► Mark Notifikasi as Read
          ├──► Edit Profile
@@ -257,8 +259,10 @@ Menyimpan data booking/reservasi
 - `jam_mulai`: Jam mulai booking
 - `jam_selesai`: Jam selesai booking
 - `total_harga`: Total harga booking
+- `metode_pembayaran`: Metode pembayaran (midtrans/cash)
 - `status_booking`: Status (pending/dp_dibayar/lunas/expired/batal]
 - `payment_deadline`: Deadline pembayaran
+- `pelunasan_deadline`: Deadline pelunasan (setelah DP)
 - `expired_at`: Waktu expired booking
 - `created_at`, `updated_at`: Timestamp
 
@@ -367,20 +371,21 @@ Menyimpan data notifikasi untuk pengguna
        │                  │                  │
        ▼                  ▼                  ▼
 ┌──────────┐      ┌──────────┐      ┌──────────┐
-│ DP Via   │      │ Lunas    │      │ Booking  │
-│ Transfer │      │ Transfer │      │ Batal    │
-└────┬─────┘      └────┬─────┘      └──────────┘
-     │                  │
-     │ 5. Upload Bukti  │ 5. Upload Bukti
-     │    Transfer     │    Transfer
-     ▼                  ▼
-┌─────────────┐   ┌─────────────┐
-│  Admin      │   │  Admin      │
-│  Verifikasi │   │  Verifikasi │
-└──────┬──────┘   └──────┬──────┘
-       │                  │
-       │ 6. Diterima?      │ 6. Diterima?
-       │                  │
+│ DP Via   │      │ Lunas    │      │ Bayar di │
+│ Transfer │      │ Transfer │      │ Tempat   │
+│ (Midtrans)│     │ (Midtrans)│     │ (Cash)   │
+└────┬─────┘      └────┬─────┘      └────┬─────┘
+     │                  │                  │
+     │ 5. Upload Bukti  │ 5. Upload Bukti  │ 5. Datang ke
+     │    Transfer     │    Transfer     │    Lokasi
+     ▼                  ▼                  ▼
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│  Admin      │   │  Admin      │   │  Admin      │
+│  Verifikasi │   │  Verifikasi │   │  Konfirmasi │
+└──────┬──────┘   └──────┬──────┘   │  Cash      │
+       │                  │           └──────┬──────┘
+       │ 6. Diterima?      │ 6. Diterima?      │
+       │                  │                  │
        ├─────┬────────────┤ ├─────┬────────────┤
        │     │            │ │     │            │
        │ Ya  │ Tidak      │ │ Ya  │ Tidak      │

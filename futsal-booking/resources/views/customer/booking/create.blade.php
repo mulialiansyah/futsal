@@ -155,19 +155,19 @@
                     <span class="text-xs text-amber-300 font-bold">Bisa DP Dulu (Min 50%):</span>
                     <span class="text-sm font-extrabold text-amber-300" id="dpHarga">Rp 0</span>
                 </div>
-                <p class="text-neutral-500 text-xs mt-3">* Harga final dihitung ulang otomatis oleh sistem. Waktu pembayaran 1 jam setelah booking.</p>
+                <p id="paymentMethodNote" class="text-neutral-500 text-xs mt-3">* Harga final dihitung ulang otomatis oleh sistem. Batas pembayaran online adalah 1 jam setelah booking.</p>
             </div>
 
             <!-- ===== METODE PEMBAYARAN ===== -->
             <div>
                 <p class="mb-3 text-xs font-medium text-neutral-400">💳 Pilih Metode Pembayaran</p>
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <label class="cursor-pointer rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 transition hover:bg-emerald-500/15">
+                    <label data-payment-option="midtrans" class="cursor-pointer rounded-xl border border-[#23282A] bg-[#0B0F0C] p-4 transition hover:border-emerald-500/60">
                         <input type="radio" name="metode_pembayaran" value="midtrans" class="sr-only" {{ old('metode_pembayaran', 'midtrans') === 'midtrans' ? 'checked' : '' }}>
                         <span class="block font-bold text-white">💳 Bayar Online</span>
                         <span class="mt-1 block text-xs text-neutral-400">Bayar DP atau lunas melalui Midtrans. Batas pembayaran awal 1 jam.</span>
                     </label>
-                    <label class="cursor-pointer rounded-xl border border-amber-400/40 bg-amber-400/10 p-4 transition hover:bg-amber-400/15">
+                    <label data-payment-option="cash" class="cursor-pointer rounded-xl border border-[#23282A] bg-[#0B0F0C] p-4 transition hover:border-amber-400/60">
                         <input type="radio" name="metode_pembayaran" value="cash" class="sr-only" {{ old('metode_pembayaran') === 'cash' ? 'checked' : '' }}>
                         <span class="block font-bold text-amber-300">💵 Bayar di Tempat (Cash)</span>
                         <span class="mt-1 block text-xs text-neutral-400">Bayar langsung di lokasi saat datang. Admin akan mengonfirmasi pembayaran.</span>
@@ -181,7 +181,7 @@
             <div class="pt-1">
                 <button type="submit" id="submitBtn"
                         class="group w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3.5 rounded-full shadow-lg shadow-emerald-950/40 transition duration-200 text-center">
-                    Buat Booking <span class="ml-1 transition-transform group-hover:translate-x-1 inline-block">›</span>
+                    Lanjut ke Pembayaran Online <span class="ml-1 transition-transform group-hover:translate-x-1 inline-block">›</span>
                 </button>
             </div>
         </form>
@@ -216,6 +216,30 @@
             submitBtn.disabled = lapanganSedangTutup || jamTidakOperasional;
             submitBtn.classList.toggle('opacity-50', submitBtn.disabled);
             submitBtn.classList.toggle('cursor-not-allowed', submitBtn.disabled);
+        }
+
+        function perbaruiMetodePembayaran() {
+            const metode = document.querySelector('input[name="metode_pembayaran"]:checked')?.value ?? 'midtrans';
+            const submitBtn = document.getElementById('submitBtn');
+            const catatan = document.getElementById('paymentMethodNote');
+
+            document.querySelectorAll('[data-payment-option]').forEach((option) => {
+                const aktif = option.dataset.paymentOption === metode;
+                option.classList.toggle('border-emerald-500', aktif && metode === 'midtrans');
+                option.classList.toggle('bg-emerald-500/10', aktif && metode === 'midtrans');
+                option.classList.toggle('border-amber-400', aktif && metode === 'cash');
+                option.classList.toggle('bg-amber-400/10', aktif && metode === 'cash');
+                option.classList.toggle('border-[#23282A]', !aktif);
+                option.setAttribute('aria-checked', aktif ? 'true' : 'false');
+            });
+
+            if (metode === 'cash') {
+                submitBtn.innerHTML = 'Konfirmasi Booking Cash <span class="ml-1 inline-block">✓</span>';
+                catatan.textContent = '* Harga final dihitung ulang otomatis oleh sistem. Pembayaran dilakukan langsung di lokasi dan dikonfirmasi admin.';
+            } else {
+                submitBtn.innerHTML = 'Lanjut ke Pembayaran Online <span class="ml-1 transition-transform group-hover:translate-x-1 inline-block">›</span>';
+                catatan.textContent = '* Harga final dihitung ulang otomatis oleh sistem. Batas pembayaran online adalah 1 jam setelah booking.';
+            }
         }
 
         // === Sinkronisasi kartu foto lapangan dengan select tersembunyi ===
@@ -370,10 +394,14 @@
         document.getElementById('tanggal_main').addEventListener('change', () => { hitungJamSelesaiDanHarga(); cekPenutupan(); });
         document.getElementById('jamMulai').addEventListener('change', hitungJamSelesaiDanHarga);
         document.getElementById('durasiJam').addEventListener('change', hitungJamSelesaiDanHarga);
+        document.querySelectorAll('input[name="metode_pembayaran"]').forEach((input) => {
+            input.addEventListener('change', perbaruiMetodePembayaran);
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             hitungJamSelesaiDanHarga();
             cekPenutupan();
+            perbaruiMetodePembayaran();
         });
     </script>
     <style>

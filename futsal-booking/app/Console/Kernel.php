@@ -9,12 +9,14 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
+     * NOTE: Disabled for Infinity Free (no cron support).
+     * Use external cron service like cron-job.org if needed.
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('bookings:release-expired')
-            ->everyMinute()
-            ->withoutOverlapping();
+        // $schedule->command('bookings:release-expired')
+        //     ->everyMinute()
+        //     ->withoutOverlapping();
     }
 
     /**

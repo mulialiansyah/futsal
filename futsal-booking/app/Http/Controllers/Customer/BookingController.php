@@ -179,7 +179,10 @@ class BookingController extends Controller
             'booking'
         );
 
-        return redirect()->route('customer.booking.success', $booking);
+        return redirect()->route(
+            $bayarDiTempat ? 'customer.booking.success' : 'customer.pembayaran.create',
+            $booking
+        );
     }
 
     public function show(Booking $booking)
