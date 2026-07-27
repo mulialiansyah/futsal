@@ -16,7 +16,7 @@ class KetersediaanController extends Controller
         $lapangans = Lapangan::orderBy('nama_lapangan')->get();
         $penutupans = PenutupanLapangan::with('lapangan')
             ->orderByDesc('tanggal_mulai')
-            ->get();
+            ->paginate(10);
 
         return view('admin.ketersediaan.index', compact('lapangans', 'penutupans'));
     }
@@ -27,9 +27,10 @@ class KetersediaanController extends Controller
             'lapangan_id' => 'required|exists:lapangans,id',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'keterangan' => 'nullable|string|max:200',
+            'keterangan' => 'required|string|max:200',
         ], [
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama dengan atau setelah tanggal mulai.',
+            'keterangan.required' => 'Alasan penutupan lapangan wajib diisi.',
         ]);
 
         // Cek apakah sudah ada penutupan yang overlap
@@ -54,22 +55,52 @@ class KetersediaanController extends Controller
         $lapangan = Lapangan::find($request->lapangan_id);
 
         // Cari booking aktif yang terdampak
-        $bookingsTerdampak = Booking::where('lapangan_id', $request->lapangan_id)
+        $bookingsTerdampak = Booking::with('user')->where('lapangan_id', $request->lapangan_id)
             ->whereIn('status_booking', ['pending', 'dp_dibayar', 'lunas'])
-            ->whereBetween('tanggal_main', [$request->tanggal_mulai, $request->tanggal_selesai])
+            ->whereDate('tanggal_main', '>=', $request->tanggal_mulai)
+            ->whereDate('tanggal_main', '<=', $request->tanggal_selesai)
             ->get();
 
         foreach ($bookingsTerdampak as $b) {
             $tglBooking = $b->tanggal_main->isoFormat('D MMMM YYYY');
             $jam = substr($b->jam_mulai, 0, 5);
-            $alasan = $request->keterangan ? " karena: {$request->keterangan}" : '.';
+            $alasan = $request->keterangan;
 
-            Notifikasi::kirim(
-                $b->user_id,
-                'Lapangan Ditutup (Reschedule) 🚫',
-                "Pemberitahuan: Lapangan {$lapangan->nama_lapangan} yang Anda sewa pada tanggal {$tglBooking} jam {$jam} terpaksa ditutup sementara oleh pengelola{$alasan} Silakan hubungi admin via WhatsApp untuk melakukan reschedule jadwal main.",
-                'penutupan'
-            );
+            // Tolak pembayaran pending yang terkait booking ini
+            $b->pembayarans()->where('status_verifikasi', 'pending')->update(['status_verifikasi' => 'ditolak']);
+
+            $statusSebelumnya = $b->status_booking;
+
+            // Batalkan booking dan hapus deadline
+            $b->update([
+                'status_booking' => 'batal',
+                'payment_deadline' => null,
+                'pelunasan_deadline' => null,
+            ]);
+
+            if ($statusSebelumnya === 'dp_dibayar' || $statusSebelumnya === 'lunas') {
+                // Booking sudah bayar -> refund
+                Notifikasi::kirim(
+                    $b->user_id,
+                    'Booking Dibatalkan & Refund Dana ❌',
+                    "Pemberitahuan: Lapangan {$lapangan->nama_lapangan} yang Anda sewa pada tanggal {$tglBooking} jam {$jam} terpaksa ditutup sementara oleh pengelola karena: {$alasan}. Booking Anda dibatalkan dan uang yang telah dibayarkan akan dikembalikan. Silakan hubungi admin via WhatsApp untuk info pengembalian dana.",
+                    'penutupan'
+                );
+
+                Notifikasi::kirimKeAdmin(
+                    'Booking Dibatalkan & Perlu Refund ⚠️',
+                    "Booking {$lapangan->nama_lapangan} ({$tglBooking} jam {$jam}) milik {$b->user->name} dibatalkan otomatis karena penutupan lapangan. Anda perlu mengembalikan dana yang telah dibayarkan.",
+                    'booking'
+                );
+            } else {
+                // Booking belum bayar (pending) -> batal
+                Notifikasi::kirim(
+                    $b->user_id,
+                    'Booking Lapangan Dibatalkan ❌',
+                    "Pemberitahuan: Lapangan {$lapangan->nama_lapangan} yang Anda sewa pada tanggal {$tglBooking} jam {$jam} terpaksa ditutup sementara oleh pengelola karena: {$alasan}. Booking Anda otomatis dibatalkan.",
+                    'penutupan'
+                );
+            }
         }
 
         return redirect()->route('admin.ketersediaan.index')

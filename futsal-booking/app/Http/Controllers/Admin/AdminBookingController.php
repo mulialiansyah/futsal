@@ -12,7 +12,7 @@ class AdminBookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['user', 'lapangan', 'pembayarans'])->latest()->get();
+        $bookings = Booking::with(['user', 'lapangan', 'pembayarans'])->latest()->paginate(15);
 
         return view('admin.booking.index', compact('bookings'));
     }
@@ -31,7 +31,20 @@ class AdminBookingController extends Controller
         ]);
 
         $statusSebelumnya = $booking->status_booking;
-        $booking->update($validated);
+        
+        $updateData = $validated;
+        if (in_array($validated['status_booking'], ['dp_dibayar', 'lunas', 'expired', 'batal'])) {
+            $updateData['payment_deadline'] = null;
+        }
+        if (in_array($validated['status_booking'], ['lunas', 'expired', 'batal'])) {
+            $updateData['pelunasan_deadline'] = null;
+        }
+        if ($validated['status_booking'] === 'dp_dibayar' && !$booking->pelunasan_deadline) {
+            $tanggalMain = Carbon::parse($booking->tanggal_main->format('Y-m-d').' '.$booking->jam_mulai);
+            $updateData['pelunasan_deadline'] = $tanggalMain->isPast() ? Carbon::now()->addHour() : $tanggalMain;
+        }
+
+        $booking->update($updateData);
 
         if ($statusSebelumnya !== $booking->status_booking) {
             $lapanganNama = $booking->lapangan->nama_lapangan;

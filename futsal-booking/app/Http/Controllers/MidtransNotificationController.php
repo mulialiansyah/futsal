@@ -68,6 +68,7 @@ class MidtransNotificationController extends Controller
             if ($totalDibayar >= $booking->total_harga) {
                 $booking->update([
                     'status_booking' => 'lunas',
+                    'payment_deadline' => null,
                     'pelunasan_deadline' => null,
                 ]);
                 $judul = 'Pembayaran Midtrans Diterima (Lunas) ✅';
@@ -75,6 +76,7 @@ class MidtransNotificationController extends Controller
             } elseif ($totalDibayar >= $booking->total_harga * 0.5 && $booking->status_booking !== 'dp_dibayar') {
                 $booking->update([
                     'status_booking' => 'dp_dibayar',
+                    'payment_deadline' => null,
                     'pelunasan_deadline' => Carbon::parse($booking->tanggal_main->format('Y-m-d').' '.$booking->jam_mulai),
                 ]);
                 $judul = 'Pembayaran DP Midtrans Diterima ✅';

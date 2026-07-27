@@ -13,7 +13,7 @@ class AdminPembayaranController extends Controller
 {
     public function index()
     {
-        $pembayarans = Pembayaran::with(['booking', 'booking.user', 'booking.lapangan'])->latest()->get();
+        $pembayarans = Pembayaran::with(['booking', 'booking.user', 'booking.lapangan'])->latest()->paginate(15);
 
         return view('admin.pembayaran.index', compact('pembayarans'));
     }
@@ -57,6 +57,7 @@ class AdminPembayaranController extends Controller
                 // Lunas
                 $booking->update([
                     'status_booking' => 'lunas',
+                    'payment_deadline' => null,
                     'pelunasan_deadline' => null,
                 ]);
 
@@ -84,6 +85,7 @@ class AdminPembayaranController extends Controller
 
                 $booking->update([
                     'status_booking' => 'dp_dibayar',
+                    'payment_deadline' => null,
                     'pelunasan_deadline' => $pelunasanDeadline,
                 ]);
 
@@ -153,6 +155,7 @@ class AdminPembayaranController extends Controller
 
             $booking->update([
                 'status_booking' => 'lunas',
+                'payment_deadline' => null,
                 'pelunasan_deadline' => null,
             ]);
         }

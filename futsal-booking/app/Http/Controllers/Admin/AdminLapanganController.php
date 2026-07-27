@@ -11,7 +11,7 @@ class AdminLapanganController extends Controller
 {
     public function index()
     {
-        $lapangans = Lapangan::all();
+        $lapangans = Lapangan::paginate(10);
 
         return view('admin.lapangan.index', compact('lapangans'));
     }
