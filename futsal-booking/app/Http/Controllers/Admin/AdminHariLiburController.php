@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HariLibur;
+use App\Models\Tarif;
 use Illuminate\Http\Request;
 
 class AdminHariLiburController extends Controller
@@ -12,7 +13,17 @@ class AdminHariLiburController extends Controller
     {
         $hariLiburs = HariLibur::orderBy('tanggal')->get();
 
-        return view('admin.hari-libur.index', compact('hariLiburs'));
+        // Range harga weekend (berlaku untuk semua hari libur)
+        $weekendHarga = Tarif::where('tipe_hari', 'weekend')->pluck('harga');
+        $weekendMin   = $weekendHarga->min() ?? 0;
+        $weekendMax   = $weekendHarga->max() ?? 0;
+
+        $rangeHargaWeekend = $weekendMin > 0
+            ? 'Rp ' . number_format($weekendMin / 1000, 0, ',', '.') . 'k'
+              . ($weekendMax !== $weekendMin ? '–' . number_format($weekendMax / 1000, 0, ',', '.') . 'k' : '')
+            : '-';
+
+        return view('admin.hari-libur.index', compact('hariLiburs', 'rangeHargaWeekend'));
     }
 
     public function create()

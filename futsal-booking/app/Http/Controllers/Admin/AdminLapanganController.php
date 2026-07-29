@@ -9,11 +9,86 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminLapanganController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $lapangans = Lapangan::paginate(10);
+        $query = $request->input('search');
+        $category = $request->input('category');
+        $allQueryParams = $request->query();
+        $needsRedirect = false;
 
-        return view('admin.lapangan.index', compact('lapangans'));
+        if ($category && in_array($category, ['standar', 'internasional'])) {
+            if (isset($allQueryParams['standar_page']) || isset($allQueryParams['internasional_page'])) {
+                unset($allQueryParams['standar_page']);
+                unset($allQueryParams['internasional_page']);
+                $needsRedirect = true;
+            }
+
+            if ($needsRedirect) {
+                return redirect()->route('admin.lapangan.index', $allQueryParams);
+            }
+
+            $lapangansQuery = Lapangan::query();
+
+            if ($query) {
+                $lapangansQuery->where(function ($q) use ($query) {
+                    $q->where('nama_lapangan', 'like', "%{$query}%")
+                        ->orWhere('kategori', 'like', "%{$query}%")
+                        ->orWhere('jenis_lapangan', 'like', "%{$query}%")
+                        ->orWhere('tipe_venue', 'like', "%{$query}%");
+                });
+            }
+
+            $lapangansQuery->where('kategori', $category);
+            $appendsParams = ['search' => $query, 'category' => $category];
+            $lapangans = $lapangansQuery->paginate(6, ['*'], 'page')->appends($appendsParams);
+
+            $standarLapangans = null;
+            $internasionalLapangans = null;
+            $mainPaginator = $lapangans;
+            $viewMode = 'single';
+        } else {
+            $viewMode = 'split';
+
+            $standarQuery = Lapangan::query()->where('kategori', 'standar');
+            $internasionalQuery = Lapangan::query()->where('kategori', 'internasional');
+
+            if ($query) {
+                $standarQuery->where(function ($q) use ($query) {
+                    $q->where('nama_lapangan', 'like', "%{$query}%")
+                        ->orWhere('jenis_lapangan', 'like', "%{$query}%")
+                        ->orWhere('tipe_venue', 'like', "%{$query}%");
+                });
+
+                $internasionalQuery->where(function ($q) use ($query) {
+                    $q->where('nama_lapangan', 'like', "%{$query}%")
+                        ->orWhere('jenis_lapangan', 'like', "%{$query}%")
+                        ->orWhere('tipe_venue', 'like', "%{$query}%");
+                });
+            }
+
+            $queryParams = ['search' => $query];
+
+            // Use same page name for both to synchronize pagination
+            $standarLapangans = $standarQuery->paginate(6, ['*'], 'page')
+                ->appends($queryParams);
+            $internasionalLapangans = $internasionalQuery->paginate(6, ['*'], 'page')
+                ->appends($queryParams);
+
+            // Determine which paginator to use for links (the one with more pages)
+            $mainPaginator = $standarLapangans->lastPage() >= $internasionalLapangans->lastPage()
+                ? $standarLapangans
+                : $internasionalLapangans;
+
+            $lapangans = null;
+        }
+
+        return view('admin.lapangan.index', compact(
+            'lapangans',
+            'standarLapangans',
+            'internasionalLapangans',
+            'mainPaginator',
+            'viewMode'
+        ));
     }
 
     public function create()
@@ -28,7 +103,9 @@ class AdminLapanganController extends Controller
             'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
             'tipe_venue' => 'required|in:indoor,outdoor',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png',
+        ], [
+            'image.mimes' => 'File harus berformat JPG, JPEG, atau PNG.',
         ]);
 
         if ($request->hasFile('image')) {
@@ -57,7 +134,9 @@ class AdminLapanganController extends Controller
             'kategori' => 'required|in:standar,internasional',
             'jenis_lapangan' => 'required|in:sintetis,vinyl',
             'tipe_venue' => 'required|in:indoor,outdoor',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png',
+        ], [
+            'image.mimes' => 'File harus berformat JPG, JPEG, atau PNG.',
         ]);
 
         if ($request->hasFile('image')) {

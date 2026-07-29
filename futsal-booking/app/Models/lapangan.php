@@ -8,12 +8,18 @@ use Illuminate\Support\Facades\Storage;
 class Lapangan extends Model
 {
     protected $fillable = [
+        'venue_id',
         'nama_lapangan',
         'kategori',         // standar | internasional
         'jenis_lapangan',   // sintetis | vinyl
         'tipe_venue',       // indoor | outdoor
         'image',
     ];
+
+    public function venue()
+    {
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
 
     public function bookings()
     {

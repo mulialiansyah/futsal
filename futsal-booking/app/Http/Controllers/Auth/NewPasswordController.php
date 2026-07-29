@@ -33,10 +33,10 @@ class NewPasswordController extends Controller
     {
         $request->validate([
             'token' => ['required'],
-            'email' => ['required', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'],
+            'email' => ['required', 'email:rfc,dns'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
-            'email.regex' => 'Format email harus valid (contoh: nama@email.com).',
+            'email.email' => 'Format email atau domain tidak valid/tidak ditemukan. Masukkan kembali email Anda.',
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we

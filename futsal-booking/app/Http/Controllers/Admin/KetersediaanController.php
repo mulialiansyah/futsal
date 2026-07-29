@@ -71,29 +71,37 @@ class KetersediaanController extends Controller
 
             $statusSebelumnya = $b->status_booking;
 
-            // Batalkan booking dan hapus deadline
-            $b->update([
-                'status_booking' => 'batal',
-                'payment_deadline' => null,
-                'pelunasan_deadline' => null,
-            ]);
-
             if ($statusSebelumnya === 'dp_dibayar' || $statusSebelumnya === 'lunas') {
-                // Booking sudah bayar -> refund
+                // Booking sudah bayar -> beri pilihan Refund atau Pindah Lapangan (3x24 jam)
+                $b->update([
+                    'status_booking' => 'menunggu_keputusan_customer',
+                    'original_status' => $statusSebelumnya,
+                    'opsi_deadline' => \Carbon\Carbon::now()->addDays(3),
+                    'alasan_penutupan' => $alasan,
+                    'payment_deadline' => null,
+                    'pelunasan_deadline' => null,
+                ]);
+
                 Notifikasi::kirim(
                     $b->user_id,
-                    'Booking Dibatalkan & Refund Dana ❌',
-                    "Pemberitahuan: Lapangan {$lapangan->nama_lapangan} yang Anda sewa pada tanggal {$tglBooking} jam {$jam} terpaksa ditutup sementara oleh pengelola karena: {$alasan}. Booking Anda dibatalkan dan uang yang telah dibayarkan akan dikembalikan. Silakan hubungi admin via WhatsApp untuk info pengembalian dana.",
+                    'Lapangan Ditutup — Pilih Opsi Refund / Pindah Lapangan ⚠️',
+                    "Pemberitahuan: Lapangan {$lapangan->nama_lapangan} pada tanggal {$tglBooking} jam {$jam} ditutup sementara karena: {$alasan}. Silakan buka detail booking untuk memilih Opsi Refund Dana atau Pindah Lapangan dalam waktu 3x24 jam.",
                     'penutupan'
                 );
 
                 Notifikasi::kirimKeAdmin(
-                    'Booking Dibatalkan & Perlu Refund ⚠️',
-                    "Booking {$lapangan->nama_lapangan} ({$tglBooking} jam {$jam}) milik {$b->user->name} dibatalkan otomatis karena penutupan lapangan. Anda perlu mengembalikan dana yang telah dibayarkan.",
+                    'Penutupan Lapangan Terdampak Booking ⚠️',
+                    "Booking {$lapangan->nama_lapangan} ({$tglBooking} jam {$jam}) milik {$b->user->name} terdampak penutupan lapangan. Customer telah dikirimi pemberitahuan untuk memilih Refund atau Pindah Lapangan (Deadline: 3x24 jam).",
                     'booking'
                 );
             } else {
                 // Booking belum bayar (pending) -> batal
+                $b->update([
+                    'status_booking' => 'batal',
+                    'payment_deadline' => null,
+                    'pelunasan_deadline' => null,
+                ]);
+
                 Notifikasi::kirim(
                     $b->user_id,
                     'Booking Lapangan Dibatalkan ❌',

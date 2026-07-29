@@ -150,12 +150,13 @@ class PembayaranController extends Controller
 
         $request->validate([
             'midtrans_order_id' => 'required|string',
-            'bukti_transfer' => 'required|image|max:5120',
+            'bukti_transfer' => 'required|file|mimes:png,jpg,jpeg|max:2048',
         ], [
             'midtrans_order_id.required' => 'Mulai pembayaran melalui Midtrans terlebih dahulu.',
             'bukti_transfer.required' => 'Upload screenshot pembayaran Midtrans.',
-            'bukti_transfer.image' => 'File harus berupa gambar.',
-            'bukti_transfer.max' => 'Ukuran file maksimal 5MB.',
+            'bukti_transfer.file' => 'File harus berupa dokumen gambar valid.',
+            'bukti_transfer.mimes' => 'File harus berformat PNG atau JPG.',
+            'bukti_transfer.max' => 'Ukuran file maksimal 2MB.',
         ]);
 
         $pembayaran = $booking->pembayarans()

@@ -55,8 +55,14 @@ Route::middleware('auth')->group(function () {
 // ===== CUSTOMER ROUTES (Penyewa) =====
 Route::middleware('auth')->prefix('customer')->name('customer.')->group(function () {
     // Booking
+    Route::get('booking/check-slots', [BookingController::class, 'checkSlots'])->name('booking.check-slots');
+    Route::post('booking/{booking}/choose-refund', [BookingController::class, 'chooseRefund'])->name('booking.choose-refund');
+    Route::post('booking/{booking}/request-cancel-refund', [BookingController::class, 'requestCancelRefund'])->name('booking.request-cancel-refund');
+    Route::get('booking/{booking}/reschedule', [BookingController::class, 'rescheduleForm'])->name('booking.reschedule-form');
+    Route::post('booking/{booking}/reschedule', [BookingController::class, 'processReschedule'])->name('booking.process-reschedule');
     Route::resource('booking', BookingController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
     Route::get('booking/{booking}/berhasil', [BookingController::class, 'success'])->name('booking.success');
+    Route::get('booking/{booking}/download-dp', [BookingController::class, 'downloadDpReceipt'])->name('booking.download-dp');
 
     // Pembayaran customer
     Route::get('booking/{booking}/bayar', [CustomerPembayaranController::class, 'create'])->name('pembayaran.create');
@@ -83,7 +89,9 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     // Kelola Booking
     Route::get('booking', [AdminBookingController::class, 'index'])->name('booking.index');
     Route::get('booking/{booking}', [AdminBookingController::class, 'show'])->name('booking.show');
-    Route::patch('booking/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('booking.update-status');
+    Route::patch('booking/{booking}/cancel', [AdminBookingController::class, 'cancel'])->name('booking.cancel');
+    Route::post('booking/{booking}/confirm-refund', [AdminBookingController::class, 'confirmRefund'])->name('booking.confirm-refund');
+    Route::post('booking/{booking}/refund', [AdminBookingController::class, 'storeRefund'])->name('booking.refund.store');
 
     // Kelola Pembayaran
     Route::get('pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');

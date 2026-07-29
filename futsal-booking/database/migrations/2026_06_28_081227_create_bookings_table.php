@@ -16,7 +16,7 @@ return new class extends Migration
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->unsignedBigInteger('total_harga')->default(0);
-            $table->enum('status_booking', ['pending', 'dp_dibayar', 'lunas', 'expired', 'batal'])->default('pending');
+            $table->enum('status_booking', ['pending', 'dp_dibayar', 'lunas', 'expired', 'batal', 'menunggu_keputusan_customer', 'menunggu_refund'])->default('pending');
             $table->dateTime('payment_deadline')->nullable();
             $table->dateTime('expired_at')->nullable();
             $table->timestamps();

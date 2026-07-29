@@ -65,7 +65,8 @@
 
             <div class="mb-8">
                 <label for="image" class="block text-sm font-medium text-neutral-400 mb-2">Ganti Gambar (Opsional)</label>
-                <input type="file" name="image" id="image" class="w-full bg-neutral-800 border border-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-neutral-400 mb-2">Format: JPG, PNG.</p>
+                <input type="file" name="image" id="image" accept="image/png, image/jpeg, image/jpg" class="w-full bg-neutral-800 border border-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('image')
                     <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
                 @enderror

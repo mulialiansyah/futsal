@@ -28,17 +28,31 @@
 
                     <div class="mb-4">
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">Pilih Lapangan</label>
-                        <select name="lapangan_id" required
+                        <select name="lapangan_id" id="lapangan-select" required
                                 class="w-full bg-white/10 border border-white/30 text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 @error('lapangan_id') border-red-500 @enderror">
                             <option value="" class="bg-white text-neutral-900">— Pilih lapangan —</option>
-                            @foreach($lapangans as $lapangan)
-                                <option value="{{ $lapangan->id }}"
-                                        class="bg-white text-neutral-900"
-                                        {{ old('lapangan_id') == $lapangan->id ? 'selected' : '' }}>
-                                    {{ $lapangan->nama_lapangan }}
-                                    ({{ $lapangan->kategori }})
-                                </option>
-                            @endforeach
+                            <optgroup label="Kategori Standar" class="bg-neutral-800 text-neutral-300">
+                                @foreach($lapangans->where('kategori', 'standar') as $lapangan)
+                                    <option value="{{ $lapangan->id }}"
+                                            data-image="{{ $lapangan->fotoUtama->url }}"
+                                            data-category="{{ $lapangan->kategori }}"
+                                            class="bg-white text-neutral-900"
+                                            {{ old('lapangan_id') == $lapangan->id ? 'selected' : '' }}>
+                                        {{ $lapangan->nama_lapangan }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                            <optgroup label="Kategori Internasional" class="bg-neutral-800 text-neutral-300">
+                                @foreach($lapangans->where('kategori', 'internasional') as $lapangan)
+                                    <option value="{{ $lapangan->id }}"
+                                            data-image="{{ $lapangan->fotoUtama->url }}"
+                                            data-category="{{ $lapangan->kategori }}"
+                                            class="bg-white text-neutral-900"
+                                            {{ old('lapangan_id') == $lapangan->id ? 'selected' : '' }}>
+                                        {{ $lapangan->nama_lapangan }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
                         </select>
                     </div>
 

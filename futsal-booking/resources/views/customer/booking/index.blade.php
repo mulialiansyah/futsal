@@ -52,7 +52,10 @@
                                         'dp_dibayar' => 'bg-blue-500/20 text-blue-300 border-blue-500/30',
                                         'lunas' => 'bg-green-500/20 text-green-300 border-green-500/30',
                                         'expired' => 'bg-red-500/20 text-red-300 border-red-500/30',
-                                        'batal' => 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30'
+                                        'batal' => 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30',
+                                        'menunggu_keputusan_customer' => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                                        'menunggu_refund' => 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+                                        'direfund' => 'bg-sky-500/20 text-sky-300 border-sky-500/30',
                                     ];
                                     $statusColor = $statusColors[$booking->status_booking] ?? $statusColors['pending'];
                                 @endphp
@@ -63,7 +66,10 @@
                                             'dp_dibayar' => 'DP Dibayar',
                                             'lunas' => 'Lunas',
                                             'expired' => 'Kedaluwarsa',
-                                            'batal' => 'Dibatalkan'
+                                            'batal' => 'Dibatalkan',
+                                            'menunggu_keputusan_customer' => 'Menunggu Keputusan',
+                                            'menunggu_refund' => 'Menunggu Refund',
+                                            'direfund' => 'Sudah Direfund',
                                         ];
                                     @endphp
                                     {{ $statusLabels[$booking->status_booking] ?? ucfirst(str_replace('_', ' ', $booking->status_booking)) }}

@@ -10,9 +10,21 @@
         </div>
 
         <!-- Email Address -->
-        <div class="mt-4">
+        <div class="mt-4" x-data="{ regEmail: '{{ old('email') }}', typoSuggestion: null }">
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" x-model="regEmail"
+                          @input.debounce.300ms="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(regEmail) : null"
+                          @blur="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(regEmail) : null"
+                          required autocomplete="username" />
+            <template x-if="typoSuggestion">
+                <div class="mt-2 p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs flex items-center justify-between gap-2 shadow-sm">
+                    <span>💡 Apakah maksud Anda <strong class="font-bold underline" x-text="typoSuggestion.suggested"></strong>?</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" @click="regEmail = typoSuggestion.suggested; typoSuggestion = null" class="px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded text-[11px] transition">Ganti</button>
+                        <button type="button" @click="typoSuggestion = null" class="px-2 py-1 text-amber-700 hover:bg-amber-100 font-semibold rounded text-[11px] transition">Abaikan</button>
+                    </div>
+                </div>
+            </template>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 

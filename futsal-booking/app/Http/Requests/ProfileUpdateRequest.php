@@ -23,7 +23,7 @@ class ProfileUpdateRequest extends FormRequest
                 'string',
                 'lowercase',
                 'max:255',
-                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+                'email:rfc,dns',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
         ];
@@ -32,7 +32,8 @@ class ProfileUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.regex' => 'Format email harus valid (contoh: nama@email.com).',
+            'email.email' => 'Format email atau domain tidak valid/tidak ditemukan. Masukkan kembali email Anda.',
+            'email.unique' => 'Email ini sudah terdaftar. Masukkan kembali email Anda.',
         ];
     }
 }

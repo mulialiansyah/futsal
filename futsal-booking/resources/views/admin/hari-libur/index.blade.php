@@ -6,7 +6,7 @@
             'keterangan' => $hariLibur->keterangan,
             'tipe' => $hariLibur->tipe,
             'visible' => true,
-        ])->values()))"
+        ])->values()), @js($rangeHargaWeekend))"
     >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
@@ -27,6 +27,7 @@
                             <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Tanggal</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Keterangan</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Tipe</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Range Harga</th>
                             <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-300">Aksi</th>
                         </tr>
                     </thead>
@@ -42,6 +43,13 @@
                                 <td class="px-6 py-3.5 text-white font-medium" x-text="formatTanggal(item.tanggal)"></td>
                                 <td class="px-6 py-3.5 text-neutral-300" x-text="item.keterangan"></td>
                                 <td class="px-6 py-3.5 text-neutral-300" x-text="formatTipe(item.tipe)"></td>
+                                <td class="px-6 py-3.5">
+                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-300">
+                                        <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 10V5a2 2 0 012-2z"/></svg>
+                                        <span x-text="rangeHargaWeekend"></span>
+                                        <span class="text-amber-500/60 font-normal">/jam</span>
+                                    </span>
+                                </td>
                                 <td class="px-6 py-3.5 whitespace-nowrap">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button @click="openEdit(item)" type="button" title="Edit" aria-label="Edit hari libur" class="p-2 rounded-lg text-neutral-400 hover:text-sky-400 hover:bg-sky-400/10 transition">
@@ -60,7 +68,7 @@
                         </template>
 
                         <tr x-show="items.length === 0">
-                            <td colspan="4" class="px-6 py-10 text-center text-neutral-500">Belum ada data hari libur.</td>
+                            <td colspan="5" class="px-6 py-10 text-center text-neutral-500">Belum ada data hari libur.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -125,9 +133,10 @@
     </div>
 
     <script>
-        function hariLiburPage(initialItems) {
+        function hariLiburPage(initialItems, rangeHargaWeekend) {
             return {
                 items: initialItems,
+                rangeHargaWeekend: rangeHargaWeekend,
                 modalOpen: false,
                 editingItem: null,
                 form: { tanggal: '', keterangan: '', tipe: 'nasional' },

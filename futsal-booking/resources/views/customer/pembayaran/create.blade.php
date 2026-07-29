@@ -57,7 +57,7 @@
                     </div>
                     <span class="text-sm font-extrabold text-emerald-400">Rp {{ number_format($booking->sisa_tagihan, 0, ',', '.') }}</span>
                 </div>
-            @if($booking->payment_deadline)
+            @if($booking->payment_deadline && $booking->status_booking !== 'lunas')
                 <div class="flex items-center justify-between rounded-2xl bg-neutral-800 px-4 py-3.5">
                     <div class="flex items-center gap-3">
                         <span class="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400/15 text-base">⏱</span>
@@ -141,7 +141,7 @@
                         Screenshot Pembayaran Midtrans <span class="text-red-400">*</span>
                     </label>
                     <p class="text-xs text-neutral-400 mb-4">
-                        Screenshot status pembayaran dari Midtrans. Format: JPG, PNG. Maks 5MB.
+                        Screenshot status pembayaran dari Midtrans. Format: JPG, PNG. Maks 2MB.
                     </p>
 
                     <!-- Drop Zone -->
@@ -156,7 +156,7 @@
                     </div>
 
                     <input type="file" id="buktiInput" name="bukti_transfer"
-                           accept="image/*" class="hidden"
+                           accept="image/png, image/jpeg, image/jpg" class="hidden"
                            onchange="previewBukti(this)">
 
                     <!-- Preview -->
@@ -174,9 +174,9 @@
                     <p id="buktiError" class="text-red-400 text-xs mt-2 hidden"></p>
                 </div>
 
-                <button type="submit"
-                        class="w-full bg-amber-400 hover:bg-amber-500 text-neutral-900 font-bold py-4 rounded-xl transition text-sm shadow-lg shadow-amber-400/20">
-                    ✅ Kirim Bukti Pembayaran
+                <button type="submit" id="kirimBuktiBtn" disabled
+                        class="w-full bg-amber-400 hover:bg-amber-500 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:hover:bg-neutral-800 disabled:cursor-not-allowed text-neutral-900 font-bold py-4 rounded-xl transition text-sm shadow-lg shadow-amber-400/20 disabled:shadow-none">
+                    <span id="kirimBuktiLabel">Upload screenshot pembayaran terlebih dahulu</span>
                 </button>
             </form>
         </div>
@@ -253,6 +253,22 @@
             document.getElementById('midtransOrderId').value = orderId;
             document.getElementById('buktiMidtransSection').classList.remove('hidden');
             document.getElementById('buktiMidtransSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            updateKirimBuktiState();
+        }
+
+        function updateKirimBuktiState() {
+            const fileInput = document.getElementById('buktiInput');
+            const btn = document.getElementById('kirimBuktiBtn');
+            const label = document.getElementById('kirimBuktiLabel');
+            if (!btn || !label) return;
+            const adaFile = !!(fileInput && fileInput.files && fileInput.files.length > 0);
+            if (adaFile) {
+                btn.disabled = false;
+                label.innerHTML = '✅ Kirim Bukti Pembayaran';
+            } else {
+                btn.disabled = true;
+                label.innerHTML = 'Upload screenshot pembayaran terlebih dahulu';
+            }
         }
 
         // Preview screenshot pembayaran
@@ -260,20 +276,49 @@
             const container = document.getElementById('previewContainer');
             const img = document.getElementById('previewImg');
             const dropZone = document.getElementById('dropZone');
+            const buktiError = document.getElementById('buktiError');
+
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+
+                if (!allowedTypes.includes(file.type)) {
+                    buktiError.textContent = 'File harus berformat PNG atau JPG.';
+                    buktiError.classList.remove('hidden');
+                    dropZone.classList.add('border-red-500/50', 'bg-red-500/10');
+                    container.classList.add('hidden');
+                    input.value = '';
+                    updateKirimBuktiState();
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    buktiError.textContent = 'Ukuran file maksimal 2MB.';
+                    buktiError.classList.remove('hidden');
+                    dropZone.classList.add('border-red-500/50', 'bg-red-500/10');
+                    container.classList.add('hidden');
+                    input.value = '';
+                    updateKirimBuktiState();
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = e => {
                     img.src = e.target.result;
                     container.classList.remove('hidden');
                     dropZone.innerHTML = `
-                        <div class="text-green-300 font-semibold text-sm">✅ ${input.files[0].name}</div>
+                        <div class="text-green-300 font-semibold text-sm">✅ ${file.name}</div>
                         <div class="text-xs text-neutral-400 mt-1">Klik untuk ganti foto</div>
                     `;
                     dropZone.classList.remove('border-red-500/50', 'bg-red-500/10');
-                    document.getElementById('buktiError').classList.add('hidden');
+                    buktiError.classList.add('hidden');
                     dropZone.classList.add('border-green-500/50', 'bg-green-500/10');
+                    updateKirimBuktiState();
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
+            } else {
+                updateKirimBuktiState();
             }
         }
 
@@ -295,7 +340,8 @@
         });
 
         // Form Submit Frontend Validation
-        document.getElementById('pembayaranForm').addEventListener('submit', function(e) {
+        const pembayaranForm = document.getElementById('pembayaranForm');
+        pembayaranForm.addEventListener('submit', function(e) {
             let isValid = true;
 
             // Validasi screenshot pembayaran
@@ -308,34 +354,65 @@
                 dropZoneEl.classList.add('border-red-500/50', 'bg-red-500/10');
                 isValid = false;
             } else {
-                buktiError.classList.add('hidden');
-                dropZoneEl.classList.remove('border-red-500/50', 'bg-red-500/10');
+                const file = fileInput.files[0];
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+
+                if (!allowedTypes.includes(file.type)) {
+                    buktiError.textContent = 'File harus berformat PNG atau JPG.';
+                    buktiError.classList.remove('hidden');
+                    dropZoneEl.classList.add('border-red-500/50', 'bg-red-500/10');
+                    isValid = false;
+                } else if (file.size > maxSize) {
+                    buktiError.textContent = 'Ukuran file maksimal 2MB.';
+                    buktiError.classList.remove('hidden');
+                    dropZoneEl.classList.add('border-red-500/50', 'bg-red-500/10');
+                    isValid = false;
+                } else {
+                    buktiError.classList.add('hidden');
+                    dropZoneEl.classList.remove('border-red-500/50', 'bg-red-500/10');
+                }
             }
 
             if (!isValid) {
-                e.preventDefault(); // Stop form submission
+                e.preventDefault();
+                updateKirimBuktiState();
+                return;
             }
+
+            const submitBtn = document.getElementById('kirimBuktiBtn');
+            const submitLabel = document.getElementById('kirimBuktiLabel');
+            submitBtn.disabled = true;
+            submitLabel.innerHTML = '⏳ Mengirim bukti pembayaran…';
+            submitBtn.classList.add('opacity-70', 'cursor-wait');
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            updateKirimBuktiState();
         });
 
         // Countdown timer
+        let countdownInterval;
         const countdownEl = document.querySelector('[data-countdown]');
-        if (countdownEl) {
-            function updateCountdown() {
-                const deadline = parseInt(countdownEl.dataset.countdown) * 1000;
-                const sisa = deadline - new Date().getTime();
-                if (sisa <= 0) {
-                    countdownEl.textContent = '00:00:00';
-                    countdownEl.classList.add('text-red-400');
-                    return;
+        @if($booking->status_booking !== 'lunas')
+            if (countdownEl) {
+                function updateCountdown() {
+                    const deadline = parseInt(countdownEl.dataset.countdown) * 1000;
+                    const sisa = deadline - new Date().getTime();
+                    if (sisa <= 0) {
+                        countdownEl.textContent = '00:00:00';
+                        countdownEl.classList.add('text-red-400');
+                        return;
+                    }
+                    const jam = Math.floor(sisa / 3600000);
+                    const menit = Math.floor((sisa % 3600000) / 60000);
+                    const detik = Math.floor((sisa % 60000) / 1000);
+                    countdownEl.textContent = `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
                 }
-                const jam = Math.floor(sisa / 3600000);
-                const menit = Math.floor((sisa % 3600000) / 60000);
-                const detik = Math.floor((sisa % 60000) / 1000);
-                countdownEl.textContent = `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+                updateCountdown();
+                countdownInterval = setInterval(updateCountdown, 1000);
             }
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        }
+        @endif
     </script>
     @if(config('services.midtrans.client_key'))
         <script src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"

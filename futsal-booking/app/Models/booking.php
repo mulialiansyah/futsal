@@ -19,6 +19,15 @@ class Booking extends Model
         'payment_deadline',
         'pelunasan_deadline',
         'expired_at',
+        'duration_hours',
+        'opsi_deadline',
+        'alasan_penutupan',
+        'original_status',
+        'nominal_refund',
+        'bukti_refund',
+        'catatan_refund',
+        'tanggal_refund',
+        'refund_tujuan',
     ];
 
     protected $casts = [
@@ -26,6 +35,9 @@ class Booking extends Model
         'payment_deadline' => 'datetime',
         'pelunasan_deadline' => 'datetime',
         'expired_at' => 'datetime',
+        'opsi_deadline' => 'datetime',
+        'tanggal_refund' => 'datetime',
+        'nominal_refund' => 'decimal:0',
     ];
 
     // ===== RELATIONSHIPS =====
@@ -110,6 +122,31 @@ class Booking extends Model
         return $this->formatSisaWaktu($sisa);
     }
 
+    /**
+     * Accessor: Hitung sisa waktu keputusan customer (dalam detik)
+     */
+    public function getSisaWaktuOpsiAttribute(): ?int
+    {
+        if ($this->status_booking !== 'menunggu_keputusan_customer' || ! $this->opsi_deadline) {
+            return null;
+        }
+
+        $sekarang = Carbon::now();
+        $sisa = $this->opsi_deadline->diffInSeconds($sekarang, false);
+
+        return max(0, $sisa);
+    }
+
+    /**
+     * Accessor: Format sisa waktu keputusan customer jadi HH:MM:SS
+     */
+    public function getSisaWaktuOpsiFormatAttribute(): string
+    {
+        $sisa = $this->sisa_waktu_opsi;
+
+        return $this->formatSisaWaktu($sisa);
+    }
+
     private function formatSisaWaktu(?int $sisa): string
     {
         if ($sisa === null || $sisa <= 0) {
@@ -124,6 +161,27 @@ class Booking extends Model
     }
 
     // ===== METHODS =====
+
+    /**
+     * Cek apakah batas waktu keputusan customer sudah expired
+     */
+    public function isOpsiExpired(): bool
+    {
+        return $this->status_booking === 'menunggu_keputusan_customer'
+            && $this->opsi_deadline
+            && Carbon::now()->greaterThan($this->opsi_deadline);
+    }
+
+    /**
+     * Ubah status ke menunggu_refund dan bersihkan opsi_deadline
+     */
+    public function markAsMenungguRefund(): void
+    {
+        $this->update([
+            'status_booking' => 'menunggu_refund',
+            'opsi_deadline' => null,
+        ]);
+    }
 
     /**
      * Cek apakah booking DP sudah expired
@@ -164,6 +222,63 @@ class Booking extends Model
         $this->update([
             'status_booking' => 'batal',
             'expired_at' => Carbon::now(),
+        ]);
+    }
+
+    /**
+     * Accessor: URL lengkap untuk file bukti refund (jika ada)
+     */
+    public function getBuktiRefundUrlAttribute(): ?string
+    {
+        if (! $this->bukti_refund) {
+            return null;
+        }
+
+        return asset('storage/'.$this->bukti_refund);
+    }
+
+    /**
+     * Cek apakah booking sudah direfund
+     */
+    public function getSudahDirefundAttribute(): bool
+    {
+        return $this->status_booking === 'direfund' || (bool) $this->bukti_refund;
+    }
+
+    /**
+     * Cek apakah booking ELIGIBLE untuk diproses refund (sudah dibayar & status cancel-related)
+     */
+    public function getBisaDirefundAttribute(): bool
+    {
+        // Sudah pernah direfund = tidak bisa lagi
+        if ($this->status_booking === 'direfund') {
+            return false;
+        }
+
+        // Harus ada pembayaran yang diterima (DP atau Lunas)
+        if ($this->total_dibayar <= 0) {
+            return false;
+        }
+
+        // Eligible: status batal / menunggu_refund / menunggu_keputusan_customer
+        return in_array($this->status_booking, ['batal', 'menunggu_refund', 'menunggu_keputusan_customer'], true);
+    }
+
+    /**
+     * Proses refund: update status + simpan bukti + nominal + timestamp
+     *
+     * @param array{nominal: numeric, bukti_refund_path: string, catatan?: string|null} $data
+     */
+    public function prosesRefund(array $data): void
+    {
+        $this->update([
+            'status_booking'  => 'direfund',
+            'nominal_refund'  => $data['nominal'],
+            'bukti_refund'    => $data['bukti_refund_path'],
+            'catatan_refund'  => $data['catatan'] ?? null,
+            'tanggal_refund'  => Carbon::now(),
+            'refund_tujuan'   => $data['refund_tujuan'] ?? null,
+            'opsi_deadline'   => null,
         ]);
     }
 }

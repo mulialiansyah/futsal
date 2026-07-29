@@ -27,9 +27,9 @@ class PasswordResetLinkController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'email' => ['required', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'],
+            'email' => ['required', 'email:rfc,dns'],
         ], [
-            'email.regex' => 'Format email harus valid (contoh: nama@email.com).',
+            'email.email' => 'Format email atau domain tidak valid/tidak ditemukan. Masukkan kembali email Anda.',
         ]);
 
         // We will send the password reset link to this user. Once we have attempted

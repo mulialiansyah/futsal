@@ -11,11 +11,19 @@ class PricingService
     /**
      * Cek apakah tanggal tertentu dihitung sebagai "weekend"
      * (Sabtu/Minggu ATAU termasuk tanggal merah/cuti bersama).
+     *
+     * @param Carbon        $tanggal
+     * @param array<string>|null $holidayDates  Array of 'Y-m-d' strings (pre-loaded untuk efisiensi dalam loop).
+     *                                           Jika null, akan query DB secara langsung.
      */
-    public static function isWeekend(Carbon $tanggal): bool
+    public static function isWeekend(Carbon $tanggal, ?array $holidayDates = null): bool
     {
         if ($tanggal->isWeekend()) {
             return true;
+        }
+
+        if ($holidayDates !== null) {
+            return in_array($tanggal->toDateString(), $holidayDates);
         }
 
         return HariLibur::where('tanggal', $tanggal->toDateString())->exists();

@@ -138,7 +138,6 @@
                 <div class="flex justify-end gap-3">
                     <a href="{{ route('admin.laporan.index') }}" class="rounded-lg border border-white/15 hover:bg-white/5 text-sm font-medium px-4 py-2 transition">Reset</a>
                     <button type="submit" class="rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-semibold px-4 py-2 transition">Filter</button>
-                    <button type="button" onclick="window.print()" class="rounded-lg border border-white/15 hover:bg-white/5 text-sm font-medium px-4 py-2 transition">Cetak / PDF</button>
                 </div>
             </form>
         </div>

@@ -8,6 +8,7 @@ use App\Models\HariLibur;
 use App\Models\Lapangan;
 use App\Models\PenutupanLapangan;
 use App\Models\Tarif;
+use App\Services\PricingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -36,9 +37,7 @@ class LapanganController extends Controller
 
         // Deteksi tipe hari ini untuk preview harga
         $today = Carbon::today();
-        $isWeekend = $today->isWeekend()
-                     || HariLibur::where('tanggal', $today->toDateString())->exists();
-        $tipeHari = $isWeekend ? 'weekend' : 'weekday';
+        $tipeHari = PricingService::isWeekend($today) ? 'weekend' : 'weekday';
 
         // Ambil tarif terendah per kategori untuk preview "Mulai dari Rp ..."
         $tarifPreview = Tarif::whereIn('kategori', ['standar', 'internasional'])
@@ -174,9 +173,7 @@ class LapanganController extends Controller
         }
 
         // Deteksi tipe hari untuk info harga
-        $isWeekend = $tanggalCarbon->isWeekend()
-                     || HariLibur::where('tanggal', $tanggal)->exists();
-        $tipeHari = $isWeekend ? 'weekend' : 'weekday';
+        $tipeHari = PricingService::isWeekend($tanggalCarbon) ? 'weekend' : 'weekday';
 
         return view('customer.lapangan.slots', compact(
             'lapangan', 'tanggal', 'tanggalCarbon', 'slots', 'isTutup', 'tipeHari'

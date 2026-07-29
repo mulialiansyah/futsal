@@ -33,10 +33,22 @@
 
             <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
                 @csrf
-                <div>
+                <div x-data="{ forgotEmail: '{{ old('email') }}', typoSuggestion: null }">
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="nama@email.com"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400">
+                    <input id="email" type="email" name="email" x-model="forgotEmail"
+                           @input.debounce.300ms="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(forgotEmail) : null"
+                           @blur="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(forgotEmail) : null"
+                           required autofocus placeholder="nama@email.com"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400">
+                    <template x-if="typoSuggestion">
+                        <div class="mt-2 p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs flex items-center justify-between gap-2 shadow-sm">
+                            <span>💡 Apakah maksud Anda <strong class="font-bold underline" x-text="typoSuggestion.suggested"></strong>?</span>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" @click="forgotEmail = typoSuggestion.suggested; typoSuggestion = null" class="px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded text-[11px] transition">Ganti</button>
+                                <button type="button" @click="typoSuggestion = null" class="px-2 py-1 text-amber-700 hover:bg-amber-100 font-semibold rounded text-[11px] transition">Abaikan</button>
+                            </div>
+                        </div>
+                    </template>
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

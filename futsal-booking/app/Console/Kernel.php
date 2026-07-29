@@ -14,9 +14,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('bookings:release-expired')
-        //     ->everyMinute()
-        //     ->withoutOverlapping();
+        $schedule->command('bookings:release-expired')
+            ->everyMinute()
+            ->withoutOverlapping();
+
+        $schedule->command('bookings:process-expired-closure-decisions')
+            ->everyMinute()
+            ->withoutOverlapping();
     }
 
     /**

@@ -42,11 +42,24 @@
                             'dp_dibayar' => 'bg-blue-500/20 text-blue-300 border-blue-500/30',
                             'lunas' => 'bg-green-500/20 text-green-300 border-green-500/30',
                             'expired' => 'bg-red-500/20 text-red-300 border-red-500/30',
-                            'batal' => 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30'
+                            'batal' => 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30',
+                            'menunggu_keputusan_customer' => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                            'menunggu_refund' => 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+                            'direfund' => 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+                        ];
+                        $statusLabelsCustomer = [
+                            'pending' => 'Menunggu Pembayaran',
+                            'dp_dibayar' => 'DP Dibayar',
+                            'lunas' => 'Lunas',
+                            'expired' => 'Kedaluwarsa',
+                            'batal' => 'Dibatalkan',
+                            'menunggu_keputusan_customer' => 'Menunggu Keputusan Anda',
+                            'menunggu_refund' => 'Menunggu Refund',
+                            'direfund' => 'Sudah Direfund',
                         ];
                     @endphp
                     <span class="px-3 py-1 rounded-full text-sm font-bold border {{ $colors[$booking->status_booking] ?? 'bg-neutral-500/20' }}">
-                        {{ ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
+                        {{ $statusLabelsCustomer[$booking->status_booking] ?? ucfirst(str_replace('_', ' ', $booking->status_booking)) }}
                     </span>
                 </div>
             </div>
@@ -93,6 +106,120 @@
                 </div>
             @endif
 
+            @if($booking->status_booking === 'menunggu_keputusan_customer')
+                <div class="bg-amber-500/20 border border-amber-500/40 rounded-2xl p-6 mb-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">⚠️</span>
+                        <div>
+                            <h4 class="font-bold text-amber-300 text-base">Lapangan Ditutup Sementara oleh Pengelola</h4>
+                            <p class="text-xs text-neutral-300 mt-0.5">Alasan: <strong class="text-white">{{ $booking->alasan_penutupan ?? 'Pemeliharaan fasilitas.' }}</strong></p>
+                        </div>
+                    </div>
+
+                    @if($booking->opsi_deadline)
+                        <div class="my-4 bg-amber-950/60 border border-amber-500/30 rounded-xl p-4 text-center">
+                            <p class="text-xs text-amber-300 uppercase tracking-wider font-semibold mb-1">⏳ Sisa Waktu Memilih Opsi (Max 3x24 Jam):</p>
+                            <div class="text-3xl font-mono font-extrabold text-amber-300" id="countdownOpsiDisplay">
+                                {{ $booking->sisa_waktu_opsi_format }}
+                            </div>
+                            <p class="text-[11px] text-neutral-400 mt-1">Jika sisa waktu habis, status otomatis diubah ke Pengembalian Dana (Refund).</p>
+                        </div>
+                    @endif
+
+                    <div class="grid grid-cols-1 gap-5 mt-4">
+                        <form method="POST" action="{{ route('customer.booking.choose-refund', $booking) }}" class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3.5">
+                            @csrf
+                            <div>
+                                <h5 class="text-sm font-bold text-amber-200 mb-1 flex items-center gap-1.5"><span>💵</span> Opsi A: Ajukan Refund Dana</h5>
+                                <p class="text-[11px] text-neutral-400 mb-2">Admin akan mengembalikan uang yang sudah dibayarkan secara manual (transfer ke rekening/e-wallet Anda). Silakan isi tujuan transfer di bawah.</p>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-amber-300/80 mb-1.5">
+                                    Tujuan Transfer Refund <span class="text-rose-400">*</span>
+                                </label>
+                                <p class="text-[11px] text-neutral-500 mb-1.5">Isi dengan format: <span class="font-semibold text-neutral-300">[Nama Bank / E-Wallet] + [Nomor Rekening / No. HP] + [Atas Nama]</span></p>
+                                <input type="text" name="refund_tujuan" required minlength="8" maxlength="255"
+                                       value="{{ old('refund_tujuan') }}"
+                                       placeholder="Contoh: BCA 731098xxxx a.n. Ahmad Fauzi — atau OVO 08123456xxxx a.n. Ahmad Fauzi"
+                                       class="w-full bg-neutral-950 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 outline-none transition placeholder:text-neutral-600">
+                                @error('refund_tujuan')
+                                    <p class="text-rose-400 text-xs mt-1.5">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <button type="submit"
+                                    data-confirm-message="Yakin ingin mengajukan Refund Dana? Pastikan tujuan transfer di atas sudah benar. Admin akan memproses pengembalian uang Anda secara manual."
+                                    class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                                <span>💵</span> Ajukan Pengembalian Dana
+                            </button>
+                        </form>
+
+                        <a href="{{ route('customer.booking.reschedule-form', $booking) }}" class="bg-white/5 border border-emerald-500/20 hover:border-emerald-500/40 hover:bg-emerald-500/5 rounded-xl p-4 transition w-full text-left">
+                            <h5 class="text-sm font-bold text-emerald-300 mb-1 flex items-center gap-1.5"><span>🔄</span> Opsi B: Pindah Lapangan / Jadwal</h5>
+                            <p class="text-[11px] text-neutral-400 mb-0">Ubah jadwal bermain atau pindah ke lapangan lain tanpa perlu refund.</p>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            @if($booking->status_booking === 'menunggu_refund')
+                <div class="bg-purple-500/20 border border-purple-500/40 rounded-2xl p-5 mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">⏳</span>
+                        <div>
+                            <h4 class="font-bold text-purple-300 text-sm">Permintaan Refund Dana Sedang Diproses</h4>
+                            <p class="text-xs text-neutral-300 mt-1">Permintaan pengembalian dana Anda telah tercatat. Admin akan segera mentransfer kembali uang yang sudah dibayarkan ke tujuan di bawah ini.</p>
+                        </div>
+                    </div>
+                    @if($booking->refund_tujuan)
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                            <p class="text-[11px] text-purple-300/80 uppercase tracking-wider font-bold mb-1">Tujuan Transfer (Yang Anda Kirim)</p>
+                            <p class="text-sm font-bold text-white">{{ $booking->refund_tujuan }}</p>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            @if($booking->status_booking === 'direfund')
+                <div class="bg-sky-500/15 border border-sky-500/40 rounded-2xl p-5 mb-6 shadow-lg shadow-sky-900/20 backdrop-blur-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center text-2xl">💸</div>
+                        <div>
+                            <h4 class="font-bold text-sky-200 text-base">Refund Sudah Dikirimkan oleh Admin</h4>
+                            <p class="text-xs text-neutral-300 mt-0.5">Admin sudah mentransfer kembali dana sesuai nominal di bawah ini. Silakan cek rekening / e-wallet Anda.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                            <p class="text-[11px] text-sky-400/80 uppercase tracking-wide font-bold mb-1">Nominal Refund</p>
+                            <p class="text-2xl font-black text-white">Rp {{ number_format($booking->nominal_refund ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                            <p class="text-[11px] text-sky-400/80 uppercase tracking-wide font-bold mb-1">Tanggal Refund</p>
+                            <p class="text-sm font-bold text-white">{{ $booking->tanggal_refund?->isoFormat('D MMMM YYYY, HH:mm') ?? '-' }}</p>
+                        </div>
+                    </div>
+                    @if($booking->refund_tujuan)
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-4">
+                            <p class="text-[11px] text-sky-400/80 uppercase tracking-wide font-bold mb-1.5">Ditransfer Ke</p>
+                            <p class="text-sm font-bold text-white">{{ $booking->refund_tujuan }}</p>
+                        </div>
+                    @endif
+                    @if($booking->catatan_refund)
+                        <div class="bg-white/5 rounded-xl p-4 border border-white/10 mb-4">
+                            <p class="text-[11px] text-sky-400/80 uppercase tracking-wide font-bold mb-1.5">Catatan Admin</p>
+                            <p class="text-sm text-neutral-200 whitespace-pre-wrap">{{ $booking->catatan_refund }}</p>
+                        </div>
+                    @endif
+                    @if($booking->bukti_refund_url)
+                        <a href="{{ $booking->bukti_refund_url }}" target="_blank"
+                           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 active:scale-[0.98] text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-sky-500/25">
+                            <span>📄</span>
+                            <span>Unduh Bukti Transfer Refund</span>
+                        </a>
+                    @endif
+                </div>
+            @endif
+
             @if(in_array($booking->status_booking, ['expired', 'batal']))
                 <div class="bg-red-500/20 border border-red-500/30 rounded-xl p-4 mb-6">
                     <p class="text-sm text-red-300 font-bold">
@@ -101,7 +228,38 @@
                 </div>
             @endif
 
-            <div class="flex gap-3">
+            @if(in_array($booking->status_booking, ['dp_dibayar', 'lunas']))
+                <form method="POST" action="{{ route('customer.booking.request-cancel-refund', $booking) }}" class="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-5 mb-6 space-y-4">
+                    @csrf
+                    <div class="flex items-start gap-3">
+                        <div class="w-11 h-11 rounded-full bg-rose-500/20 flex items-center justify-center text-xl shrink-0">🚫</div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-rose-200 text-base mb-1">Batalkan Booking & Ajukan Pengembalian Dana</h4>
+                            <p class="text-xs text-neutral-300 mt-0.5">Jika Anda ingin membatalkan dan meminta pengembalian dana (refund) sebesar <span class="font-bold text-emerald-300">Rp {{ number_format($booking->total_dibayar, 0, ',', '.') }}</span>, isi tujuan transfer di bawah lalu submit. Admin akan memproses transfer secara manual maksimal 1x24 jam kerja.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-rose-300/80 mb-1.5">
+                            Tujuan Transfer Refund <span class="text-rose-400">*</span>
+                        </label>
+                        <p class="text-[11px] text-neutral-500 mb-1.5">Isi dengan format: <span class="font-semibold text-neutral-300">[Nama Bank / E-Wallet] + [Nomor Rekening / No. HP] + [Atas Nama]</span></p>
+                        <input type="text" name="refund_tujuan" required minlength="8" maxlength="255"
+                               value="{{ old('refund_tujuan') }}"
+                               placeholder="Contoh: BRI 0341xxxxxx a.n. Siti Rahmawati — atau GoPay 0899xxxxxx a.n. Siti Rahmawati"
+                               class="w-full bg-neutral-950 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50 outline-none transition placeholder:text-neutral-600">
+                        @error('refund_tujuan')
+                            <p class="text-rose-400 text-xs mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <button type="submit"
+                            data-confirm-message="Yakin ingin MEMBATALKAN booking ini dan mengajukan pengembalian dana? Slot lapangan akan dilepas dan tidak bisa dikembalikan."
+                            class="w-full bg-rose-600 hover:bg-rose-500 active:scale-[0.98] text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-rose-900/20 inline-flex items-center justify-center gap-2">
+                        <span>🚫</span> Batalkan Booking & Ajukan Refund
+                    </button>
+                </form>
+            @endif
+
+            <div class="flex flex-col sm:flex-row gap-3">
                 @if($booking->status_booking === 'pending')
                     <form method="POST" action="{{ route('customer.booking.destroy', $booking) }}"
                           data-confirm-message="Yakin batalkan booking ini?" class="flex-1">
@@ -110,6 +268,13 @@
                             Batalkan Booking
                         </button>
                     </form>
+                @endif
+
+                @if(in_array($booking->status_booking, ['dp_dibayar', 'lunas', 'menunggu_keputusan_customer', 'menunggu_refund', 'direfund', 'refund_selesai']))
+                    <a href="{{ route('customer.booking.download-dp', $booking) }}" 
+                       class="flex-1 text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        📄 {{ $booking->sisa_tagihan == 0 ? 'Unduh Bukti Lunas' : 'Unduh Bukti DP' }}
+                    </a>
                 @endif
             </div>
         </div>
@@ -192,7 +357,17 @@
     </div>
 
     <script>
+        let countdownInterval;
+
         function updateCountdown() {
+            @if($booking->status_booking === 'lunas')
+                // Stop timer if already paid in full
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+                return;
+            @endif
+
             @if($booking->status_booking === 'pending' && $booking->payment_deadline)
                 const deadline = new Date({{ $booking->payment_deadline->timestamp * 1000 }});
                 const now = new Date();
@@ -224,8 +399,30 @@
                         `${String(jam2).padStart(2, '0')}:${String(menit2).padStart(2, '0')}:${String(detik2).padStart(2, '0')}`;
                 }
             @endif
+
+            @if($booking->status_booking === 'menunggu_keputusan_customer' && $booking->opsi_deadline)
+                const deadlineOpsi = new Date({{ $booking->opsi_deadline->timestamp * 1000 }});
+                const nowOpsi = new Date();
+                const sisaOpsi = deadlineOpsi - nowOpsi;
+                const elOpsi = document.getElementById('countdownOpsiDisplay');
+
+                if (elOpsi) {
+                    if (sisaOpsi <= 0) {
+                        elOpsi.textContent = '00:00:00';
+                    } else {
+                        const hOpsi = Math.floor(sisaOpsi / (1000 * 60 * 60));
+                        const mOpsi = Math.floor((sisaOpsi % (1000 * 60 * 60)) / (1000 * 60));
+                        const sOpsi = Math.floor((sisaOpsi % (1000 * 60)) / 1000);
+                        elOpsi.textContent =
+                            `${String(hOpsi).padStart(2, '0')}:${String(mOpsi).padStart(2, '0')}:${String(sOpsi).padStart(2, '0')}`;
+                    }
+                }
+            @endif
         }
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
+
+        @if($booking->status_booking !== 'lunas')
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 1000);
+        @endif
     </script>
 </x-app-layout>

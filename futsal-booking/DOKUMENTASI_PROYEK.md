@@ -26,7 +26,7 @@ FutsalKite adalah sistem manajemen booking lapangan futsal berbasis web yang mem
 ### 1.5 Fitur Utama
 
 #### Untuk Penyewa (Customer):
-- Registrasi dan login akun
+- Registrasi dan login akun dengan deteksi typo domain email
 - Melihat daftar lapangan dengan kategori (Standar/Internasional)
 - Melihat denah lapangan dengan status ketersediaan real-time
 - Booking lapangan dengan perhitungan harga otomatis
@@ -123,16 +123,17 @@ FutsalKite adalah sistem manajemen booking lapangan futsal berbasis web yang mem
 
 #### UC-01: Booking Lapangan
 - **Aktor**: Penyewa
-- **Deskripsi**: Penyewa dapat melakukan booking lapangan futsal dengan memilih tanggal, jam, dan lapangan yang tersedia
+- **Deskripsi**: Penyewa dapat melakukan booking lapangan futsal dengan memilih kategori lapangan, tanggal, jam, dan lapangan yang tersedia
 - **Prekondisi**: Penyewa sudah login
 - **Flow Utama**:
-  1. Penyewa memilih lapangan dari daftar
-  2. Penyewa melihat detail dan denah lapangan
-  3. Penyewa memilih tanggal dan jam main
-  4. Sistem menampilkan harga berdasarkan tarif yang berlaku
-  5. Penyewa konfirmasi booking
-  6. Sistem membuat booking dengan status "pending"
-  7. Sistem menghitung deadline pembayaran (30 menit)
+  1. Penyewa memilih kategori lapangan (Standar/Internasional)
+  2. Penyewa memilih lapangan dari daftar sesuai kategori
+  3. Penyewa melihat detail dan denah lapangan
+  4. Penyewa memilih tanggal dan jam main
+  5. Sistem menampilkan harga berdasarkan tarif yang berlaku
+  6. Penyewa konfirmasi booking
+  7. Sistem membuat booking dengan status "pending"
+  8. Sistem menghitung deadline pembayaran (30 menit)
 - **Postkondisi**: Booking berhasil dibuat dengan status pending
 
 #### UC-02: Verifikasi Pembayaran
@@ -331,14 +332,23 @@ Menyimpan data notifikasi untuk pengguna
 │  Penyewa    │
 └──────┬──────┘
        │
-       │ 1. Login & Pilih Lapangan
+       │ 1. Login
+       ▼
+┌─────────────────┐
+│  Pilih Kategori│
+│  Lapangan      │
+│  (Standar/     │
+│  Internasional)│
+└──────┬──────────┘
+       │
+       │ 2. Pilih Lapangan
        ▼
 ┌─────────────────┐
 │  Pilih Tanggal  │
 │  & Jam Main    │
 └──────┬──────────┘
        │
-       │ 2. Cek Ketersediaan
+       │ 3. Cek Ketersediaan
        ▼
 ┌─────────────────┐
 │  Lapangan      │─────► Tersedia?
@@ -352,7 +362,7 @@ Menyimpan data notifikasi untuk pengguna
 │  (Tarif Otomatis)│      │
 └──────┬──────────┘       │
        │                  │
-       │ 3. Konfirmasi    │
+       │ 4. Konfirmasi    │
        ▼                  │
 ┌─────────────────┐       │
 │  Booking        │       │
@@ -360,7 +370,7 @@ Menyimpan data notifikasi untuk pengguna
 │  (Pending)      │       │
 └──────┬──────────┘       │
        │                  │
-       │ 4. Pilih Metode   │
+       │ 5. Pilih Metode   │
        │    Pembayaran    │
        ▼                  │
 ┌─────────────────┐       │
@@ -376,7 +386,7 @@ Menyimpan data notifikasi untuk pengguna
 │ (Midtrans)│     │ (Midtrans)│     │ (Cash)   │
 └────┬─────┘      └────┬─────┘      └────┬─────┘
      │                  │                  │
-     │ 5. Upload Bukti  │ 5. Upload Bukti  │ 5. Datang ke
+     │ 6. Upload Bukti  │ 6. Upload Bukti  │ 6. Datang ke
      │    Transfer     │    Transfer     │    Lokasi
      ▼                  ▼                  ▼
 ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
@@ -384,7 +394,7 @@ Menyimpan data notifikasi untuk pengguna
 │  Verifikasi │   │  Verifikasi │   │  Konfirmasi │
 └──────┬──────┘   └──────┬──────┘   │  Cash      │
        │                  │           └──────┬──────┘
-       │ 6. Diterima?      │ 6. Diterima?      │
+       │ 7. Diterima?      │ 7. Diterima?      │
        │                  │                  │
        ├─────┬────────────┤ ├─────┬────────────┤
        │     │            │ │     │            │
@@ -396,7 +406,7 @@ Menyimpan data notifikasi untuk pengguna
 │ Dibayar  │ │ Ditolak  │ ││         │ │ Ditolak  │
 └─────┬────┘ └────┬─────┘ │└──────────┘ └────┬─────┘
       │           │       │                 │
-      │ 7. Pilih   │       │                 │
+      │ 8. Pilih   │       │                 │
       │    Metode  │       │                 │
       │ Pelunasan  │       │                 │
       ▼           │       │                 │
@@ -412,7 +422,7 @@ Menyimpan data notifikasi untuk pengguna
 │ Pelunasan│      │ (Tunai)  │             │
 └────┬─────┘      └────┬─────┘             │
      │                  │                   │
-     │ 8. Upload Bukti  │ 8. Bayar di       │
+     │ 9. Upload Bukti  │ 9. Bayar di       │
      │    Transfer     │    Lokasi          │
      ▼                  ▼                   │
 ┌─────────────┐   ┌─────────────┐           │
@@ -420,7 +430,7 @@ Menyimpan data notifikasi untuk pengguna
 │  Verifikasi │   │  Verifikasi │           │
 └──────┬──────┘   └──────┬──────┘           │
        │                  │                   │
-       │ 9. Diterima?      │ 9. Diterima?      │
+       │ 10. Diterima?     │ 10. Diterima?     │
        │                  │                   │
        ├─────┬────────────┤ ├─────┬────────────┤
        │     │            │ │     │            │
@@ -628,12 +638,13 @@ php artisan serve
 #### 1. Booking Lapangan
 1. Login sebagai penyewa
 2. Buka halaman "Lapangan"
-3. Pilih lapangan yang diinginkan
-4. Klik "Lihat Detail"
-5. Pilih tanggal dan jam main di denah
-6. Sistem akan menampilkan harga otomatis
-7. Konfirmasi booking
-8. Upload bukti pembayaran DP
+3. Pilih kategori lapangan (Standar/Internasional)
+4. Pilih lapangan yang diinginkan sesuai kategori
+5. Klik "Lihat Detail"
+6. Pilih tanggal dan jam main di denah
+7. Sistem akan menampilkan harga otomatis
+8. Konfirmasi booking
+9. Upload bukti pembayaran DP
 
 #### 2. Manajemen Tarif (Admin)
 1. Login sebagai admin

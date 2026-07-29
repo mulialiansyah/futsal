@@ -670,9 +670,21 @@
             <form method="POST" action="{{ route('login') }}" @submit="$dispatch('loading-start')">
                 @csrf
 
-                <div class="field">
+                <div class="field" x-data="{ loginEmail: '{{ old('email') }}', typoSuggestion: null }">
                     <label for="email">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Masukkan email Anda">
+                    <input id="email" type="email" name="email" x-model="loginEmail"
+                           @input.debounce.300ms="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(loginEmail) : null"
+                           @blur="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(loginEmail) : null"
+                           required autofocus placeholder="Masukkan email Anda">
+                    <template x-if="typoSuggestion">
+                        <div style="margin-top: 6px; padding: 8px 12px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 8px; font-size: 0.78rem; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <span>💡 Apakah maksud Anda <strong style="text-decoration: underline;" x-text="typoSuggestion.suggested"></strong>?</span>
+                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                                <button type="button" @click="loginEmail = typoSuggestion.suggested; typoSuggestion = null" style="background: #d97706; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">Ganti</button>
+                                <button type="button" @click="typoSuggestion = null" style="background: transparent; color: #92400e; border: none; padding: 3px 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;">Abaikan</button>
+                            </div>
+                        </div>
+                    </template>
                     @error('email')
                         <div class="error-msg">{{ $message }}</div>
                     @enderror
@@ -723,7 +735,15 @@
             <div class="form-title">BUAT AKUN</div>
             <div class="form-subtitle">Gabung <span>FutsalKite</span> hari ini — gratis!</div>
 
-            <form method="POST" action="{{ route('register') }}" @submit="$dispatch('loading-start')">
+            <form method="POST" action="{{ route('register') }}" 
+                  @submit="$dispatch('loading-start')"
+                  @submit.prevent="
+                    if (typoSuggestion) {
+                        submitError = 'Email sepertinya salah ketik. Apakah maksud Anda ' + typoSuggestion.suggested + '?';
+                        $el.querySelector('#email_reg').focus();
+                        return false;
+                    }
+                  ">
                 @csrf
 
                 <div class="field">
@@ -734,9 +754,24 @@
                     @enderror
                 </div>
 
-                <div class="field">
+                <div class="field" x-data="{ regEmail: '{{ old('email') }}', typoSuggestion: null, submitError: null }">
                     <label for="email_reg">Email</label>
-                    <input id="email_reg" type="email" name="email" value="{{ old('email') }}" required placeholder="Masukkan email Anda">
+                    <input id="email_reg" type="email" name="email" x-model="regEmail"
+                           @input.debounce.300ms="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(regEmail) : null; submitError = null"
+                           @blur="typoSuggestion = window.checkEmailTypo ? window.checkEmailTypo(regEmail) : null"
+                           required placeholder="Masukkan email Anda">
+                    <template x-if="typoSuggestion">
+                        <div style="margin-top: 6px; padding: 8px 12px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 8px; font-size: 0.78rem; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <span>💡 Apakah maksud Anda <strong style="text-decoration: underline;" x-text="typoSuggestion.suggested"></strong>?</span>
+                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                                <button type="button" @click="regEmail = typoSuggestion.suggested; typoSuggestion = null; submitError = null" style="background: #d97706; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">Ganti</button>
+                                <button type="button" @click="typoSuggestion = null" style="background: transparent; color: #92400e; border: none; padding: 3px 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer;">Abaikan</button>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="submitError">
+                        <div class="error-msg" x-text="submitError"></div>
+                    </template>
                     @error('email')
                         <div class="error-msg">{{ $message }}</div>
                     @enderror

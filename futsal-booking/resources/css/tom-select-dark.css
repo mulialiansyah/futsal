@@ -1,0 +1,138 @@
+/* Tom Select Dark Theme for FutsalKite Admin */
+
+/* Hide the original select element when Tom Select is initialized */
+select.tomselected,
+#lapangan-select.tomselected {
+    display: none !important;
+}
+
+/* Fallback extra aggressive hide: any select inside the form that has Tom Select wrapper right after it */
+form .ts-wrapper ~ select#lapangan-select {
+    display: none !important;
+}
+
+/* Override global input styles for Tom Select search input */
+.ts-wrapper .ts-control input,
+.ts-wrapper input.ts-control,
+#lapangan-select-ts-control {
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    color: white !important;
+    outline: none !important;
+    border-radius: 0 !important;
+}
+
+.ts-wrapper {
+    font-family: 'Manrope', sans-serif;
+}
+
+.ts-wrapper.single .ts-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.ts-wrapper.single .ts-control,
+.ts-wrapper.single .ts-control input {
+    height: auto;
+}
+
+.ts-wrapper.single .ts-control .item {
+    color: white;
+    padding: 0;
+    margin: 0;
+}
+
+.ts-wrapper.single .ts-control .placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.ts-wrapper.single .ts-control input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+}
+
+.ts-dropdown {
+    background: #1f2937;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-top: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.ts-dropdown .optgroup-header {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ts-dropdown .option {
+    color: rgba(255, 255, 255, 0.9);
+    padding: 10px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ts-dropdown .option:hover {
+    background: rgba(59, 130, 246, 0.2);
+    color: white;
+}
+
+.ts-dropdown .option.selected {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
+.ts-dropdown .option.active {
+    background: rgba(59, 130, 246, 0.3);
+    color: white;
+}
+
+.ts-wrapper.single .ts-control .dropdown-toggle {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ts-wrapper.single .ts-control .dropdown-toggle::after {
+    border-top-color: rgba(255, 255, 255, 0.7);
+}
+
+.ts-wrapper.single .ts-control .dropdown-toggle:hover::after {
+    border-top-color: #fbbf24;
+}
+
+/* Scrollbar styling */
+.ts-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ts-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.ts-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.ts-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
